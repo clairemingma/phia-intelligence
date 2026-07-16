@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s http://localhost:3000)",
+      "mcp__figma__get_screenshot",
+      "mcp__figma__get_design_context",
+      "mcp__figma__get_metadata",
+      "Bash(curl -s http://localhost:3000/editorials)",
+      "Bash(curl -s http://localhost:3000/amplify)",
+      "Skill(run)",
+      "Bash(curl -s http://localhost:3000/)",
+      "Bash(chromium-cli screenshot *)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(node -e ' *)",
+      "Bash(npx playwright@latest --version)",
+      "Bash(npm init *)",
+      "Bash(npm install *)",
+      "Bash(npx playwright *)",
+      "Bash(npm run *)",
+      "Bash(echo \"PID: $!\")",
+      "Bash(lsof -i :3000 -sTCP:LISTEN)",
+      "mcp__ide__getDiagnostics",
+      "Bash(git -C /Users/clairemong/sandbox log --oneline -10)",
+      "Bash(npm list *)",
+      "Bash(npx tsc *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(rm *)",
+      "Bash(python3 -c ' *)"
+    ]
+  }
+}
