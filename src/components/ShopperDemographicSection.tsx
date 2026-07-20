@@ -1,179 +1,285 @@
+"use client";
+
+import { useState } from "react";
+
+const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
+const GT = "var(--font-gt-super-display), 'Playfair Display', Georgia, serif";
+
 const genderData = [
-  { label: "Women", pct: "68%", color: "#1a1a1a" },
-  { label: "Men", pct: "24%", color: "#767676" },
-  { label: "Non-binary / Other", pct: "8%", color: "#cecece" },
+  { label: "Women", pct: "68%", value: 68, color: "#1a42a9" },
+  { label: "Men",   pct: "32%", value: 32, color: "#6681c5" },
 ];
 
+// SVG donut helpers — angles are degrees clockwise from 12 o'clock
+const CX = 150, CY = 150, IR = 110, OR = 130;
+
+function polarToCart(cx: number, cy: number, r: number, deg: number) {
+  const rad = (deg * Math.PI) / 180;
+  return { x: cx + r * Math.sin(rad), y: cy - r * Math.cos(rad) };
+}
+
+function annularSector(cx: number, cy: number, ir: number, or: number, startDeg: number, endDeg: number) {
+  const sOut = polarToCart(cx, cy, or, startDeg);
+  const eOut = polarToCart(cx, cy, or, endDeg);
+  const sIn  = polarToCart(cx, cy, ir, startDeg);
+  const eIn  = polarToCart(cx, cy, ir, endDeg);
+  const large = endDeg - startDeg > 180 ? 1 : 0;
+  return [
+    `M ${sOut.x} ${sOut.y}`,
+    `A ${or} ${or} 0 ${large} 1 ${eOut.x} ${eOut.y}`,
+    `L ${eIn.x} ${eIn.y}`,
+    `A ${ir} ${ir} 0 ${large} 0 ${sIn.x} ${sIn.y}`,
+    "Z",
+  ].join(" ");
+}
+
+const SEGMENTS = [
+  { ...genderData[0], startDeg: 0,     endDeg: 244.8 },
+  { ...genderData[1], startDeg: 244.8, endDeg: 360   },
+];
+
+// SVG viewBox is 550.852×322.614; container is 550×321.75 with inset: -0.13% 0 -0.14% 0
+// x_px = x_svg * (550/550.852), y_px = y_svg - (0.0013 * 321.75)
 const locationData = [
-  { rank: 1, city: "New York", pct: "18%" },
-  { rank: 2, city: "Los Angeles", pct: "14%" },
-  { rank: 3, city: "Chicago", pct: "8%" },
-  { rank: 4, city: "Houston", pct: "6%" },
-  { rank: 5, city: "Miami", pct: "5%" },
+  { rank: 1, city: "New York",    pct: "18%", x: 502, y: 110 },
+  { rank: 2, city: "Los Angeles", pct: "14%", x:  79, y: 190 },
+  { rank: 3, city: "Chicago",     pct: "8%",  x: 377, y: 116 },
+  { rank: 4, city: "Houston",     pct: "6%",  x: 308, y: 269 },
+  { rank: 5, city: "Miami",       pct: "5%",  x: 477, y: 303 },
 ];
 
-function DonutChart() {
+function GenderCard() {
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
+
   return (
-    <div className="flex items-center justify-center size-[256px] -rotate-90">
-      <svg
-        viewBox="0 0 256 256"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="size-[256px]"
+    <div className="border border-[rgba(0,0,0,0.08)] flex flex-1 flex-col gap-[16px] items-start min-w-0 p-[21px] rounded-[6px] aspect-square">
+      <div className="flex flex-col gap-[4px] w-full">
+        <p className="text-[14px] leading-none text-[#1a1a1a] truncate" style={{ fontFamily: PP, fontWeight: 500 }}>
+          Gender
+        </p>
+        <p className="text-[14px] leading-[20px] text-[#666] truncate" style={{ fontFamily: PP, fontWeight: 400 }}>
+          By reported identity
+        </p>
+      </div>
+
+      <div
+        className="flex-1 flex items-center justify-center w-full relative"
+        onMouseMove={e => {
+          const r = e.currentTarget.getBoundingClientRect();
+          setCursor({ x: e.clientX - r.left, y: e.clientY - r.top });
+        }}
+        onMouseLeave={() => { setCursor(null); setActiveIndex(null); }}
       >
-        {/* Background track */}
-        <path
-          d="M24 128C24 185.399 70.6008 232 128 232C185.399 232 232 185.399 232 128C232 70.6008 185.399 24 128 24C70.6008 24 24 70.6008 24 128Z"
-          stroke="black"
-          strokeOpacity="0.06"
-          strokeWidth="20"
-        />
-        {/* Women — 68% */}
-        <path
-          d="M232 128C232 146.609 227.007 164.878 217.541 180.9C208.075 196.922 194.484 210.111 178.184 219.091C161.885 228.071 143.474 232.512 124.873 231.953C106.272 231.393 88.1622 225.853 72.4318 215.91C56.7015 205.967 43.9273 191.985 35.4416 175.423C26.9558 158.861 23.0695 140.325 24.188 121.749C25.3064 103.174 31.3886 85.2383 41.8002 69.814C52.2118 54.3897 66.5714 42.0416 83.3811 34.0576"
-          stroke="#1A42A9"
-          strokeWidth="20"
-        />
-        {/* Men — 24% */}
-        <path
-          d="M83.3813 34.0578C107.255 22.7188 134.55 20.8944 159.72 28.9553C184.89 37.0161 206.047 54.3575 218.892 77.4556"
-          stroke="#6681C5"
-          strokeWidth="20"
-        />
-      </svg>
+        <svg width={300} height={300} viewBox="0 0 300 300">
+          {/* Background track */}
+          <circle cx={CX} cy={CY} r={(IR + OR) / 2} stroke="rgba(0,0,0,0.06)" strokeWidth={OR - IR} fill="none" />
+          {/* Segments — hit detection is exact to the ring path */}
+          {SEGMENTS.map((seg, i) => (
+            <path
+              key={seg.label}
+              d={annularSector(CX, CY, IR, OR, seg.startDeg, seg.endDeg)}
+              fill={seg.color}
+              opacity={activeIndex === null || activeIndex === i ? 1 : 0.4}
+              style={{ transition: "opacity 0.15s", cursor: "default" }}
+              onMouseEnter={() => setActiveIndex(i)}
+              onMouseLeave={() => setActiveIndex(null)}
+            />
+          ))}
+        </svg>
+
+        {activeIndex !== null && cursor && (
+          <div
+            className="absolute pointer-events-none z-10 bg-[#1a1a1a] text-white rounded-[6px] px-[10px] py-[6px] whitespace-nowrap"
+            style={{ left: cursor.x, top: cursor.y - 40, transform: "translateX(-50%)", fontFamily: PP }}
+          >
+            <span className="text-[12px] font-medium">{genderData[activeIndex].label}</span>
+            <span className="text-[12px] opacity-60 ml-[6px]">{genderData[activeIndex].pct}</span>
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-[8px] w-full mt-auto mb-[84px]">
+        {genderData.map(({ label, pct, color }, i) => (
+          <div
+            key={label}
+            className="flex gap-[8px] items-center w-full cursor-default transition-opacity"
+            style={{ opacity: activeIndex === null || activeIndex === i ? 1 : 0.4 }}
+            onMouseEnter={() => setActiveIndex(i)}
+            onMouseLeave={() => setActiveIndex(null)}
+          >
+            <div className="shrink-0 size-[8px] rounded-full" style={{ background: color }} />
+            <p className="shrink-0 text-[14px] leading-[20px] text-[#1a1a1a]" style={{ fontFamily: PP, fontWeight: 400 }}>
+              {label}
+            </p>
+            <div className="flex-1" />
+            <p className="shrink-0 text-[14px] leading-[20px] text-black" style={{ fontFamily: PP, fontWeight: 500 }}>
+              {pct}
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
+function MapTooltip({ city, pct, x, y }: { city: string; pct: string; x: number; y: number }) {
+  // Flip above/below based on vertical position; nudge left for right-edge cities
+  const above = y > 160;
+  const left = Math.min(x, 470);
+  return (
+    <div
+      className="absolute pointer-events-none z-10 bg-[#1a1a1a] text-white rounded-[6px] px-[10px] py-[6px] whitespace-nowrap"
+      style={{
+        left,
+        top: above ? y - 48 : y + 16,
+        transform: "translateX(-50%)",
+        fontFamily: PP,
+      }}
+    >
+      <span className="text-[12px] font-medium">{city}</span>
+      <span className="text-[12px] opacity-60 ml-[6px]">{pct}</span>
+    </div>
+  );
+}
+
+function LocationsCard() {
+  const [hovered, setHovered] = useState<number | null>(null);
+
+  return (
+    <div className="border border-[rgba(0,0,0,0.08)] flex flex-1 flex-col gap-[20px] items-center min-w-0 p-[21px] rounded-[6px] aspect-square">
+      <div className="flex flex-col gap-[4px] w-full">
+        <p className="text-[14px] leading-none text-[#1a1a1a] truncate" style={{ fontFamily: PP, fontWeight: 500 }}>
+          Top Locations
+        </p>
+        <p className="text-[14px] leading-[20px] text-[#666] truncate" style={{ fontFamily: PP, fontWeight: 400 }}>
+          By city
+        </p>
+      </div>
+
+      {/* Map with hotspots */}
+      <div className="relative shrink-0 h-[321.75px] w-[550px]">
+        <div className="absolute inset-[-0.13%_0_-0.14%_0]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/assets/usa-map-locations.svg"
+            alt="Top locations map"
+            className="block max-w-none size-full"
+          />
+        </div>
+
+        {/* City hotspots */}
+        {locationData.map(({ rank, city, pct, x, y }, i) => (
+          <button
+            key={rank}
+            className="absolute rounded-full cursor-pointer"
+            style={{ left: x - 16, top: y - 16, width: 32, height: 32 }}
+            onMouseEnter={() => setHovered(i)}
+            onMouseLeave={() => setHovered(null)}
+            aria-label={`${city}: ${pct}`}
+          />
+        ))}
+
+        {hovered !== null && (
+          <MapTooltip
+            city={locationData[hovered].city}
+            pct={locationData[hovered].pct}
+            x={locationData[hovered].x}
+            y={locationData[hovered].y}
+          />
+        )}
+      </div>
+
+      {/* Ranked list */}
+      <div className="flex flex-col gap-[8px] w-full mt-auto">
+        {locationData.map(({ rank, city, pct }, i) => (
+          <div
+            key={rank}
+            className="flex gap-[8px] items-center w-full cursor-default transition-opacity"
+            style={{ opacity: hovered === null || hovered === i ? 1 : 0.4 }}
+            onMouseEnter={() => setHovered(i)}
+            onMouseLeave={() => setHovered(null)}
+          >
+            <span className="shrink-0 w-[12px] text-[14px] leading-[20px] text-[#afafaf] text-right" style={{ fontFamily: PP, fontWeight: 400 }}>
+              {rank}
+            </span>
+            <p className="shrink-0 text-[14px] leading-[20px] text-[#1a1a1a]" style={{ fontFamily: PP, fontWeight: 400 }}>
+              {city}
+            </p>
+            <div className="flex-1" />
+            <p className="shrink-0 text-[14px] leading-[20px] text-black" style={{ fontFamily: PP, fontWeight: 500 }}>
+              {pct}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const similarBrands = [
+  { name: "Reformation", overlap: "41% shopper overlap", logo: "/assets/brand-reformation.png", logoW: 58.846, logoH: 7.444 },
+  { name: "COS",         overlap: "34% shopper overlap", logo: "/assets/brand-cos.png",         logoW: 51.923, logoH: 18.462 },
+  { name: "Mango",       overlap: "28% shopper overlap", logo: "/assets/brand-mango.png",       logoW: 65,     logoH: 65    },
+  { name: "Mango",       overlap: "28% shopper overlap", logo: "/assets/brand-mango.png",       logoW: 65,     logoH: 65    },
+];
+
 export default function ShopperDemographicSection() {
   return (
     <div className="flex flex-col gap-[48px] items-center py-[64px] w-full">
-      {/* Section title */}
       <div className="flex flex-col gap-[16px] items-start w-[1200px]">
-        <div className="w-full h-px bg-[#e3e3e3]" />
+        <div className="w-full h-px bg-[#1a1a1a]" />
         <h2
           className="text-[36px] leading-[40px] tracking-[-0.72px] text-[#1a1a1a]"
-          style={{
-            fontFamily: "var(--font-gt-super-display), 'Playfair Display', Georgia, serif",
-            fontWeight: 300,
-          }}
+          style={{ fontFamily: GT, fontWeight: 300 }}
         >
           Shopper Demographic
         </h2>
       </div>
 
-      {/* Cards row */}
       <div className="flex gap-[16px] items-stretch w-[1200px]">
+        <GenderCard />
+        <LocationsCard />
+      </div>
 
-        {/* Gender card */}
-        <div className="border border-[rgba(0,0,0,0.08)] flex flex-1 flex-col gap-[16px] items-start min-w-0 p-[21px] rounded-[6px]">
-          {/* Header */}
-          <div className="flex flex-col gap-[4px] w-full">
-            <p
-              className="text-[14px] leading-none text-[#1a1a1a] truncate"
-              style={{ fontFamily: "var(--font-pp-neue-montreal), system-ui, sans-serif", fontWeight: 500 }}
-            >
-              Gender
-            </p>
-            <p
-              className="text-[14px] leading-[20px] text-[#666] truncate"
-              style={{ fontFamily: "var(--font-pp-neue-montreal), system-ui, sans-serif", fontWeight: 400 }}
-            >
-              By reported identity
-            </p>
-          </div>
+      {/* Similar Brands */}
+      <div className="flex flex-col gap-[24px] items-start w-[1200px]">
+        <div className="flex flex-col gap-[4px]">
+          <p className="text-[14px] leading-none text-[#1a1a1a] truncate" style={{ fontFamily: PP, fontWeight: 500 }}>
+            Similar Brands on Phia
+          </p>
+          <p className="text-[14px] leading-[20px] text-[#666]" style={{ fontFamily: PP, fontWeight: 400 }}>
+            Brands your shoppers also browse
+          </p>
+        </div>
 
-          {/* Chart + legend */}
-          <div className="flex flex-col gap-[20px] items-center w-full">
-            <div className="flex items-center h-[354.64px]">
-              <DonutChart />
-            </div>
-
-            {/* Legend */}
-            <div className="flex flex-col gap-[8px] w-full">
-              {genderData.map(({ label, pct, color }) => (
-                <div key={label} className="flex gap-[8px] items-center w-full">
-                  <div
-                    className="shrink-0 size-[8px] rounded-full"
-                    style={{ background: color }}
+        <div className="flex gap-[24px] items-center w-full">
+          {similarBrands.map(({ name, overlap, logo, logoW, logoH }, i) => (
+            <div key={i} className="flex flex-[1_0_0] items-center min-w-0">
+              <div className="flex gap-[16px] items-center shrink-0">
+                {/* Circular brand tile */}
+                <div className="bg-white border border-[rgba(0,0,0,0.08)] flex items-center justify-center overflow-hidden p-[1.611px] rounded-full shrink-0 size-[75px]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={logo}
+                    alt={name}
+                    style={{ width: logoW, height: logoH, objectFit: "contain", display: "block" }}
                   />
-                  <p
-                    className="flex-1 min-w-0 text-[12px] leading-[18px] tracking-[0.12px] text-[#1a1a1a]"
-                    style={{ fontFamily: "var(--font-inter), system-ui, sans-serif", fontWeight: 400 }}
-                  >
-                    {label}
+                </div>
+
+                {/* Info */}
+                <div className="flex flex-col gap-[6px] items-start">
+                  <p className="text-[14px] leading-[20px] text-[#1a1a1a] whitespace-nowrap" style={{ fontFamily: PP, fontWeight: 500 }}>
+                    {name}
                   </p>
-                  <p
-                    className="text-[12px] leading-[18px] text-black whitespace-nowrap"
-                    style={{ fontFamily: "var(--font-inter), system-ui, sans-serif", fontWeight: 500 }}
-                  >
-                    {pct}
+                  <p className="text-[14px] leading-none text-[#002d9f] whitespace-nowrap" style={{ fontFamily: PP, fontWeight: 500 }}>
+                    {overlap}
                   </p>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Top Locations card */}
-        <div className="border border-[rgba(0,0,0,0.08)] flex flex-1 flex-col gap-[20px] items-center justify-center min-w-0 p-[21px] rounded-[6px]">
-          {/* Header */}
-          <div className="flex flex-col gap-[4px] w-full">
-            <p
-              className="text-[14px] leading-none text-[#1a1a1a] truncate"
-              style={{ fontFamily: "var(--font-pp-neue-montreal), system-ui, sans-serif", fontWeight: 500 }}
-            >
-              Top Locations
-            </p>
-            <p
-              className="text-[14px] leading-[20px] text-[#666] truncate"
-              style={{ fontFamily: "var(--font-pp-neue-montreal), system-ui, sans-serif", fontWeight: 400 }}
-            >
-              By city
-            </p>
-          </div>
-
-          {/* Map */}
-          <div className="relative flex items-center justify-center h-[354.64px] w-full">
-            <div className="relative" style={{ width: "510.671px", height: "298.743px" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/assets/usa-map.svg"
-                alt="Top locations map"
-                style={{ width: "100%", height: "100%", display: "block" }}
-              />
-            </div>
-          </div>
-
-          {/* Ranked list */}
-          <div className="flex flex-col gap-[8px] w-full">
-            {locationData.map(({ rank, city, pct }) => (
-              <div key={rank} className="flex gap-[8px] items-center w-full">
-                <div className="w-[12px] flex justify-end shrink-0">
-                  <span
-                    className="text-[10px] leading-[15px] text-[#afafaf] text-right"
-                    style={{ fontFamily: "var(--font-roboto-mono), monospace", fontWeight: 400 }}
-                  >
-                    {rank}
-                  </span>
-                </div>
-                <p
-                  className="flex-1 min-w-0 text-[12px] leading-[18px] tracking-[0.12px] text-[#1a1a1a]"
-                  style={{ fontFamily: "var(--font-inter), system-ui, sans-serif", fontWeight: 400 }}
-                >
-                  {city}
-                </p>
-                <p
-                  className="text-[12px] leading-[18px] text-black whitespace-nowrap"
-                  style={{ fontFamily: "var(--font-inter), system-ui, sans-serif", fontWeight: 500 }}
-                >
-                  {pct}
-                </p>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
-
       </div>
     </div>
   );

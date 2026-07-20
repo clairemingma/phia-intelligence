@@ -7,15 +7,15 @@ const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
 const TIME_FILTERS = ["7D", "30D", "90D", "180D", "YTD", "All Time", "Custom Range"];
 
 const METRICS = [
-  { label: "Total Sales",         value: "$84,210", change: "14%", positive: true  },
-  { label: "Total Transactions",  value: "1,247",   change: "9%",  positive: true  },
-  { label: "Average Order Value", value: "$67",     change: "5%",  positive: true  },
   { label: "Product Views",       value: "48,390",  change: "22%", positive: true  },
   { label: "Click Through Rate",  value: "3.8%",    change: "11%", positive: false },
+  { label: "Total Sales",         value: "$84,210", change: null },
+  { label: "Total Transactions",  value: "1,247",   change: null },
+  { label: "Average Order Value", value: "$67",     change: null },
 ];
 
 export default function MetricsSection() {
-  const [activeFilter, setActiveFilter] = useState("7D");
+  const [activeFilter, setActiveFilter] = useState("30D");
   const [activeMetric, setActiveMetric] = useState(0);
 
   return (
@@ -42,7 +42,7 @@ export default function MetricsSection() {
           <div
             key={m.label}
             onClick={() => setActiveMetric(i)}
-            className={`cursor-pointer flex-[1_0_0] min-w-0 border rounded-[6px] flex flex-col gap-[12px] items-center p-[17px] transition-colors ${
+            className={`cursor-pointer flex-[1_0_0] min-w-0 h-[151px] border rounded-[6px] flex flex-col gap-[12px] items-center justify-center p-[17px] transition-colors ${
               i === activeMetric
                 ? "bg-[#f9f8f7] border-[rgba(0,0,0,0.12)]"
                 : "bg-white border-[rgba(0,0,0,0.08)] hover:border-[rgba(0,0,0,0.12)]"
@@ -50,11 +50,13 @@ export default function MetricsSection() {
           >
             <p className="text-[#666] text-[16px] leading-[20px] text-center whitespace-nowrap w-full" style={{ fontFamily: PP, fontWeight: 500 }}>{m.label}</p>
             <p className="text-black text-[48px] leading-[1.1] text-center whitespace-nowrap w-full" style={{ fontFamily: PP, fontWeight: 400 }}>{m.value}</p>
-            <div className="flex items-center shrink-0">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={m.positive ? "/assets/caret-up.svg" : "/assets/caret-down.svg"} alt="" aria-hidden className="shrink-0 size-[16px]"/>
-              <span className="text-[16px] leading-[20px] text-center whitespace-nowrap" style={{ fontFamily: PP, fontWeight: 500, color: m.positive ? "#14774f" : "#e11445" }}>{m.change}</span>
-            </div>
+            {m.change != null && (
+              <div className="flex items-center shrink-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={m.positive ? "/assets/caret-up.svg" : "/assets/caret-down.svg"} alt="" aria-hidden className="shrink-0 size-[16px]"/>
+                <span className="text-[16px] leading-[20px] text-center whitespace-nowrap" style={{ fontFamily: PP, fontWeight: 500, color: m.positive ? "#14774f" : "#e11445" }}>{m.change}</span>
+              </div>
+            )}
           </div>
         ))}
       </div>

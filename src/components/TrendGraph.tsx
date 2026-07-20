@@ -5,7 +5,6 @@ import {
   Area,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
@@ -13,9 +12,8 @@ import { MetricKey, buildData, TOOLTIP_FORMAT } from "@/lib/trendData";
 
 const PP          = "var(--font-pp-neue-montreal), system-ui, sans-serif";
 const LINE_COLOR  = "#3B52C4";
-const FILL_COLOR  = "#E5EAF5"; // Brand/Phia Secondary Blue
+const FILL_COLOR  = "#E5EAF5";
 const AXIS_COLOR  = "#666666";
-const GRID_COLOR  = "rgba(0,0,0,0.06)";
 
 interface Props {
   metricLabel: string;
@@ -65,8 +63,8 @@ export default function TrendGraph({ metricLabel, timeFilter }: Props) {
   const data   = buildData(metric, timeFilter);
 
   return (
-    <div className="w-full bg-white border border-[rgba(0,0,0,0.08)] rounded-[8px] p-[20px]">
-      <ResponsiveContainer width="100%" height={380}>
+    <div className="w-full bg-white border border-[rgba(0,0,0,0.08)] rounded-[8px] p-[24px]">
+      <ResponsiveContainer width="100%" height={400}>
         <AreaChart
           data={data}
           margin={{ top: 8, right: 4, left: 0, bottom: 8 }}
@@ -74,16 +72,9 @@ export default function TrendGraph({ metricLabel, timeFilter }: Props) {
           <defs>
             <linearGradient id="phia-fill" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%"   stopColor={FILL_COLOR} stopOpacity={1} />
-              <stop offset="100%" stopColor={FILL_COLOR} stopOpacity={1} />
+              <stop offset="100%" stopColor={FILL_COLOR} stopOpacity={0} />
             </linearGradient>
           </defs>
-
-          {/* Horizontal grid lines only */}
-          <CartesianGrid
-            vertical={false}
-            stroke={GRID_COLOR}
-            strokeDasharray=""
-          />
 
           {/* Y-axis: 0–100 in steps of 20, right-aligned labels */}
           <YAxis

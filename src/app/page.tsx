@@ -1,6 +1,7 @@
 import NavBar from "@/components/NavBar";
 import HeroSection from "@/components/HeroSection";
 import MetricsSection from "@/components/MetricsSection";
+import LaunchingSoonSectionB from "@/components/LaunchingSoonSectionB";
 import TrendingProductsSection from "@/components/TrendingProductsSection";
 import TopCategoriesSection from "@/components/TopCategoriesSection";
 import ShopperDemographicSection from "@/components/ShopperDemographicSection";
@@ -16,6 +17,7 @@ export default function Home() {
       <div className="h-[68px]" />
       <HeroSection />
       <MetricsSection />
+      <LaunchingSoonSectionB />
       <TrendingProductsSection />
       <TopCategoriesSection />
       <ShopperDemographicSection />
