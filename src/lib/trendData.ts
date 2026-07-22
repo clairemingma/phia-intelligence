@@ -37,20 +37,16 @@ export const TOOLTIP_FORMAT: Record<MetricKey, (v: number) => string> = {
   "Click Through Rate":  (v) => `${v.toFixed(2)}%`,
 };
 
-// X-axis labels per time filter
 export const X_LABELS: Record<string, string[]> = {
-  "7D":           ["Jul 10", "Jul 11", "Jul 12", "Jul 13", "Jul 14", "Jul 15", "Jul 16"],
-  "30D":          ["Jun 17", "Jun 24", "Jul 1", "Jul 8", "Jul 16"],
-  "90D":          ["Apr", "May", "Jun", "Jul"],
-  "180D":         ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
-  "YTD":          ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
-  "All Time":     ["Aug", "Sept", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar"],
-  "Custom Range": ["Aug", "Sept", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar"],
+  "7D":           ["Jul 11", "Jul 12", "Jul 13", "Jul 14", "Jul 15", "Jul 16", "Jul 17", "Jul 18", "Jul 19", "Jul 20", "Jul 21", "Jul 22"],
+  "30D":          ["Jun 22", "Jun 25", "Jun 27", "Jun 30", "Jul 3", "Jul 6", "Jul 8", "Jul 11", "Jul 14", "Jul 17", "Jul 19", "Jul 22"],
+  "90D":          ["Apr 23", "May 1", "May 9", "May 18", "May 26", "Jun 3", "Jun 11", "Jun 19", "Jun 28", "Jul 6", "Jul 14", "Jul 22"],
+  "180D":         ["Jan 23", "Feb 8", "Feb 24", "Mar 13", "Mar 29", "Apr 14", "May 1", "May 17", "Jun 2", "Jun 19", "Jul 5", "Jul 22"],
+  "YTD":          ["Jan 1", "Jan 19", "Feb 6", "Feb 25", "Mar 15", "Apr 3", "Apr 21", "May 10", "May 28", "Jun 16", "Jul 4", "Jul 22"],
+  "All Time":     ["Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
+  "Custom Range": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
 };
 
-// Generate normalized 0–100 data that tracks with the underlying metric trend.
-// The tooltip formatter converts the normalised value back to a real metric value
-// for display (approximate, derived from current value + change % + wave).
 export function buildData(metric: MetricKey, timeFilter: string) {
   const labels = X_LABELS[timeFilter] ?? X_LABELS["All Time"];
   const n      = labels.length;
@@ -60,7 +56,6 @@ export function buildData(metric: MetricKey, timeFilter: string) {
   const { pct } = CHANGES[metric];
   const start = positive ? current / (1 + pct) : current * (1 + pct);
 
-  // raw 0-1 values: linear trend + seeded wave
   const raw = Array.from({ length: n }, (_, i) => {
     const t = i / Math.max(n - 1, 1);
     const trend = positive ? t * 0.55 : (1 - t) * 0.55;
@@ -75,8 +70,7 @@ export function buildData(metric: MetricKey, timeFilter: string) {
   const range = rMax - rMin || 1;
 
   return labels.map((label, i) => {
-    const normalized = ((raw[i] - rMin) / range) * 88 + 8; // keep 8–96 for headroom
-    // approximate real value by lerping between start and current with same normalization
+    const normalized = ((raw[i] - rMin) / range) * 88 + 8;
     const realApprox = start + (current - start) * ((raw[i] - rMin) / range);
     return { label, value: +normalized.toFixed(1), real: +realApprox.toFixed(2) };
   });

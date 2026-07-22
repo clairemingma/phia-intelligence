@@ -101,7 +101,7 @@ export default function LaunchingSoonSectionB() {
               return (
                 <div key={section.label}>
                   <button
-                    className="w-full text-left flex flex-col gap-[8px] py-[16px]"
+                    className="w-full text-left flex flex-col gap-[8px] py-[16px] cursor-pointer"
                     onClick={() => setActiveIdx(i)}
                   >
                     {/* Label */}

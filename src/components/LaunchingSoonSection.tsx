@@ -34,7 +34,7 @@ export default function LaunchingSoonSection() {
           {SECTIONS.map((section, i) => (
             <div key={section.label}>
               <div
-                className="flex flex-col gap-[8px] py-[12px] cursor-default"
+                className="flex flex-col gap-[8px] py-[12px] cursor-pointer"
                 onMouseEnter={() => setActiveIdx(i)}
               >
                 <p

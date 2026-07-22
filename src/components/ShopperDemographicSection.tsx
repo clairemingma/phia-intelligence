@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
 const GT = "var(--font-gt-super-display), 'Playfair Display', Georgia, serif";
@@ -10,7 +10,6 @@ const genderData = [
   { label: "Men",   pct: "32%", value: 32, color: "#6681c5" },
 ];
 
-// SVG donut helpers — angles are degrees clockwise from 12 o'clock
 const CX = 150, CY = 150, IR = 110, OR = 130;
 
 function polarToCart(cx: number, cy: number, r: number, deg: number) {
@@ -38,8 +37,6 @@ const SEGMENTS = [
   { ...genderData[1], startDeg: 244.8, endDeg: 360   },
 ];
 
-// SVG viewBox is 550.852×322.614; container is 550×321.75 with inset: -0.13% 0 -0.14% 0
-// x_px = x_svg * (550/550.852), y_px = y_svg - (0.0013 * 321.75)
 const locationData = [
   { rank: 1, city: "New York",    pct: "18%", x: 502, y: 110 },
   { rank: 2, city: "Los Angeles", pct: "14%", x:  79, y: 190 },
@@ -53,7 +50,10 @@ function GenderCard() {
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
 
   return (
-    <div className="border border-[rgba(0,0,0,0.08)] flex flex-1 flex-col gap-[16px] items-start min-w-0 p-[21px] rounded-[6px] aspect-square">
+    <div
+      className="flex flex-1 flex-col gap-[16px] items-start min-w-0 p-[21px] rounded-[6px] aspect-square"
+      style={{ border: "1px solid rgba(0,0,0,0.08)" }}
+    >
       <div className="flex flex-col gap-[4px] w-full">
         <p className="text-[14px] leading-none text-[#1a1a1a] truncate" style={{ fontFamily: PP, fontWeight: 500 }}>
           Gender
@@ -72,16 +72,14 @@ function GenderCard() {
         onMouseLeave={() => { setCursor(null); setActiveIndex(null); }}
       >
         <svg width={300} height={300} viewBox="0 0 300 300">
-          {/* Background track */}
           <circle cx={CX} cy={CY} r={(IR + OR) / 2} stroke="rgba(0,0,0,0.06)" strokeWidth={OR - IR} fill="none" />
-          {/* Segments — hit detection is exact to the ring path */}
           {SEGMENTS.map((seg, i) => (
             <path
               key={seg.label}
               d={annularSector(CX, CY, IR, OR, seg.startDeg, seg.endDeg)}
               fill={seg.color}
               opacity={activeIndex === null || activeIndex === i ? 1 : 0.4}
-              style={{ transition: "opacity 0.15s", cursor: "default" }}
+              style={{ transition: "opacity 0.15s" }}
               onMouseEnter={() => setActiveIndex(i)}
               onMouseLeave={() => setActiveIndex(null)}
             />
@@ -109,13 +107,9 @@ function GenderCard() {
             onMouseLeave={() => setActiveIndex(null)}
           >
             <div className="shrink-0 size-[8px] rounded-full" style={{ background: color }} />
-            <p className="shrink-0 text-[14px] leading-[20px] text-[#1a1a1a]" style={{ fontFamily: PP, fontWeight: 400 }}>
-              {label}
-            </p>
+            <p className="shrink-0 text-[14px] leading-[20px] text-[#1a1a1a]" style={{ fontFamily: PP, fontWeight: 400 }}>{label}</p>
             <div className="flex-1" />
-            <p className="shrink-0 text-[14px] leading-[20px] text-black" style={{ fontFamily: PP, fontWeight: 500 }}>
-              {pct}
-            </p>
+            <p className="shrink-0 text-[14px] leading-[20px] text-black" style={{ fontFamily: PP, fontWeight: 500 }}>{pct}</p>
           </div>
         ))}
       </div>
@@ -124,18 +118,12 @@ function GenderCard() {
 }
 
 function MapTooltip({ city, pct, x, y }: { city: string; pct: string; x: number; y: number }) {
-  // Flip above/below based on vertical position; nudge left for right-edge cities
   const above = y > 160;
   const left = Math.min(x, 470);
   return (
     <div
       className="absolute pointer-events-none z-10 bg-[#1a1a1a] text-white rounded-[6px] px-[10px] py-[6px] whitespace-nowrap"
-      style={{
-        left,
-        top: above ? y - 48 : y + 16,
-        transform: "translateX(-50%)",
-        fontFamily: PP,
-      }}
+      style={{ left, top: above ? y - 48 : y + 16, transform: "translateX(-50%)", fontFamily: PP }}
     >
       <span className="text-[12px] font-medium">{city}</span>
       <span className="text-[12px] opacity-60 ml-[6px]">{pct}</span>
@@ -146,8 +134,23 @@ function MapTooltip({ city, pct, x, y }: { city: string; pct: string; x: number;
 function LocationsCard() {
   const [hovered, setHovered] = useState<number | null>(null);
 
+  function handleMapMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    let nearest = 0, minDist = Infinity;
+    locationData.forEach(({ x, y }, i) => {
+      const d = Math.hypot(mx - x, my - y);
+      if (d < minDist) { minDist = d; nearest = i; }
+    });
+    setHovered(nearest);
+  }
+
   return (
-    <div className="border border-[rgba(0,0,0,0.08)] flex flex-1 flex-col gap-[20px] items-center min-w-0 p-[21px] rounded-[6px] aspect-square">
+    <div
+      className="flex flex-1 flex-col gap-[20px] items-center min-w-0 p-[21px] rounded-[6px] aspect-square"
+      style={{ border: "1px solid rgba(0,0,0,0.08)" }}
+    >
       <div className="flex flex-col gap-[4px] w-full">
         <p className="text-[14px] leading-none text-[#1a1a1a] truncate" style={{ fontFamily: PP, fontWeight: 500 }}>
           Top Locations
@@ -157,40 +160,23 @@ function LocationsCard() {
         </p>
       </div>
 
-      {/* Map with hotspots */}
-      <div className="relative shrink-0 h-[321.75px] w-[550px]">
+      <div
+        className="relative shrink-0 h-[321.75px] w-[550px]"
+        onMouseMove={handleMapMouseMove}
+        onMouseLeave={() => setHovered(null)}
+      >
         <div className="absolute inset-[-0.13%_0_-0.14%_0]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/assets/usa-map-locations.svg"
-            alt="Top locations map"
-            className="block max-w-none size-full"
-          />
+          <img src="/assets/usa-map-locations.svg" alt="Top locations map" className="block max-w-none size-full pointer-events-none" />
         </div>
-
-        {/* City hotspots */}
-        {locationData.map(({ rank, city, pct, x, y }, i) => (
-          <button
-            key={rank}
-            className="absolute rounded-full cursor-pointer"
-            style={{ left: x - 16, top: y - 16, width: 32, height: 32 }}
-            onMouseEnter={() => setHovered(i)}
-            onMouseLeave={() => setHovered(null)}
-            aria-label={`${city}: ${pct}`}
-          />
+        {locationData.map(({ rank, x, y }) => (
+          <div key={rank} className="absolute rounded-full pointer-events-none" style={{ left: x - 16, top: y - 16, width: 32, height: 32 }} />
         ))}
-
         {hovered !== null && (
-          <MapTooltip
-            city={locationData[hovered].city}
-            pct={locationData[hovered].pct}
-            x={locationData[hovered].x}
-            y={locationData[hovered].y}
-          />
+          <MapTooltip city={locationData[hovered].city} pct={locationData[hovered].pct} x={locationData[hovered].x} y={locationData[hovered].y} />
         )}
       </div>
 
-      {/* Ranked list */}
       <div className="flex flex-col gap-[8px] w-full mt-auto">
         {locationData.map(({ rank, city, pct }, i) => (
           <div
@@ -200,16 +186,10 @@ function LocationsCard() {
             onMouseEnter={() => setHovered(i)}
             onMouseLeave={() => setHovered(null)}
           >
-            <span className="shrink-0 w-[12px] text-[14px] leading-[20px] text-[#afafaf] text-right" style={{ fontFamily: PP, fontWeight: 400 }}>
-              {rank}
-            </span>
-            <p className="shrink-0 text-[14px] leading-[20px] text-[#1a1a1a]" style={{ fontFamily: PP, fontWeight: 400 }}>
-              {city}
-            </p>
+            <span className="shrink-0 w-[12px] text-[14px] leading-[20px] text-[#afafaf] text-right" style={{ fontFamily: PP, fontWeight: 400 }}>{rank}</span>
+            <p className="shrink-0 text-[14px] leading-[20px] text-[#1a1a1a]" style={{ fontFamily: PP, fontWeight: 400 }}>{city}</p>
             <div className="flex-1" />
-            <p className="shrink-0 text-[14px] leading-[20px] text-black" style={{ fontFamily: PP, fontWeight: 500 }}>
-              {pct}
-            </p>
+            <p className="shrink-0 text-[14px] leading-[20px] text-black" style={{ fontFamily: PP, fontWeight: 500 }}>{pct}</p>
           </div>
         ))}
       </div>
@@ -217,70 +197,86 @@ function LocationsCard() {
   );
 }
 
-const similarBrands = [
+const BRANDS = [
   { name: "Reformation", overlap: "41% shopper overlap", logo: "/assets/brand-reformation.png", logoW: 58.846, logoH: 7.444 },
   { name: "COS",         overlap: "34% shopper overlap", logo: "/assets/brand-cos.png",         logoW: 51.923, logoH: 18.462 },
-  { name: "Mango",       overlap: "28% shopper overlap", logo: "/assets/brand-mango.png",       logoW: 65,     logoH: 65    },
-  { name: "Mango",       overlap: "28% shopper overlap", logo: "/assets/brand-mango.png",       logoW: 65,     logoH: 65    },
+  { name: "Mango",       overlap: "28% shopper overlap", logo: "/assets/brand-mango.png",       logoW: 71.538, logoH: 9.05 },
+  { name: "Mango",       overlap: "28% shopper overlap", logo: "/assets/brand-mango.png",       logoW: 71.538, logoH: 9.05 },
 ];
 
 export default function ShopperDemographicSection() {
+  const [visible, setVisible] = useState(false);
+  const brandsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = brandsRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
+      { rootMargin: "-35% 0px -35% 0px", threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="flex flex-col gap-[48px] items-center py-[64px] w-full">
+
+      {/* Section title */}
       <div className="flex flex-col gap-[16px] items-start w-[1200px]">
         <div className="w-full h-px bg-[#1a1a1a]" />
-        <h2
-          className="text-[36px] leading-[40px] tracking-[-0.72px] text-[#1a1a1a]"
-          style={{ fontFamily: GT, fontWeight: 300 }}
-        >
+        <h2 className="text-[36px] leading-[40px] tracking-[-0.72px] text-[#1a1a1a]" style={{ fontFamily: GT, fontWeight: 300 }}>
           Shopper Demographic
         </h2>
       </div>
 
+      {/* Cards row */}
       <div className="flex gap-[16px] items-stretch w-[1200px]">
         <GenderCard />
         <LocationsCard />
       </div>
 
       {/* Similar Brands */}
-      <div className="flex flex-col gap-[24px] items-start w-[1200px]">
-        <div className="flex flex-col gap-[4px]">
-          <p className="text-[14px] leading-none text-[#1a1a1a] truncate" style={{ fontFamily: PP, fontWeight: 500 }}>
-            Similar Brands on Phia
-          </p>
-          <p className="text-[14px] leading-[20px] text-[#666]" style={{ fontFamily: PP, fontWeight: 400 }}>
-            Brands your shoppers also browse
-          </p>
-        </div>
+      <div className="flex flex-col gap-[24px] items-start py-[48px] w-[1200px]">
+          <div className="flex flex-col gap-[4px]">
+            <p className="text-[14px] leading-none text-[#1a1a1a]" style={{ fontFamily: PP, fontWeight: 500 }}>
+              Similar Brands on Phia
+            </p>
+            <p className="text-[14px] leading-[20px] text-[#666]" style={{ fontFamily: PP, fontWeight: 400 }}>
+              Brands your shoppers also browse
+            </p>
+          </div>
 
-        <div className="flex gap-[24px] items-center w-full">
-          {similarBrands.map(({ name, overlap, logo, logoW, logoH }, i) => (
-            <div key={i} className="flex flex-[1_0_0] items-center min-w-0">
-              <div className="flex gap-[16px] items-center shrink-0">
-                {/* Circular brand tile */}
-                <div className="bg-white border border-[rgba(0,0,0,0.08)] flex items-center justify-center overflow-hidden p-[1.611px] rounded-full shrink-0 size-[75px]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={logo}
-                    alt={name}
-                    style={{ width: logoW, height: logoH, objectFit: "contain", display: "block" }}
-                  />
-                </div>
-
-                {/* Info */}
-                <div className="flex flex-col gap-[6px] items-start">
-                  <p className="text-[14px] leading-[20px] text-[#1a1a1a] whitespace-nowrap" style={{ fontFamily: PP, fontWeight: 500 }}>
-                    {name}
-                  </p>
-                  <p className="text-[14px] leading-none text-[#002d9f] whitespace-nowrap" style={{ fontFamily: PP, fontWeight: 500 }}>
-                    {overlap}
-                  </p>
+          <div ref={brandsRef} className="flex gap-[24px] items-center w-full">
+            {BRANDS.map(({ name, overlap, logo, logoW, logoH }, i) => (
+              <div
+                key={i}
+                className="flex flex-1 items-center min-w-0"
+                style={{
+                  opacity: visible ? 1 : 0,
+                  transform: visible ? "translateY(0)" : "translateY(16px)",
+                  transition: `opacity 0.5s ease, transform 0.5s ease`,
+                  transitionDelay: `${i * 80}ms`,
+                }}
+              >
+                <div className="flex gap-[16px] items-center shrink-0">
+                  <div
+                    className="bg-white flex items-center justify-center overflow-hidden rounded-full shrink-0 size-[75px]"
+                    style={{ border: "1px solid rgba(0,0,0,0.08)", padding: "1.611px" }}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={logo} alt={name} style={{ width: logoW, height: logoH, objectFit: "cover" }} />
+                  </div>
+                  <div className="flex flex-col gap-[6px] items-start overflow-hidden shrink-0">
+                    <p className="text-[14px] leading-[20px] text-[#1a1a1a] whitespace-nowrap" style={{ fontFamily: PP, fontWeight: 500 }}>{name}</p>
+                    <p className="text-[14px] leading-none text-[#002d9f] whitespace-nowrap" style={{ fontFamily: PP, fontWeight: 500 }}>{overlap}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import TopCategoriesSection from "@/components/TopCategoriesSection";
 
 const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
 const GT = "var(--font-gt-super-display), 'Playfair Display', Georgia, serif";
@@ -89,13 +90,12 @@ export default function TrendingProductsSection() {
             <button
               key={f}
               onClick={() => setActiveSort(f)}
-              className={`flex h-[44px] items-center justify-center px-[18px] rounded-[6px] shrink-0 border ${
-                activeSort === f ? "border-[#e3e3e3]" : "border-transparent"
-              }`}
+              className="cursor-pointer flex h-[44px] items-center justify-center px-[18px] rounded-[6px] shrink-0 border outline-none transition-colors"
+              style={{ borderColor: activeSort === f ? "#e3e3e3" : "transparent" }}
             >
               <span
-                className="text-[12px] leading-none text-black whitespace-nowrap"
-                style={{ fontFamily: PP, fontWeight: 500 }}
+                className="text-[12px] leading-none whitespace-nowrap transition-colors"
+                style={{ fontFamily: PP, fontWeight: 500, color: activeSort === f ? "#000" : "#999" }}
               >
                 {f}
               </span>
@@ -107,6 +107,11 @@ export default function TrendingProductsSection() {
 
       {/* Row 2 */}
       <CardRow startRank={6} />
+
+      {/* Top Categories */}
+      <div className="pt-[48px] w-full">
+        <TopCategoriesSection />
+      </div>
 
     </div>
   );

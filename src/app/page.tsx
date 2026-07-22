@@ -3,7 +3,6 @@ import HeroSection from "@/components/HeroSection";
 import MetricsSection from "@/components/MetricsSection";
 import LaunchingSoonSectionB from "@/components/LaunchingSoonSectionB";
 import TrendingProductsSection from "@/components/TrendingProductsSection";
-import TopCategoriesSection from "@/components/TopCategoriesSection";
 import ShopperDemographicSection from "@/components/ShopperDemographicSection";
 import PartnerSection from "@/components/PartnerSection";
 import ReachSection from "@/components/ReachSection";
@@ -19,7 +18,6 @@ export default function Home() {
       <MetricsSection />
       <LaunchingSoonSectionB />
       <TrendingProductsSection />
-      <TopCategoriesSection />
       <ShopperDemographicSection />
       <PartnerSection />
       <ReachSection />
