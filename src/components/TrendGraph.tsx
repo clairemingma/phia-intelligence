@@ -9,7 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { MetricKey, buildData, TOOLTIP_FORMAT, CURRENT_VALUES } from "@/lib/trendData";
+import { MetricKey, buildData, buildCustomLabels, TOOLTIP_FORMAT, CURRENT_VALUES } from "@/lib/trendData";
 
 function niceAxisTicks(max: number): number[] {
   if (max <= 0) return [0, 0, 0, 0, 0, 0];
@@ -57,6 +57,7 @@ const CHART_RIGHT_MARGIN = 8;
 interface Props {
   metricLabel: string;
   timeFilter: string;
+  customRange?: { start: string; end: string };
 }
 
 interface YTickProps {
@@ -113,12 +114,13 @@ function CustomTooltip({ active, payload, formatValue }: CustomTooltipProps) {
   );
 }
 
-export default function TrendGraph({ metricLabel, timeFilter }: Props) {
+export default function TrendGraph({ metricLabel, timeFilter, customRange }: Props) {
   const [isHovering, setIsHovering] = useState(false);
 
   const metric    = metricLabel as MetricKey;
   const niceTicks = niceAxisTicks(CURRENT_VALUES[metric]);
-  const data      = buildData(metric, timeFilter);
+  const customLabels = customRange ? buildCustomLabels(customRange.start, customRange.end) : undefined;
+  const data      = buildData(metric, timeFilter, customLabels);
   const labels    = data.map(d => d.label);
   const lastIndex = data.length - 1;
 

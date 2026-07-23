@@ -81,7 +81,7 @@ export default function TopCategoriesSection() {
             </div>
 
             {/* Scrollable pills */}
-            <div className="flex flex-col gap-[16px] items-start w-full overflow-y-auto flex-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <div className="flex flex-col gap-[8px] items-start w-full overflow-y-auto flex-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {CATEGORIES.map((cat) => {
                 const isActive = active === cat.name;
 
@@ -91,9 +91,9 @@ export default function TopCategoriesSection() {
                     {/* Category pill */}
                     <button
                       onClick={() => handleCategory(cat.name)}
-                      className="cursor-pointer outline-none flex gap-[8px] h-[44px] items-center justify-center px-[18px] rounded-[999px] shrink-0 border"
+                      className={`cursor-pointer outline-none flex gap-[8px] h-[44px] items-center justify-center px-[19px] rounded-[999px] shrink-0 border transition-colors${!isActive ? " hover:bg-[rgba(0,0,0,0.04)]" : ""}`}
                       style={{
-                        background:  isActive ? cat.shade : "transparent",
+                        background:  isActive ? cat.shade : undefined,
                         borderColor: isActive ? cat.shade : "#e3e3e3",
                         transition:  "background 0.25s ease, border-color 0.25s ease",
                       }}
@@ -123,11 +123,11 @@ export default function TopCategoriesSection() {
                               <button
                                 key={sub}
                                 onClick={() => setActiveSub(isSubActive ? null : sub)}
-                                className="cursor-pointer outline-none active:opacity-100 flex h-[36px] items-center justify-center px-[14px] rounded-[999px] shrink-0 border"
+                                className={`cursor-pointer outline-none active:opacity-100 flex h-[36px] items-center justify-center px-[15px] rounded-[999px] shrink-0 border${!isSubActive ? " hover:bg-[rgba(0,0,0,0.04)]" : ""}`}
                                 style={{
                                   ...(isSubActive
                                     ? { background: "#e5eaf5", borderColor: "#e5eaf5" }
-                                    : { background: "transparent", borderColor: "#e3e3e3" }),
+                                    : { borderColor: "#e3e3e3" }),
                                   WebkitTapHighlightColor: "transparent",
                                   opacity: isActive ? 1 : 0,
                                   transition: [

@@ -47,8 +47,24 @@ export const X_LABELS: Record<string, string[]> = {
   "Custom Range": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
 };
 
-export function buildData(metric: MetricKey, timeFilter: string) {
-  const labels = X_LABELS[timeFilter] ?? X_LABELS["All Time"];
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+export function buildCustomLabels(start: string, end: string): string[] {
+  const s = new Date(start);
+  const e = new Date(end);
+  if (isNaN(s.getTime()) || isNaN(e.getTime()) || s >= e) return X_LABELS["Custom Range"];
+  const n = 12;
+  const step = (e.getTime() - s.getTime()) / (n - 1);
+  const diffDays = (e.getTime() - s.getTime()) / 86_400_000;
+  return Array.from({ length: n }, (_, i) => {
+    const d = new Date(s.getTime() + step * i);
+    if (diffDays > 365) return `${MONTHS[d.getMonth()]} '${String(d.getFullYear()).slice(2)}`;
+    return `${MONTHS[d.getMonth()]} ${d.getDate()}`;
+  });
+}
+
+export function buildData(metric: MetricKey, timeFilter: string, customLabels?: string[]) {
+  const labels = customLabels ?? X_LABELS[timeFilter] ?? X_LABELS["All Time"];
   const n      = labels.length;
   const seed   = METRIC_KEYS.indexOf(metric);
   const { positive } = CHANGES[metric];

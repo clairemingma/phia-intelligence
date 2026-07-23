@@ -72,36 +72,43 @@ export default function TrendingProductsSection() {
   return (
     <div className="flex flex-col gap-[48px] items-start justify-center px-[120px] py-[64px] w-full">
 
-      {/* Section title */}
+      {/* Section title + sort buttons */}
       <div className="flex flex-col gap-[16px] items-start w-full shrink-0">
-        <div className="w-full h-px bg-[#1a1a1a]" />
-        <h2
-          className="text-[36px] leading-[40px] tracking-[-0.72px] text-[#1a1a1a] whitespace-nowrap"
-          style={{ fontFamily: GT, fontWeight: 300 }}
-        >
-          Trending Products
-        </h2>
+        <div className="w-full h-px" style={{ background: "rgba(0,0,0,0.08)" }} />
+        <div className="flex items-start justify-between w-full">
+          <h2
+            className="text-[36px] leading-[40px] tracking-[-0.72px] text-[#1a1a1a] whitespace-nowrap"
+            style={{ fontFamily: GT, fontWeight: 300 }}
+          >
+            Trending Products
+          </h2>
+          <div className="flex gap-[8px] items-start shrink-0">
+            {SORT_FILTERS.map((f) => {
+              const isActive = activeSort === f;
+              return (
+                <button
+                  key={f}
+                  onClick={() => setActiveSort(f)}
+                  className={`cursor-pointer flex h-[44px] items-center justify-center px-[18px] rounded-[6px] shrink-0 outline-none transition-colors bg-white${!isActive ? " hover:bg-[rgba(0,0,0,0.04)]" : ""}`}
+                  style={{
+                    border: isActive ? "1px solid rgba(0,0,0,0.08)" : "1px solid transparent",
+                  }}
+                >
+                  <span
+                    className="text-[12px] leading-none whitespace-nowrap"
+                    style={{ fontFamily: PP, fontWeight: 500, color: isActive ? "#1a1a1a" : "#666" }}
+                  >
+                    {f}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
-      {/* Row 1 with sort filter tabs */}
+      {/* Row 1 */}
       <div className="flex flex-col gap-[16px] items-start w-full shrink-0">
-        <div className="flex items-start">
-          {SORT_FILTERS.map((f) => (
-            <button
-              key={f}
-              onClick={() => setActiveSort(f)}
-              className="cursor-pointer flex h-[44px] items-center justify-center px-[18px] rounded-[6px] shrink-0 border outline-none transition-colors"
-              style={{ borderColor: activeSort === f ? "#e3e3e3" : "transparent" }}
-            >
-              <span
-                className="text-[12px] leading-none whitespace-nowrap transition-colors"
-                style={{ fontFamily: PP, fontWeight: 500, color: activeSort === f ? "#000" : "#999" }}
-              >
-                {f}
-              </span>
-            </button>
-          ))}
-        </div>
         <CardRow startRank={1} />
       </div>
 
