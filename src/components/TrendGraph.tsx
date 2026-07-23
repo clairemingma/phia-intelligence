@@ -131,7 +131,7 @@ export default function TrendGraph({ metricLabel, timeFilter, customRange }: Pro
       <circle
         cx={cx}
         cy={cy}
-        r={4}
+        r={5}
         fill={LINE_COLOR}
       />
     );
@@ -183,12 +183,12 @@ export default function TrendGraph({ metricLabel, timeFilter, customRange }: Pro
             type="natural"
             dataKey="value"
             stroke={LINE_COLOR}
-            strokeWidth={1.5}
+            strokeWidth={2}
             strokeLinecap="round"
             fill="url(#phia-fill)"
             dot={renderDot}
 
-            activeDot={{ r: 4, fill: LINE_COLOR, stroke: "none" }}
+            activeDot={{ r: 5, fill: LINE_COLOR, stroke: "none" }}
           />
         </AreaChart>
       </ResponsiveContainer>
