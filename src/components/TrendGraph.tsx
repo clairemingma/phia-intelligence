@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   AreaChart,
   Area,
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
 } from "recharts";
 import { MetricKey, buildData, buildCustomLabels, TOOLTIP_FORMAT, CURRENT_VALUES } from "@/lib/trendData";
 
@@ -116,6 +115,19 @@ function CustomTooltip({ active, payload, formatValue }: CustomTooltipProps) {
 
 export default function TrendGraph({ metricLabel, timeFilter, customRange }: Props) {
   const [isHovering, setIsHovering] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [chartWidth, setChartWidth] = useState(0);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(entries => {
+      setChartWidth(entries[0].contentRect.width);
+    });
+    ro.observe(el);
+    setChartWidth(el.getBoundingClientRect().width);
+    return () => ro.disconnect();
+  }, []);
 
   const metric    = metricLabel as MetricKey;
   const niceTicks = niceAxisTicks(CURRENT_VALUES[metric]);
@@ -138,10 +150,9 @@ export default function TrendGraph({ metricLabel, timeFilter, customRange }: Pro
   };
 
   return (
-    <div className="w-full bg-white rounded-[8px] p-[24px]" style={{ border: '1px solid rgba(0,0,0,0.08)' }}>
-      <div className="[&_svg]:overflow-visible">
-      <ResponsiveContainer width="100%" height={320}>
-        <AreaChart
+    <div className="w-full bg-white rounded-[8px] p-[24px] outline-none" style={{ border: '1px solid rgba(0,0,0,0.08)' }}>
+      <div className="[&_svg]:overflow-visible [&_*]:outline-none" ref={containerRef}>
+        <AreaChart width={chartWidth} height={320}
           data={data}
           margin={{ top: 8, right: CHART_RIGHT_MARGIN, left: 0, bottom: 16 }}
           onMouseEnter={() => setIsHovering(true)}
@@ -187,44 +198,47 @@ export default function TrendGraph({ metricLabel, timeFilter, customRange }: Pro
             strokeLinecap="round"
             fill="url(#phia-fill)"
             dot={renderDot}
-
+            isAnimationActive={false}
             activeDot={{ r: 5, fill: LINE_COLOR, stroke: "none" }}
           />
         </AreaChart>
-      </ResponsiveContainer>
       </div>
 
-      {/* Custom x-axis: starts/ends at the chart plot area edges, labels in 40px frames, left-aligned */}
+      {/* X-axis labels — stepped density by breakpoint */}
+      {([
+        { count: 6,  cls: "flex sm:hidden" },
+        { count: 8,  cls: "hidden sm:flex md:hidden" },
+        { count: 10, cls: "hidden md:flex lg:hidden" },
+      ] as const).map(({ count, cls }) => (
+        <div
+          key={count}
+          className={cls}
+          style={{ justifyContent: "space-between", marginLeft: Y_AXIS_WIDTH, marginRight: CHART_RIGHT_MARGIN, marginTop: 16, height: 16 }}
+        >
+          {Array.from({ length: count }, (_, idx) => {
+            const labelIdx = Math.round(idx * (labels.length - 1) / (count - 1));
+            return (
+              <span key={idx} style={{ fontFamily: PP, fontWeight: 500, fontSize: 12, lineHeight: "16px", color: AXIS_COLOR, whiteSpace: "nowrap" }}>
+                {labels[labelIdx]}
+              </span>
+            );
+          })}
+        </div>
+      ))}
+
+      {/* lg+: 12 evenly-spaced labels */}
       <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginLeft: Y_AXIS_WIDTH,
-          marginRight: CHART_RIGHT_MARGIN,
-          marginTop: 16,
-          height: 16,
-        }}
+        className="hidden lg:flex"
+        style={{ justifyContent: "space-between", marginLeft: Y_AXIS_WIDTH, marginRight: CHART_RIGHT_MARGIN, marginTop: 16, height: 16 }}
       >
-        {labels.map((label, i) => (
-          <div
-            key={i}
-            style={{ width: 40, height: 16, flexShrink: 0, overflow: "hidden" }}
-          >
-            <span
-              style={{
-                fontFamily: PP,
-                fontWeight: 500,
-                fontSize: 12,
-                lineHeight: "16px",
-                color: AXIS_COLOR,
-                whiteSpace: "nowrap",
-                display: "block",
-              }}
-            >
-              {label}
+        {Array.from({ length: 12 }, (_, idx) => {
+          const labelIdx = Math.round(idx * (labels.length - 1) / 11);
+          return (
+            <span key={idx} style={{ fontFamily: PP, fontWeight: 500, fontSize: 12, lineHeight: "16px", color: AXIS_COLOR, whiteSpace: "nowrap" }}>
+              {labels[labelIdx]}
             </span>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

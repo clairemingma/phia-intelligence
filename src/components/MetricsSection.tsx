@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import TrendGraph from "./TrendGraph";
 
 const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
@@ -285,6 +285,24 @@ export default function MetricsSection() {
 
   const dropdownRef     = useRef<HTMLDivElement>(null);
   const calendarWrapRef = useRef<HTMLDivElement>(null);
+  const gridRef         = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const el = gridRef.current;
+    if (!el) return;
+    function equalizeHeights() {
+      if (!el) return;
+      el.style.gridAutoRows = "auto";
+      el.style.alignItems   = "start";
+      void el.offsetHeight;
+      const maxH = Math.max(0, ...Array.from(el.children).map(c => (c as HTMLElement).offsetHeight));
+      el.style.gridAutoRows = `${maxH}px`;
+      el.style.alignItems   = "stretch";
+    }
+    equalizeHeights();
+    window.addEventListener("resize", equalizeHeights);
+    return () => window.removeEventListener("resize", equalizeHeights);
+  }, []);
 
   useEffect(() => {
     if (!dropdownOpen) return;
@@ -325,7 +343,7 @@ export default function MetricsSection() {
     : undefined;
 
   return (
-    <div className="flex flex-col gap-[48px] items-end px-[120px] py-[64px] w-full">
+    <div className="flex flex-col gap-[48px] items-end px-6 lg:px-16 xl:px-[120px] py-[64px] w-full">
 
       {/* Title row */}
       <div className="flex flex-col gap-[16px] items-start w-full">
@@ -397,29 +415,29 @@ export default function MetricsSection() {
       </div>
 
       {/* Metric cards */}
-      <div className="flex gap-[16px] items-start w-full">
+      <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-[16px] w-full">
         {METRICS.map((m, i) => {
           const isActive = i === activeMetric;
           return (
             <div
               key={m.label}
               onClick={() => setActiveMetric(i)}
-              className={`cursor-pointer flex-[1_0_0] min-w-px h-[151px] border rounded-[6px] relative transition-colors ${
+              className={`cursor-pointer border rounded-[6px] relative transition-colors [container-type:inline-size] ${
                 isActive
                   ? "bg-[#002D9F] border-[#002D9F]"
                   : "bg-transparent border-[rgba(0,0,0,0.08)] hover:bg-[rgba(0,0,0,0.04)]"
               }`}
             >
-              <div className="flex flex-col gap-[12px] items-center p-[17px] size-full">
+              <div className="flex flex-col gap-[12px] items-center p-[17px] h-full w-full">
                 <p
-                  className="text-[16px] leading-[20px] text-center whitespace-nowrap w-full"
+                  className="text-[13px] leading-[18px] text-center truncate w-full"
                   style={{ fontFamily: PP, fontWeight: 500, color: isActive ? "white" : "#666" }}
                 >
                   {m.label}
                 </p>
                 <p
-                  className="text-[48px] leading-[1.1] text-center whitespace-nowrap w-full"
-                  style={{ fontFamily: PP, fontWeight: 400, color: isActive ? "white" : "#1a1a1a" }}
+                  className="leading-[1.1] text-center whitespace-nowrap w-full"
+                  style={{ fontFamily: PP, fontWeight: 400, color: isActive ? "white" : "#1a1a1a", fontSize: "clamp(20px, 18cqw, 48px)" }}
                 >
                   {m.value}
                 </p>
