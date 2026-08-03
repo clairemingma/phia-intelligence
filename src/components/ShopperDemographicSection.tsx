@@ -255,11 +255,11 @@ export default function ShopperDemographicSection() {
             </p>
           </div>
 
-          <div ref={brandsRef} className="flex flex-col xs:flex-row gap-[16px] xs:gap-[24px] items-start w-full xs:overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div ref={brandsRef} className="flex flex-col sm:flex-row gap-[16px] sm:gap-[24px] items-start w-full sm:overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {BRANDS.map(({ name, overlap, logo, logoW, logoH }, i) => (
               <div
                 key={i}
-                className="flex w-full xs:flex-1 xs:shrink-0 xs:min-w-max items-center"
+                className="flex w-full sm:flex-1 sm:shrink-0 sm:min-w-max items-center"
                 style={{
                   opacity: visible ? 1 : 0,
                   transform: visible ? "translateY(0)" : "translateY(16px)",
