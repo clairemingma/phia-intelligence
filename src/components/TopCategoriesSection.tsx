@@ -19,7 +19,7 @@ const PRODUCTS = [
 
 function ProductCard({ rank, views, name, price }: typeof PRODUCTS[number]) {
   return (
-    <div className="flex flex-col items-start shrink-0 w-[calc(50vw-32px)] lg:w-[288px] lg:h-[438px] lg:justify-center">
+    <div className="flex flex-col items-start w-full lg:shrink-0 lg:w-[288px] lg:h-[438px] lg:justify-center">
       <div className="flex flex-col gap-[12px] items-start w-full">
         <div className="aspect-[400/500] border border-[rgba(227,227,227,0.4)] rounded-[6px] overflow-hidden shrink-0 w-full bg-[#e5eaf5]" />
         <div className="flex flex-col gap-[6px] items-start overflow-hidden w-full">
@@ -114,7 +114,7 @@ export default function TopCategoriesSection() {
               );
             })}
           </div>
-          <div className="flex flex-wrap gap-[8px] items-start">
+          <div className="flex flex-nowrap gap-[8px] items-center overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {displayedCat.subs.map((sub, subIdx) => {
               const isSubActive = activeSub === sub;
               return (
@@ -213,8 +213,8 @@ export default function TopCategoriesSection() {
       </div>
 
       {/* Product cards — staggered float-in */}
-      <div className="w-full lg:flex-1 lg:min-w-0 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        <div className="flex gap-[16px] items-start">
+      <div className="w-full lg:flex-1 lg:min-w-0">
+        <div className="grid grid-cols-2 lg:flex gap-[16px] items-start">
           {PRODUCTS.map((p, i) => (
             <div
               key={i}
