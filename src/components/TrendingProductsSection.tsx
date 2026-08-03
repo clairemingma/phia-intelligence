@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import TopCategoriesSection from "@/components/TopCategoriesSection";
 
 const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
@@ -15,6 +15,16 @@ const PRODUCTS = Array.from({ length: 10 }, (_, i) => ({
   price: "$1,000",
   views: "480 views",
 }));
+
+function ChevronDown() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0 size-[16px]" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(2.5, 5.5)">
+        <path d="M10.854 0.854028L5.85403 5.85403C5.80759 5.90052 5.75245 5.9374 5.69175 5.96256C5.63105 5.98772 5.56599 6.00067 5.50028 6.00067C5.43457 6.00067 5.36951 5.98772 5.30881 5.96256C5.24811 5.9374 5.19296 5.90052 5.14653 5.85403L0.146528 0.854028C0.0527077 0.760208 0 0.63296 0 0.500278C0 0.367596 0.0527077 0.240348 0.146528 0.146528C0.240348 0.0527074 0.367596 0 0.500278 0C0.63296 0 0.760208 0.0527074 0.854028 0.146528L5.50028 4.7934L10.1465 0.146528C10.193 0.100073 10.2481 0.0632225 10.3088 0.0380812C10.3695 0.0129398 10.4346 0 10.5003 0C10.566 0 10.631 0.0129398 10.6917 0.0380812C10.7524 0.0632225 10.8076 0.100073 10.854 0.146528C10.9005 0.192983 10.9373 0.248133 10.9625 0.30883C10.9876 0.369526 11.0006 0.434581 11.0006 0.500278C11.0006 0.565975 10.9876 0.63103 10.9625 0.691726C10.9373 0.752423 10.9005 0.807573 10.854 0.854028Z" fill="#1A1A1A" />
+      </g>
+    </svg>
+  );
+}
 
 function ProductCard({ name, price, views, rank }: typeof PRODUCTS[number]) {
   return (
@@ -56,6 +66,8 @@ function ProductCard({ name, price, views, rank }: typeof PRODUCTS[number]) {
 export default function TrendingProductsSection() {
   const [activeSort, setActiveSort] = useState<SortFilter>("Impressions");
   const [visible, setVisible] = useState(true);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   function handleSort(f: SortFilter) {
     if (f === activeSort) return;
@@ -63,10 +75,19 @@ export default function TrendingProductsSection() {
     setTimeout(() => { setActiveSort(f); setVisible(true); }, 150);
   }
 
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    function onClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setDropdownOpen(false);
+    }
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, [dropdownOpen]);
+
   return (
     <div className="flex flex-col gap-[48px] items-start justify-center px-6 lg:px-16 xl:px-[120px] py-[64px] w-full">
 
-      {/* Section title + sort buttons */}
+      {/* Section title + sort controls */}
       <div className="flex flex-col gap-[16px] items-start w-full shrink-0">
         <div className="w-full h-px bg-[#1a1a1a]" />
         <div className="flex items-start justify-between w-full">
@@ -76,7 +97,45 @@ export default function TrendingProductsSection() {
           >
             Trending Products
           </h2>
-          <div className="flex gap-[8px] items-start shrink-0">
+
+          {/* Dropdown — xs and sm only */}
+          <div className="relative md:hidden" ref={dropdownRef}>
+            <button
+              onClick={() => setDropdownOpen(o => !o)}
+              className="cursor-pointer flex gap-[8px] h-[44px] items-center justify-center px-[18px] rounded-[6px] border border-[#e3e3e3] bg-white outline-none hover:bg-[rgba(0,0,0,0.04)] transition-colors"
+            >
+              <span className="text-[12px] leading-none whitespace-nowrap" style={{ fontFamily: PP, fontWeight: 500, color: "#1a1a1a" }}>
+                {activeSort}
+              </span>
+              <ChevronDown />
+            </button>
+            {dropdownOpen && (
+              <div
+                className="absolute right-0 top-[calc(100%+4px)] z-50 bg-white rounded-[8px] border border-[rgba(0,0,0,0.08)] flex flex-col overflow-hidden"
+                style={{ boxShadow: "0px 2px 4px rgba(0,5,20,0.04), 0px 1px 1.5px rgba(0,5,20,0.06)" }}
+              >
+                {SORT_FILTERS.map((f, i) => (
+                  <div key={f}>
+                    {i > 0 && <div className="h-px bg-[rgba(0,0,0,0.08)]" />}
+                    <button
+                      onClick={() => { handleSort(f); setDropdownOpen(false); }}
+                      className="cursor-pointer flex h-[44px] items-center justify-start px-[18px] w-full outline-none hover:bg-[rgba(0,0,0,0.04)] transition-colors"
+                    >
+                      <span
+                        className="text-[12px] leading-none whitespace-nowrap"
+                        style={{ fontFamily: PP, fontWeight: 500, color: f === activeSort ? "#1a1a1a" : "#666" }}
+                      >
+                        {f}
+                      </span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Button tabs — md and above */}
+          <div className="hidden md:flex gap-[8px] items-start shrink-0">
             {SORT_FILTERS.map((f) => {
               const isActive = activeSort === f;
               return (
