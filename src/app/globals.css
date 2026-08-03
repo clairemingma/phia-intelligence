@@ -10,12 +10,15 @@
   --color-brand-red: #e11445;
   --color-brand-bg: #f9f8f7;
   --color-brand-border: #e3e3e3;
+
+  --breakpoint-xs: 390px;
 }
 
 body {
   background: #ffffff;
   color: #1a1a1a;
   font-family: var(--font-pp-neue-montreal), "Plus Jakarta Sans", system-ui, sans-serif;
+  overflow-x: hidden;
 }
 
 .font-display {

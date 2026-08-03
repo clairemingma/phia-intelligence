@@ -123,7 +123,7 @@ function MapTooltip({ city, pct, xPct, yPct, above }: { city: string; pct: strin
   return (
     <div
       className="absolute pointer-events-none z-10 bg-[#1a1a1a] text-white rounded-[6px] px-[10px] py-[6px] whitespace-nowrap"
-      style={{ left: `${xPct}%`, top: above ? `calc(${yPct}% - 48px)` : `calc(${yPct}% + 16px)`, transform: "translateX(-50%)", fontFamily: PP }}
+      style={{ left: `clamp(0px, calc(${xPct}% - 75px), calc(100% - 150px))`, top: above ? `calc(${yPct}% - 48px)` : `calc(${yPct}% + 16px)`, fontFamily: PP }}
     >
       <span className="text-[12px] font-medium">{city}</span>
       <span className="text-[12px] opacity-60 ml-[6px]">{pct}</span>
@@ -255,11 +255,11 @@ export default function ShopperDemographicSection() {
             </p>
           </div>
 
-          <div ref={brandsRef} className="grid grid-cols-2 sm:flex sm:flex-row gap-[24px] items-start w-full sm:overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div ref={brandsRef} className="flex flex-col xs:flex-row gap-[16px] xs:gap-[24px] items-start w-full xs:overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {BRANDS.map(({ name, overlap, logo, logoW, logoH }, i) => (
               <div
                 key={i}
-                className="flex sm:flex-1 sm:shrink-0 items-center sm:min-w-max"
+                className="flex w-full xs:flex-1 xs:shrink-0 xs:min-w-max items-center"
                 style={{
                   opacity: visible ? 1 : 0,
                   transform: visible ? "translateY(0)" : "translateY(16px)",
