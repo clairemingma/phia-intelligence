@@ -114,7 +114,7 @@ export default function TopCategoriesSection() {
               );
             })}
           </div>
-          <div className="flex flex-nowrap gap-[8px] items-center overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="flex flex-nowrap gap-[8px] items-center overflow-x-auto sm:flex-wrap sm:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {displayedCat.subs.map((sub, subIdx) => {
               const isSubActive = activeSub === sub;
               return (
