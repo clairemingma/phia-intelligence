@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import TopCategoriesSection from "@/components/TopCategoriesSection";
 
 const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
@@ -55,17 +55,12 @@ function ProductCard({ name, price, views, rank }: typeof PRODUCTS[number]) {
 
 export default function TrendingProductsSection() {
   const [activeSort, setActiveSort] = useState<SortFilter>("Impressions");
-  const [gridVisible, setGridVisible] = useState(true);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [visible, setVisible] = useState(true);
 
-  function handleSortChange(f: SortFilter) {
+  function handleSort(f: SortFilter) {
     if (f === activeSort) return;
-    if (timerRef.current) clearTimeout(timerRef.current);
-    setGridVisible(false);
-    timerRef.current = setTimeout(() => {
-      setActiveSort(f);
-      setGridVisible(true);
-    }, 200);
+    setVisible(false);
+    setTimeout(() => { setActiveSort(f); setVisible(true); }, 180);
   }
 
   return (
@@ -87,7 +82,7 @@ export default function TrendingProductsSection() {
               return (
                 <button
                   key={f}
-                  onClick={() => handleSortChange(f)}
+                  onClick={() => handleSort(f)}
                   className={`cursor-pointer flex h-[44px] items-center justify-center px-[18px] rounded-[6px] shrink-0 outline-none transition-colors bg-white${!isActive ? " hover:bg-[rgba(0,0,0,0.04)]" : ""}`}
                   style={{
                     border: isActive ? "1px solid rgba(0,0,0,0.08)" : "1px solid transparent",
@@ -107,16 +102,19 @@ export default function TrendingProductsSection() {
       </div>
 
       {/* Products grid — 5 per row, wraps with 48px row gap */}
-      <div
-        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-[16px] gap-y-[48px] w-full"
-        style={{
-          opacity: gridVisible ? 1 : 0,
-          transform: gridVisible ? "translateY(0)" : "translateY(10px)",
-          transition: "opacity 0.2s ease, transform 0.2s ease",
-        }}
-      >
-        {PRODUCTS.map((p) => (
-          <ProductCard key={p.rank} {...p} />
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-[16px] gap-y-[48px] w-full">
+        {PRODUCTS.map((p, i) => (
+          <div
+            key={p.rank}
+            style={{
+              opacity: visible ? 1 : 0,
+              transform: visible ? "translateY(0)" : "translateY(10px)",
+              transition: "opacity 0.45s ease, transform 0.45s ease",
+              transitionDelay: visible ? `${i * 30}ms` : "0ms",
+            }}
+          >
+            <ProductCard {...p} />
+          </div>
         ))}
       </div>
 
