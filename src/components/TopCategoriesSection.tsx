@@ -214,7 +214,7 @@ export default function TopCategoriesSection() {
 
       {/* Product cards — staggered float-in */}
       <div className="w-full lg:flex-1 lg:min-w-0">
-        <div className="grid grid-cols-2 lg:flex gap-[16px] items-start">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex gap-[16px] items-start">
           {PRODUCTS.map((p, i) => (
             <div
               key={i}
