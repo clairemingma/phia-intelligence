@@ -3,11 +3,11 @@ const GT = "var(--font-gt-super-display), 'Playfair Display', Georgia, serif";
 
 export default function PartnerSection() {
   return (
-    <div className="bg-[#f9f8f7] flex flex-col items-start justify-center px-[120px] py-[64px] w-full">
-      <div className="flex items-start w-full">
+    <div className="bg-[#f9f8f7] flex flex-col items-start justify-center px-6 lg:px-16 xl:px-[120px] py-[64px] w-full">
+      <div className="flex flex-col lg:flex-row items-start w-full gap-[48px] lg:gap-0">
 
         {/* Left — avatar + name */}
-        <div className="flex flex-[1_0_0] gap-[24px] items-start min-w-0">
+        <div className="flex flex-[1_0_0] gap-[24px] items-start min-w-0 w-full">
           {/* Circular avatar — 3-layer composite */}
           <div className="relative rounded-full shrink-0 size-[100px] overflow-hidden">
             <div aria-hidden className="absolute inset-0 pointer-events-none">
@@ -38,7 +38,7 @@ export default function PartnerSection() {
         </div>
 
         {/* Right — description + email CTA */}
-        <div className="flex flex-[1_0_0] gap-[24px] items-start self-stretch min-w-0">
+        <div className="flex flex-[1_0_0] flex-col gap-[24px] items-start self-stretch min-w-0 w-full">
           <p
             className="flex-[1_0_0] leading-[32px] tracking-[0.18px] text-[18px] text-[#666] min-w-0"
             style={{ fontFamily: PP, fontWeight: 400 }}

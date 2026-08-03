@@ -21,3 +21,9 @@ body {
 .font-display {
   font-family: var(--font-gt-super-display), "Playfair Display", Georgia, serif;
 }
+
+/* Remove focus outline from recharts SVG elements */
+.recharts-wrapper,
+.recharts-wrapper * {
+  outline: none !important;
+}

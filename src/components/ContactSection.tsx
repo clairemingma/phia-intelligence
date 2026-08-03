@@ -83,7 +83,7 @@ export default function ContactSection() {
   });
 
   return (
-    <div className="flex flex-col items-start px-[120px] py-[96px] w-full">
+    <div className="flex flex-col items-start px-6 lg:px-16 xl:px-[120px] py-[96px] w-full">
       <div className="flex flex-col gap-[64px] items-start w-full">
 
         {/* Heading */}
@@ -114,7 +114,7 @@ export default function ContactSection() {
         {/* Form */}
         <div className="flex flex-col items-center w-full">
           <form
-            className="flex flex-col gap-[24px] items-start w-[800px]"
+            className="flex flex-col gap-[24px] items-start w-full max-w-[800px]"
             onSubmit={e => e.preventDefault()}
           >
             {FIELDS.map(({ id, label, type }) => (

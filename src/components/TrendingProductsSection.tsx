@@ -9,17 +9,16 @@ const GT = "var(--font-gt-super-display), 'Playfair Display', Georgia, serif";
 const SORT_FILTERS = ["Impressions", "Top Selling"] as const;
 type SortFilter = typeof SORT_FILTERS[number];
 
-const products = [
-  { name: "Multipocket Tote Bag", price: "$1,000", views: "480 views" },
-  { name: "Multipocket Tote Bag", price: "$1,000", views: "480 views" },
-  { name: "Multipocket Tote Bag", price: "$1,000", views: "480 views" },
-  { name: "Multipocket Tote Bag", price: "$1,000", views: "480 views" },
-  { name: "Multipocket Tote Bag", price: "$1,000", views: "480 views" },
-];
+const PRODUCTS = Array.from({ length: 10 }, (_, i) => ({
+  rank: i + 1,
+  name: "Multipocket Tote Bag",
+  price: "$1,000",
+  views: "480 views",
+}));
 
-function ProductCard({ name, price, views, rank }: typeof products[number] & { rank: number }) {
+function ProductCard({ name, price, views, rank }: typeof PRODUCTS[number]) {
   return (
-    <div className="flex flex-[1_0_0] flex-col items-start justify-center min-w-0">
+    <div className="flex flex-col items-start">
       <div className="flex flex-col gap-[12px] items-start w-full">
 
         {/* 4:5 image placeholder */}
@@ -27,14 +26,12 @@ function ProductCard({ name, price, views, rank }: typeof products[number] & { r
 
         {/* Info */}
         <div className="flex flex-col gap-[8px] items-start w-full">
-          {/* Rank · views */}
           <p
             className="text-[14px] leading-none truncate whitespace-nowrap"
             style={{ fontFamily: PP, fontWeight: 500, color: "#002d9f" }}
           >
             #{rank} · {views}
           </p>
-          {/* Name + price */}
           <div className="flex flex-col gap-[4px] items-start text-[14px] w-full">
             <p
               className="leading-none text-[#1a1a1a] truncate w-full whitespace-nowrap"
@@ -56,28 +53,18 @@ function ProductCard({ name, price, views, rank }: typeof products[number] & { r
   );
 }
 
-function CardRow({ startRank }: { startRank: number }) {
-  return (
-    <div className="flex gap-[16px] items-start w-full shrink-0">
-      {products.map((p, i) => (
-        <ProductCard key={i} {...p} rank={startRank + i} />
-      ))}
-    </div>
-  );
-}
-
 export default function TrendingProductsSection() {
   const [activeSort, setActiveSort] = useState<SortFilter>("Impressions");
 
   return (
-    <div className="flex flex-col gap-[48px] items-start justify-center px-[120px] py-[64px] w-full">
+    <div className="flex flex-col gap-[48px] items-start justify-center px-6 lg:px-16 xl:px-[120px] py-[64px] w-full">
 
       {/* Section title + sort buttons */}
       <div className="flex flex-col gap-[16px] items-start w-full shrink-0">
-        <div className="w-full h-px" style={{ background: "rgba(0,0,0,0.08)" }} />
+        <div className="w-full h-px bg-[#1a1a1a]" />
         <div className="flex items-start justify-between w-full">
           <h2
-            className="text-[36px] leading-[40px] tracking-[-0.72px] text-[#1a1a1a] whitespace-nowrap"
+            className="text-[36px] leading-[40px] tracking-[-0.72px] text-[#1a1a1a]"
             style={{ fontFamily: GT, fontWeight: 300 }}
           >
             Trending Products
@@ -107,13 +94,12 @@ export default function TrendingProductsSection() {
         </div>
       </div>
 
-      {/* Row 1 */}
-      <div className="flex flex-col gap-[16px] items-start w-full shrink-0">
-        <CardRow startRank={1} />
+      {/* Products grid — 5 per row, wraps with 48px row gap */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-[16px] gap-y-[48px] w-full">
+        {PRODUCTS.map((p) => (
+          <ProductCard key={p.rank} {...p} />
+        ))}
       </div>
-
-      {/* Row 2 */}
-      <CardRow startRank={6} />
 
       {/* Top Categories */}
       <div className="pt-[48px] w-full">

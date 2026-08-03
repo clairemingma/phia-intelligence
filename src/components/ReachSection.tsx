@@ -4,8 +4,8 @@ const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
 
 export default function ReachSection() {
   return (
-    <div className="flex flex-col items-center py-[96px] w-full">
-      <div className="flex gap-[64px] h-[625px] items-start w-[1200px]">
+    <div className="flex flex-col items-center py-[96px] px-6 lg:px-16 xl:px-[120px] w-full">
+      <div className="flex flex-col lg:flex-row gap-[64px] items-start w-full max-w-[1200px]">
 
         {/* Left — copy */}
         <div className="flex flex-1 flex-col h-full items-start min-w-0">
@@ -53,15 +53,15 @@ export default function ReachSection() {
 
         {/* Right — dark box with phone mockup */}
         <div
-          className="relative bg-[#1a1a1a] overflow-hidden shrink-0 size-[625px]"
+          className="relative bg-[#1a1a1a] overflow-hidden aspect-square w-full max-w-[625px] mx-auto lg:mx-0 lg:shrink-0 lg:w-[625px]"
           style={{ border: "1px solid rgba(0,0,0,0.08)" }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/assets/phone-closet.png"
             alt="Phia app"
-            className="absolute object-cover pointer-events-none"
-            style={{ left: 111, top: 64, width: 400, height: 818 }}
+            className="absolute pointer-events-none"
+            style={{ left: "17.76%", top: "10.24%", width: "64%", height: "130.88%" }}
           />
         </div>
 

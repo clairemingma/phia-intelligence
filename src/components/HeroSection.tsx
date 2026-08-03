@@ -2,10 +2,7 @@ const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
 
 export default function HeroSection() {
   return (
-    <section
-      className="relative w-full flex flex-col items-center justify-center bg-[rgba(0,0,0,0.2)]"
-      style={{ height: 405 }}
-    >
+    <section className="relative w-full aspect-[1440/405] flex flex-col items-center justify-center bg-[rgba(0,0,0,0.2)]">
       {/* Background: single photo + dark overlay */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none select-none" aria-hidden>
         <div className="absolute inset-0 overflow-hidden">

@@ -11,13 +11,13 @@ export default function LaunchingSoonSectionB() {
   const [activeIdx, setActiveIdx] = useState(0);
 
   return (
-    <section className="bg-[#f9f8f7] flex flex-col items-center py-[64px] w-full">
-      <div className="flex gap-[64px] items-start w-[1200px]">
+    <section className="bg-[#f9f8f7] flex flex-col items-center py-[64px] px-6 lg:px-16 xl:px-[120px] w-full">
+      <div className="flex flex-col-reverse lg:flex-row gap-[64px] items-start w-full max-w-[1200px]">
 
         {/* Left — Figma mockup, exact positioning, sticky */}
-        <div className="sticky top-[96px] shrink-0 w-[568px] h-[568px] overflow-hidden bg-[#0e0e0e] relative">
+        <div className="sticky top-[96px] shrink-0 aspect-square w-full max-w-[625px] mx-auto lg:mx-0 lg:w-[568px] overflow-hidden bg-[#0e0e0e] relative">
 
-          {/* Film grain noise overlay — sits above bg, below all mockup images */}
+          {/* Film grain noise overlay */}
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
@@ -29,7 +29,7 @@ export default function LaunchingSoonSectionB() {
             }}
           />
 
-          {/* Phia.com — single image, exact Figma coords: centered-x, top 64px */}
+          {/* Phia.com — coords as % of 568px base */}
           <div
             className="absolute inset-0 transition-opacity duration-500 ease-in-out"
             style={{ opacity: activeIdx === 0 ? 1 : 0, zIndex: 2 }}
@@ -39,29 +39,29 @@ export default function LaunchingSoonSectionB() {
               alt="Phia.com"
               className="absolute"
               style={{
-                width: 400,
-                height: 550,
+                width: "70.42%",
+                height: "96.83%",
                 left: "50%",
-                top: 64,
+                top: "11.27%",
                 transform: "translateX(-50%)",
               }}
             />
           </div>
 
-          {/* Digital Closet — single combined image, exact Figma coords */}
+          {/* Digital Closet — coords as % of 568px base */}
           <div
             className="absolute inset-0 transition-opacity duration-500 ease-in-out"
             style={{ opacity: activeIdx === 1 ? 1 : 0, zIndex: 2 }}
           >
             <img
-              src="/assets/phone-closet.png"
+              src="/assets/phone-closet-v2.png"
               alt="Digital Closet"
-              className="absolute object-cover pointer-events-none"
-              style={{ left: 116, top: 46, width: 336, height: 687 }}
+              className="absolute pointer-events-none"
+              style={{ left: "20.42%", top: "8.1%", width: "59.15%", height: "120.95%" }}
             />
           </div>
 
-          {/* Creator Network — single combined image, exact Figma coords */}
+          {/* Creator Network — coords as % of 568px base */}
           <div
             className="absolute inset-0 transition-opacity duration-500 ease-in-out"
             style={{ opacity: activeIdx === 2 ? 1 : 0, zIndex: 2 }}
@@ -69,8 +69,8 @@ export default function LaunchingSoonSectionB() {
             <img
               src="/assets/phone-creator.png"
               alt="Creator Network"
-              className="absolute object-cover pointer-events-none"
-              style={{ left: "50%", top: 46, width: 336, height: 687, transform: "translateX(-50%)" }}
+              className="absolute pointer-events-none"
+              style={{ left: "50%", top: "8.1%", width: "59.15%", height: "120.95%", transform: "translateX(-50%)" }}
             />
           </div>
 

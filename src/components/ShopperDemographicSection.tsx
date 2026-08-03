@@ -51,7 +51,7 @@ function GenderCard() {
 
   return (
     <div
-      className="flex flex-1 flex-col gap-[16px] items-start min-w-0 p-[21px] rounded-[6px] aspect-square"
+      className="flex flex-1 flex-col gap-[16px] items-start min-w-0 p-[21px] rounded-[6px]"
       style={{ border: "1px solid rgba(0,0,0,0.08)" }}
     >
       <div className="flex flex-col gap-[4px] w-full">
@@ -71,7 +71,7 @@ function GenderCard() {
         }}
         onMouseLeave={() => { setCursor(null); setActiveIndex(null); }}
       >
-        <svg width={300} height={300} viewBox="0 0 300 300">
+        <svg viewBox="0 0 300 300" style={{ width: "min(300px, 100%)", height: "auto" }}>
           <circle cx={CX} cy={CY} r={(IR + OR) / 2} stroke="rgba(0,0,0,0.06)" strokeWidth={OR - IR} fill="none" />
           {SEGMENTS.map((seg, i) => (
             <path
@@ -117,13 +117,13 @@ function GenderCard() {
   );
 }
 
-function MapTooltip({ city, pct, x, y }: { city: string; pct: string; x: number; y: number }) {
-  const above = y > 160;
-  const left = Math.min(x, 470);
+const MAP_W = 550, MAP_H = 321.75;
+
+function MapTooltip({ city, pct, xPct, yPct, above }: { city: string; pct: string; xPct: number; yPct: number; above: boolean }) {
   return (
     <div
       className="absolute pointer-events-none z-10 bg-[#1a1a1a] text-white rounded-[6px] px-[10px] py-[6px] whitespace-nowrap"
-      style={{ left, top: above ? y - 48 : y + 16, transform: "translateX(-50%)", fontFamily: PP }}
+      style={{ left: `${xPct}%`, top: above ? `calc(${yPct}% - 48px)` : `calc(${yPct}% + 16px)`, transform: "translateX(-50%)", fontFamily: PP }}
     >
       <span className="text-[12px] font-medium">{city}</span>
       <span className="text-[12px] opacity-60 ml-[6px]">{pct}</span>
@@ -136,8 +136,8 @@ function LocationsCard() {
 
   function handleMapMouseMove(e: React.MouseEvent<HTMLDivElement>) {
     const rect = e.currentTarget.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
+    const mx = (e.clientX - rect.left) / rect.width  * MAP_W;
+    const my = (e.clientY - rect.top)  / rect.height * MAP_H;
     let nearest = 0, minDist = Infinity;
     locationData.forEach(({ x, y }, i) => {
       const d = Math.hypot(mx - x, my - y);
@@ -148,7 +148,7 @@ function LocationsCard() {
 
   return (
     <div
-      className="flex flex-1 flex-col gap-[20px] items-center min-w-0 p-[21px] rounded-[6px] aspect-square"
+      className="flex flex-1 flex-col gap-[20px] items-center min-w-0 p-[21px] rounded-[6px]"
       style={{ border: "1px solid rgba(0,0,0,0.08)" }}
     >
       <div className="flex flex-col gap-[4px] w-full">
@@ -161,19 +161,27 @@ function LocationsCard() {
       </div>
 
       <div
-        className="relative shrink-0 h-[321.75px] w-[550px]"
+        className="relative w-full max-w-[550px] mx-auto overflow-hidden"
+        style={{ aspectRatio: `${MAP_W}/${MAP_H}` }}
         onMouseMove={handleMapMouseMove}
         onMouseLeave={() => setHovered(null)}
       >
-        <div className="absolute inset-[-0.13%_0_-0.14%_0]">
+        <div className="absolute inset-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/assets/usa-map-locations.svg" alt="Top locations map" className="block max-w-none size-full pointer-events-none" />
+          <img src="/assets/usa-map-locations.svg" alt="Top locations map" className="block w-full h-full pointer-events-none" />
         </div>
         {locationData.map(({ rank, x, y }) => (
-          <div key={rank} className="absolute rounded-full pointer-events-none" style={{ left: x - 16, top: y - 16, width: 32, height: 32 }} />
+          <div key={rank} className="absolute rounded-full pointer-events-none"
+            style={{ left: `${(x / MAP_W) * 100}%`, top: `${(y / MAP_H) * 100}%`, width: 32, height: 32, transform: "translate(-50%, -50%)" }} />
         ))}
         {hovered !== null && (
-          <MapTooltip city={locationData[hovered].city} pct={locationData[hovered].pct} x={locationData[hovered].x} y={locationData[hovered].y} />
+          <MapTooltip
+            city={locationData[hovered].city}
+            pct={locationData[hovered].pct}
+            xPct={(locationData[hovered].x / MAP_W) * 100}
+            yPct={(locationData[hovered].y / MAP_H) * 100}
+            above={locationData[hovered].y > MAP_H / 2}
+          />
         )}
       </div>
 
@@ -220,10 +228,10 @@ export default function ShopperDemographicSection() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-[48px] items-center py-[64px] w-full">
+    <div className="flex flex-col gap-[48px] items-center py-[64px] px-6 lg:px-16 xl:px-[120px] w-full">
 
       {/* Section title */}
-      <div className="flex flex-col gap-[16px] items-start w-[1200px]">
+      <div className="flex flex-col gap-[16px] items-start w-full max-w-full max-w-[1200px]">
         <div className="w-full h-px bg-[#1a1a1a]" />
         <h2 className="text-[36px] leading-[40px] tracking-[-0.72px] text-[#1a1a1a]" style={{ fontFamily: GT, fontWeight: 300 }}>
           Shopper Demographic
@@ -231,13 +239,13 @@ export default function ShopperDemographicSection() {
       </div>
 
       {/* Cards row */}
-      <div className="flex gap-[16px] items-stretch w-[1200px]">
+      <div className="flex flex-col lg:flex-row gap-[16px] items-stretch w-full max-w-[1200px]">
         <GenderCard />
         <LocationsCard />
       </div>
 
       {/* Similar Brands */}
-      <div className="flex flex-col gap-[24px] items-start py-[48px] w-[1200px]">
+      <div className="flex flex-col gap-[24px] items-start py-[48px] w-full max-w-[1200px]">
           <div className="flex flex-col gap-[4px]">
             <p className="text-[14px] leading-none text-[#1a1a1a]" style={{ fontFamily: PP, fontWeight: 500 }}>
               Similar Brands on Phia
@@ -247,11 +255,11 @@ export default function ShopperDemographicSection() {
             </p>
           </div>
 
-          <div ref={brandsRef} className="flex gap-[24px] items-center w-full">
+          <div ref={brandsRef} className="grid grid-cols-2 sm:flex sm:flex-row gap-[24px] items-start w-full sm:overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {BRANDS.map(({ name, overlap, logo, logoW, logoH }, i) => (
               <div
                 key={i}
-                className="flex flex-1 items-center min-w-0"
+                className="flex sm:flex-1 sm:shrink-0 items-center sm:min-w-max"
                 style={{
                   opacity: visible ? 1 : 0,
                   transform: visible ? "translateY(0)" : "translateY(16px)",
