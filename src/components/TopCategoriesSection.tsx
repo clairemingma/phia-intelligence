@@ -55,7 +55,7 @@ export default function TopCategoriesSection() {
 
   useEffect(() => {
     setCardsVisible(false);
-    const t = setTimeout(() => setCardsVisible(true), 250);
+    const t = setTimeout(() => setCardsVisible(true), 150);
     return () => clearTimeout(t);
   }, [active, activeSub]);
 
@@ -221,8 +221,10 @@ export default function TopCategoriesSection() {
               style={{
                 opacity: cardsVisible ? 1 : 0,
                 transform: cardsVisible ? "translateY(0)" : "translateY(16px)",
-                transition: "opacity 0.5s ease, transform 0.5s ease",
-                transitionDelay: cardsVisible ? `${i * 80}ms` : "0ms",
+                transition: cardsVisible
+                  ? "opacity 0.55s cubic-bezier(0.16,1,0.3,1), transform 0.55s cubic-bezier(0.16,1,0.3,1)"
+                  : "opacity 0.12s ease, transform 0.12s ease",
+                transitionDelay: cardsVisible ? `${i * 55}ms` : "0ms",
               }}
             >
               <ProductCard {...p} />

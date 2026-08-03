@@ -60,7 +60,7 @@ export default function TrendingProductsSection() {
   function handleSort(f: SortFilter) {
     if (f === activeSort) return;
     setVisible(false);
-    setTimeout(() => { setActiveSort(f); setVisible(true); }, 180);
+    setTimeout(() => { setActiveSort(f); setVisible(true); }, 150);
   }
 
   return (
@@ -108,9 +108,11 @@ export default function TrendingProductsSection() {
             key={p.rank}
             style={{
               opacity: visible ? 1 : 0,
-              transform: visible ? "translateY(0)" : "translateY(10px)",
-              transition: "opacity 0.45s ease, transform 0.45s ease",
-              transitionDelay: visible ? `${i * 30}ms` : "0ms",
+              transform: visible ? "translateY(0)" : "translateY(16px)",
+              transition: visible
+                ? "opacity 0.55s cubic-bezier(0.16,1,0.3,1), transform 0.55s cubic-bezier(0.16,1,0.3,1)"
+                : "opacity 0.12s ease, transform 0.12s ease",
+              transitionDelay: visible ? `${i * 35}ms` : "0ms",
             }}
           >
             <ProductCard {...p} />
