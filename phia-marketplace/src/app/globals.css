@@ -1,0 +1,131 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+  /* Both sticky Navbar rows: 69px header + 45px category row */
+  --nav-height: 114px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --font-sans: var(--font-pp-neue-montreal), system-ui, sans-serif;
+  --font-display: var(--font-gt-super-display), Georgia, serif;
+
+  /* Design system colors */
+  --color-phia-blue: #002d9f;
+  --color-phia-green: #14774f;
+  --color-phia-blue-light: #e5eaf5;
+  --color-charcoal: #1a1a1a;
+  --color-mid-gray: #666666;
+  --color-muted: #999999;
+  --color-border: #e3e3e3;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-pp-neue-montreal), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* The filter column scrolls when a tall section is open, but shows no bar of
+   its own — only the searchable multiselect lists inside it get one.
+   overflow-x is clipped so a sub-pixel overflow can't add a bar underneath. */
+.filters-scroll {
+  scrollbar-width: none;
+}
+.filters-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Thin scrollbar for brand list */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #e3e3e3;
+  border-radius: 2px;
+}
+
+/* Selected filter tags settle in on the same curve as the accordion */
+@keyframes filter-tag-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.filter-tag {
+  animation: filter-tag-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .filter-tag {
+    animation: none;
+  }
+}
+
+/* Dual-thumb price range slider.
+   Both inputs overlay the rail; only their thumbs take pointer events.
+   They overhang the rail by half a thumb on each side so thumb centers
+   travel exactly from the rail's left edge to its right edge. */
+.price-range {
+  -webkit-appearance: none;
+  appearance: none;
+  position: absolute;
+  top: 0;
+  left: -9px;
+  width: calc(100% + 18px);
+  height: 18px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  outline: none;
+  pointer-events: none;
+}
+.price-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1.5px solid var(--color-charcoal);
+  cursor: grab;
+  pointer-events: auto;
+  transition: box-shadow 200ms ease, transform 200ms ease;
+}
+.price-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1.5px solid var(--color-charcoal);
+  cursor: grab;
+  pointer-events: auto;
+  transition: box-shadow 200ms ease, transform 200ms ease;
+}
+.price-range::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.08);
+}
+.price-range::-moz-range-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.08);
+}
+.price-range:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px rgba(0, 45, 159, 0.15);
+}
+.price-range:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 3px rgba(0, 45, 159, 0.15);
+}
