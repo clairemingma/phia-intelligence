@@ -147,9 +147,14 @@ body {
 }
 
 /* Dual-thumb price range slider.
-   Both inputs overlay the rail; only their thumbs take pointer events.
-   They overhang the rail by half a thumb on each side so thumb centers
-   travel exactly from the rail's left edge to its right edge. */
+   Nothing here is a native range control's own paint. A phone dresses one in
+   chrome an appearance reset can't reach — a track, a border, an inset shadow,
+   whichever of its internals a given browser decides to draw — which showed up
+   as a grey slab behind the rail. So both inputs are invisible and carry only
+   the drag, while the rail, the selected range and the two handles are ordinary
+   elements we draw. The inputs still overhang the rail by half a thumb on each
+   side, so their thumbs travel exactly from the rail's left edge to its right
+   edge and the handles can follow them one for one. */
 .price-range {
   -webkit-appearance: none;
   appearance: none;
@@ -160,69 +165,56 @@ body {
   height: 16px;
   margin: 0;
   padding: 0;
-  background: transparent;
+  opacity: 0;
   outline: none;
   pointer-events: none;
-  /* iOS gives form controls a border and an inset shadow of its own, and paints
-     a grey block over whatever a finger lands on. Resetting the input's
-     appearance doesn't clear any of it, so on a control this short they show as
-     a grey slab behind the rail. */
-  border: none;
-  box-shadow: none;
   -webkit-tap-highlight-color: transparent;
 }
-/* The native track keeps its fill and shadow even with the input's appearance
-   reset, so it is cleared in its own right — the rail and the selected range are
-   drawn by the elements underneath. */
-.price-range::-webkit-slider-runnable-track {
-  -webkit-appearance: none;
-  appearance: none;
-  height: 16px;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-}
-.price-range::-moz-range-track {
-  height: 16px;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-}
-/* Firefox fills the track up to the thumb; that fill is the selected range's
-   job here. */
-.price-range::-moz-range-progress {
-  background: transparent;
-}
+/* Only the thumb takes pointer events, so the drag target is the 16px handle
+   rather than the whole rail. Sized but never seen. */
 .price-range::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 16px;
   height: 16px;
-  border-radius: 50%;
-  background: #ffffff;
-  border: 1.5px solid var(--color-charcoal);
   cursor: grab;
   pointer-events: auto;
-  transition: transform 200ms ease;
 }
 .price-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: none;
+  cursor: grab;
+  pointer-events: auto;
+}
+.price-range::-webkit-slider-thumb:active {
+  cursor: grabbing;
+}
+.price-range::-moz-range-thumb:active {
+  cursor: grabbing;
+}
+
+/* The handles. Centred on the value their input holds, and deaf to the pointer
+   so a drag always lands on that input underneath. */
+.price-thumb {
+  position: absolute;
+  top: 50%;
   width: 16px;
   height: 16px;
   border-radius: 50%;
   background: #ffffff;
   border: 1.5px solid var(--color-charcoal);
-  cursor: grab;
-  pointer-events: auto;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
   transition: transform 200ms ease;
 }
-.price-range::-webkit-slider-thumb:active {
-  cursor: grabbing;
-  transform: scale(1.08);
+/* Dragging lifts the handle whose input is under the finger. */
+.price-range-min:active ~ .price-thumb-min,
+.price-range-max:active ~ .price-thumb-max {
+  transform: translate(-50%, -50%) scale(1.08);
 }
-.price-range::-moz-range-thumb:active {
-  cursor: grabbing;
-  transform: scale(1.08);
+@media (prefers-reduced-motion: reduce) {
+  .price-thumb {
+    transition: none;
+  }
 }
-/* No focus ring on the thumbs. Browsers treat a range slider as
-   keyboard-interactive and match :focus-visible after a plain drag too, so any
-   halo here follows a finger around instead of marking keyboard focus. */

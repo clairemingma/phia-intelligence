@@ -213,7 +213,7 @@ export default function Sidebar({
   // forking into two copies.
   const [sheetOpen, setSheetOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const closeRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
   // A filter changed while the sheet covered the results. Scrolling them now
   // would be invisible, so it waits for the sheet to come down.
   const scrollPending = useRef(false);
@@ -231,9 +231,13 @@ export default function Sidebar({
     return () => column.removeEventListener("change", sync);
   }, []);
 
-  // The page behind the sheet holds still, Escape closes it, and focus starts on
-  // the way out — the way every panel on the page behaves.
-  useOverlay({ open: sheetOpen, onDismiss: () => closeSheet(), focusRef: closeRef });
+  // The page behind the panel holds still, Escape closes it, and focus moves to
+  // the panel itself — the way every panel on the page behaves. Focus lands on
+  // the panel rather than on the button that closes it: a browser draws its
+  // focus ring on a control focused from script, so the X would open the page
+  // wearing a ring nobody asked for, and a Tab from the panel reaches that
+  // button first anyway.
+  useOverlay({ open: sheetOpen, onDismiss: () => closeSheet(), focusRef: panelRef });
 
   // `key` is the section's stable identity; `label` is what it displays, which
   // for Categories changes to the category you've drilled into.
@@ -384,7 +388,14 @@ export default function Sidebar({
 
       <aside
         id="filter-sheet"
-        {...(sheetOpen ? { role: "dialog", "aria-modal": true, "aria-label": "Filters" } : {})}
+        ref={panelRef}
+        // tabIndex only while it is a dialog, so the panel can take focus on
+        // open; as the filter column it is nothing to focus. outline-none keeps
+        // that focus silent — it marks where a screen reader is, not something
+        // to draw a ring around.
+        {...(sheetOpen
+          ? { role: "dialog", "aria-modal": true, "aria-label": "Filters", tabIndex: -1 }
+          : {})}
         // Two shapes, one element: a page of its own below lg, filling the
         // screen edge to edge, and the sticky filter column at lg and up.
         // Closed, it is display:none on mobile — nothing to tab into — while
@@ -394,7 +405,7 @@ export default function Sidebar({
         // both edges: on a phone browser a fixed element's bottom edge sits
         // under the toolbar, which would take the footer's buttons with it. The
         // page holds still while this is up, so dvh can't shift underneath it.
-        className={`no-scrollbar ${
+        className={`no-scrollbar outline-none ${
           sheetOpen ? "filter-sheet flex" : "hidden"
         } fixed inset-x-0 top-0 z-[70] flex-col h-dvh bg-white overflow-hidden
         lg:block lg:sticky lg:inset-x-auto lg:z-auto lg:top-[calc(var(--nav-height)_+_16px)] lg:h-auto lg:max-h-[calc(100vh_-_var(--nav-height)_-_32px)] lg:overflow-y-auto lg:overflow-x-clip`}
@@ -403,7 +414,6 @@ export default function Sidebar({
         <div className="lg:hidden flex items-center justify-between shrink-0 h-[52px] px-5 border-b border-[#e3e3e3]">
           <span className="text-[14px] font-medium text-[#1a1a1a]">Filters</span>
           <button
-            ref={closeRef}
             onClick={closeSheet}
             aria-label="Close filters"
             className="flex items-center justify-center size-[32px] -mr-2 text-[#666] hover:text-[#1a1a1a] transition-colors cursor-pointer"
@@ -491,7 +501,7 @@ export default function Sidebar({
               }
               onPointerUp={afterFilterChange}
               onKeyUp={afterFilterChange}
-              className="price-range"
+              className="price-range price-range-min"
               // Lift the min thumb above the max thumb when both sit at the top of
               // the range, otherwise the max thumb covers it and it can't be dragged back.
               style={{ zIndex: priceMin > PRICE_CEILING - PRICE_STEP * 2 ? 4 : 2 }}
@@ -508,9 +518,16 @@ export default function Sidebar({
               }
               onPointerUp={afterFilterChange}
               onKeyUp={afterFilterChange}
-              className="price-range"
+              className="price-range price-range-max"
               style={{ zIndex: 3 }}
             />
+            {/* The handles you see. The inputs above paint nothing — a phone
+                decorates a native range control in ways an appearance reset
+                can't reach — so they only carry the drag, and these follow their
+                values. Ordered after the inputs so a drag can lift its own
+                handle. */}
+            <span className="price-thumb price-thumb-min" style={{ left: `${pct(priceMin)}%` }} />
+            <span className="price-thumb price-thumb-max" style={{ left: `${pct(priceMax)}%` }} />
           </div>
         </div>
       </FilterSection>

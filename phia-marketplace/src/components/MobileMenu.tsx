@@ -11,14 +11,17 @@ import { useOverlay } from "@/lib/overlay";
 export default function MobileMenu({ links }: { links: string[] }) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const closeRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   function close() {
     setOpen(false);
     triggerRef.current?.focus();
   }
 
-  useOverlay({ open, onDismiss: close, focusRef: closeRef });
+  // Focus lands on the drawer itself rather than on the button that closes it: a
+  // browser draws its focus ring on a control focused from script, and a Tab
+  // from the drawer reaches that button first anyway.
+  useOverlay({ open, onDismiss: close, focusRef: panelRef });
 
   // At md these links are back across the header, so the drawer has to let go —
   // otherwise a resize leaves the page scroll locked behind a panel that is no
@@ -57,17 +60,18 @@ export default function MobileMenu({ links }: { links: string[] }) {
       {open && (
         <div
           id="mobile-menu"
+          ref={panelRef}
           role="dialog"
           aria-modal
           aria-label="Menu"
-          className="nav-drawer md:hidden fixed inset-y-0 right-0 z-[70] flex flex-col w-[300px] max-w-[85vw] bg-white"
+          tabIndex={-1}
+          className="nav-drawer outline-none md:hidden fixed inset-y-0 right-0 z-[70] flex flex-col w-[300px] max-w-[85vw] bg-white"
         >
           {/* Same header as the filter sheet, so the page's two panels open the
               same way. */}
           <div className="flex items-center justify-between shrink-0 h-[52px] px-5 border-b border-[#e3e3e3]">
             <span className="text-[14px] font-medium text-[#1a1a1a]">Menu</span>
             <button
-              ref={closeRef}
               onClick={close}
               aria-label="Close menu"
               className="flex items-center justify-center size-[32px] -mr-2 text-[#666] hover:text-[#1a1a1a] transition-colors cursor-pointer"
