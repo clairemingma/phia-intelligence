@@ -70,12 +70,15 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
       {/* One 5-column rhythm across the page: the filter column, each of the
           four product cards, and the search field are all one column wide. */}
       <main className="px-6 md:px-10 lg:px-[60px] pt-8 pb-16">
-        <Breadcrumb path={categoryPath} />
-
-        {/* Page heading — the marketplace pitch on the landing, the category
-            you're in once you've navigated into one */}
+        {/* The trail sits inside the heading's column rather than above the
+            grid, so the search field starts on the breadcrumb's top edge
+            instead of a row below it. */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-start mb-8">
           <div className="lg:col-span-4">
+            <Breadcrumb path={categoryPath} />
+
+            {/* Page heading — the marketplace pitch on the landing, the
+                category you're in once you've navigated into one */}
             <h1
               className="text-[36px] font-light leading-[40px] tracking-[-0.72px] text-[#1a1a1a]"
               style={{ fontFamily: "var(--font-gt-super-display)" }}
