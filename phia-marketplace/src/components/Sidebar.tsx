@@ -10,7 +10,6 @@ import {
   colors,
   conditions,
   materials,
-  resultCount,
   stores,
   subcategoriesOf,
 } from "@/lib/data";
@@ -391,10 +390,17 @@ export default function Sidebar({
         // the sticky filter column at lg and up. Closed, it is display:none on
         // mobile — nothing to tab into — while lg:block keeps the column up
         // regardless of the sheet's state.
+        //
+        // The sheet's height is fixed rather than sized to its contents, so
+        // opening a short section like Price doesn't drop the sheet's top edge
+        // and slide the whole panel down under the finger — only the body inside
+        // it changes. Measured in dvh: the sheet locks the page while it is up,
+        // so the browser's chrome can't move under it, and a fixed 85vh would
+        // otherwise put the footer button behind that chrome.
         className={`no-scrollbar ${
           sheetOpen ? "filter-sheet flex" : "hidden"
-        } fixed inset-x-0 bottom-0 z-[70] flex-col max-h-[85vh] bg-white rounded-t-[16px] overflow-hidden
-        lg:block lg:sticky lg:inset-x-auto lg:bottom-auto lg:z-auto lg:top-[calc(var(--nav-height)_+_16px)] lg:max-h-[calc(100vh_-_var(--nav-height)_-_32px)] lg:rounded-none lg:overflow-y-auto lg:overflow-x-clip`}
+        } fixed inset-x-0 bottom-0 z-[70] flex-col h-[85dvh] bg-white rounded-t-[16px] overflow-hidden
+        lg:block lg:sticky lg:inset-x-auto lg:bottom-auto lg:z-auto lg:top-[calc(var(--nav-height)_+_16px)] lg:h-auto lg:max-h-[calc(100vh_-_var(--nav-height)_-_32px)] lg:rounded-none lg:overflow-y-auto lg:overflow-x-clip`}
       >
         {/* Sheet header — the column needs no title, the page already gives it */}
         <div className="lg:hidden flex items-center justify-between shrink-0 h-[52px] px-5 border-b border-[#e3e3e3]">
@@ -602,23 +608,29 @@ export default function Sidebar({
       </FilterSection>
         </div>
 
-        {/* Sheet footer — one full-width target to get back to the results, and
-            a way out of every filter at once when there is something to clear. */}
-        <div className="lg:hidden shrink-0 flex items-center gap-3 px-5 py-3 border-t border-[#e3e3e3] pb-[calc(12px_+_env(safe-area-inset-bottom))]">
-          {activeFilters.length > 0 && (
+        {/* Sheet footer — the way back to the results, and a way out of every
+            filter at once when there is something to clear. Clear All takes the
+            left and Apply the right: the dismissive action before the confirming
+            one, which is how both platform guidelines order a pair and how the
+            filter sheets shoppers already know are built. The pair holds the
+            same 350px envelope one button had, so they split it evenly. */}
+        <div className="lg:hidden shrink-0 px-5 py-3 border-t border-[#e3e3e3] pb-[calc(12px_+_env(safe-area-inset-bottom))]">
+          <div className="flex items-center gap-3 w-full max-w-[350px] mx-auto">
+            {activeFilters.length > 0 && (
+              <button
+                onClick={clearAll}
+                className="flex-1 h-[44px] rounded-full border border-[#e3e3e3] text-[12px] font-medium text-[#1a1a1a] cursor-pointer hover:border-[#1a1a1a] transition-colors"
+              >
+                Clear All
+              </button>
+            )}
             <button
-              onClick={clearAll}
-              className="shrink-0 h-[44px] px-1 text-[12px] text-[#666] underline underline-offset-[3px] hover:text-[#1a1a1a] transition-colors cursor-pointer"
+              onClick={closeSheet}
+              className="flex-1 h-[44px] rounded-full bg-[#002d9f] text-[12px] font-medium text-white cursor-pointer"
             >
-              Clear All
+              Apply
             </button>
-          )}
-          <button
-            onClick={closeSheet}
-            className="flex-1 h-[44px] rounded-full bg-[#002d9f] text-[12px] font-medium text-white cursor-pointer"
-          >
-            Show {resultCount.toLocaleString("en-US")} results
-          </button>
+          </div>
         </div>
       </aside>
     </div>

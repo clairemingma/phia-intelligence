@@ -44,10 +44,13 @@ export default function ResultsBar({ count }: { count: number | null }) {
           with the sort beside it, so a dot divides them. */}
       {count !== null && (
         <>
-          <p className="text-[14px] font-normal leading-[20px] text-[#666]">
+          {/* Below lg the row is the count and the sort at either edge, so the
+              count takes the space between them and the dot that joins the two
+              into one phrase at column width goes. */}
+          <p className="text-[14px] font-normal leading-[20px] text-[#666] mr-auto lg:mr-0">
             {count.toLocaleString("en-US")} {count === 1 ? "result" : "results"}
           </p>
-          <span aria-hidden className="text-[#666] leading-none">
+          <span aria-hidden className="hidden lg:inline text-[#666] leading-none">
             ·
           </span>
         </>

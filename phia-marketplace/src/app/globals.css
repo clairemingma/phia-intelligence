@@ -194,9 +194,16 @@ body {
   cursor: grabbing;
   transform: scale(1.08);
 }
-.price-range:focus-visible::-webkit-slider-thumb {
-  box-shadow: 0 0 0 3px rgba(0, 45, 159, 0.15);
-}
-.price-range:focus-visible::-moz-range-thumb {
-  box-shadow: 0 0 0 3px rgba(0, 45, 159, 0.15);
+/* The focus ring is for keyboards. Browsers treat a range slider as
+   keyboard-interactive and match :focus-visible after a plain drag too, which on
+   a touchscreen leaves the ring sitting under the thumb once the finger is
+   gone — so it is drawn only where a fine pointer, and with it a keyboard, is
+   actually in play. */
+@media (any-pointer: fine) {
+  .price-range:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 3px rgba(0, 45, 159, 0.15);
+  }
+  .price-range:focus-visible::-moz-range-thumb {
+    box-shadow: 0 0 0 3px rgba(0, 45, 159, 0.15);
+  }
 }
