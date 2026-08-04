@@ -13,6 +13,7 @@ import {
   stores,
   subcategoriesOf,
 } from "@/lib/data";
+import { scrollToTop } from "@/lib/scroll";
 import SearchField from "./SearchField";
 
 // Same taxonomy as the masthead, in the same order — one source so the filter
@@ -226,21 +227,6 @@ export default function Sidebar({
     const next = new Set(set);
     next.has(item) ? next.delete(item) : next.add(item);
     return next;
-  }
-
-  // Every filter change — adding, removing, or clearing — returns the shopper
-  // to the top of the results, since the grid below them just changed.
-  function scrollToTop() {
-    // Deferred a frame: focusing a control scrolls it into view during the
-    // click, and that scroll would cancel a smooth one started synchronously.
-    requestAnimationFrame(() => {
-      window.scrollTo({
-        top: 0,
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-          ? "auto"
-          : "smooth",
-      });
-    });
   }
 
   const toggleFilter = (

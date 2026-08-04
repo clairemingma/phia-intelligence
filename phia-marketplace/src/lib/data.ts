@@ -63,16 +63,42 @@ export const editorialCards: Editorial[] = [
   },
 ];
 
-// How many results the grid renders. Shared so the count above the grid and the
-// grid itself can never disagree.
-export const resultCount = 20;
+// How many results there are in total, and how many of them one page of the grid
+// shows. Shared so the count above the grid, the grid itself and the pagination
+// can never disagree.
+export const resultCount = 2586;
+export const productsPerPage = 48;
+export const pageCount = Math.ceil(resultCount / productsPerPage);
+
+// A page is full everywhere but the last, which holds the remainder.
+export function pageSize(page: number) {
+  return page < pageCount
+    ? productsPerPage
+    : resultCount - (pageCount - 1) * productsPerPage;
+}
+
+// ?page= arrives as untrusted text: anything missing, non-numeric or off the end
+// of the results lands on page 1 rather than on an empty grid.
+export function resolvePage(value?: string) {
+  const page = Number(value);
+  return Number.isInteger(page) && page >= 1 && page <= pageCount ? page : 1;
+}
 
 // The active category lives in the URL, so the nav, the sidebar and the
 // breadcrumb all read from one place: /?category=Women&subcategory=Jackets
 export function categoryHref(category: string, subcategory?: string) {
-  const params = new URLSearchParams({ category });
+  return pageHref(1, category, subcategory);
+}
+
+// Paging keeps you where you are in the taxonomy — only the page moves. Page 1
+// is the canonical URL for a set of results, so it carries no ?page=.
+export function pageHref(page: number, category?: string, subcategory?: string) {
+  const params = new URLSearchParams();
+  if (category) params.set("category", category);
   if (subcategory) params.set("subcategory", subcategory);
-  return `/?${params}`;
+  if (page > 1) params.set("page", String(page));
+  const query = params.toString();
+  return query ? `/?${query}` : "/";
 }
 
 // The masthead taxonomy: one entry per category link, each opening a hover

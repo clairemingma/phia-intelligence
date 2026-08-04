@@ -4,9 +4,10 @@ import CatalogSearch from "@/components/CatalogSearch";
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
 import ProductGrid from "@/components/ProductGrid";
+import Pagination from "@/components/Pagination";
 import ResultsBar from "@/components/ResultsBar";
 import Footer from "@/components/Footer";
-import { categoryDescription, resultCount } from "@/lib/data";
+import { categoryDescription, pageSize, resolvePage, resultCount } from "@/lib/data";
 
 const LANDING_TITLE = "Shop Every Store at Once";
 
@@ -36,22 +37,28 @@ export async function generateMetadata({
 }: {
   searchParams: SearchParams;
 }): Promise<Metadata> {
-  const { category, subcategory } = await searchParams;
+  const { category, subcategory, page } = await searchParams;
   const activeCategory = firstValue(category);
+  const activePage = resolvePage(firstValue(page));
+
+  // Deeper pages say so, so they don't compete with page 1 as duplicate titles.
+  const heading = headingFor(activeCategory, firstValue(subcategory));
+  const title = activePage > 1 ? `${heading} — Page ${activePage}` : heading;
 
   return {
-    title: `${headingFor(activeCategory, firstValue(subcategory))} | phia Marketplace`,
+    title: `${title} | phia Marketplace`,
     description: descriptionFor(activeCategory),
   };
 }
 
 export default async function Home({ searchParams }: { searchParams: SearchParams }) {
-  const { category, subcategory } = await searchParams;
+  const { category, subcategory, page } = await searchParams;
 
   // The breadcrumb trail below "Shop". Unfiltered, the landing is the trending
   // feed — Shop / Trending; a subcategory only counts if a category is set.
   const activeCategory = firstValue(category);
   const activeSubcategory = firstValue(subcategory);
+  const activePage = resolvePage(firstValue(page));
   const categoryPath = activeCategory
     ? [activeCategory, ...(activeSubcategory ? [activeSubcategory] : [])]
     : ["Trending"];
@@ -62,7 +69,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
 
       {/* One 5-column rhythm across the page: the filter column, each of the
           four product cards, and the search field are all one column wide. */}
-      <main className="px-6 md:px-10 lg:px-[60px] pt-8">
+      <main className="px-6 md:px-10 lg:px-[60px] pt-8 pb-16">
         <Breadcrumb path={categoryPath} />
 
         {/* Page heading — the marketplace pitch on the landing, the category
@@ -89,7 +96,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
         <ResultsBar count={resultCount} />
 
         {/* Main layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 pb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
           {/* Keyed by location: navigating to another category remounts the
               filters, so the accordion re-opens at its first section and stale
               selections don't carry across an unrelated set of results. */}
@@ -99,9 +106,17 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
             activeSubcategory={activeSubcategory}
           />
           <div className="lg:col-span-4 min-w-0">
-            <ProductGrid />
+            <ProductGrid count={pageSize(activePage)} />
           </div>
         </div>
+
+        {/* Pagination closes the page rather than the results column — it sits
+            outside the filter-and-grid layout and spans the full width. */}
+        <Pagination
+          page={activePage}
+          activeCategory={activeCategory}
+          activeSubcategory={activeSubcategory}
+        />
       </main>
 
       <Footer />
