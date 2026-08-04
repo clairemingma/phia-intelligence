@@ -5,8 +5,8 @@ import { CaretDown, Check } from "@phosphor-icons/react";
 
 export const sortOptions = [
   "Trending",
-  "Price: Low to High",
-  "Price: High to Low",
+  "Price Low to High",
+  "Price High to Low",
 ] as const;
 
 export type SortOption = (typeof sortOptions)[number];
@@ -38,15 +38,18 @@ export default function ResultsBar({ count }: { count: number | null }) {
   }, [open]);
 
   return (
-    <div className="flex items-center justify-between gap-4 pb-5">
-      {/* Result count — only once there is a count to show */}
-      {count === null ? (
-        <span />
-      ) : (
-        <p className="text-[14px] font-normal leading-[20px] text-[#666]">
-          <span className="font-medium text-[#1a1a1a]">{count.toLocaleString()}</span>{" "}
-          {count === 1 ? "result" : "results"}
-        </p>
+    <div className="flex items-center justify-end gap-2.5 pb-5">
+      {/* Result count — only once there is a count to show. Reads as one phrase
+          with the sort beside it, so a dot divides them. */}
+      {count !== null && (
+        <>
+          <p className="text-[14px] font-normal leading-[20px] text-[#666]">
+            {count.toLocaleString("en-US")} {count === 1 ? "result" : "results"}
+          </p>
+          <span aria-hidden className="text-[#666] leading-none">
+            ·
+          </span>
+        </>
       )}
 
       {/* Sort */}
@@ -55,13 +58,13 @@ export default function ResultsBar({ count }: { count: number | null }) {
           onClick={() => setOpen(!open)}
           aria-haspopup="menu"
           aria-expanded={open}
-          className="flex items-center gap-2 h-[34px] pl-4 pr-3.5 rounded-full border border-[#e3e3e3] text-[12px] font-medium text-[#1a1a1a] cursor-pointer hover:border-[#1a1a1a] transition-colors"
+          className="flex items-center gap-1.5 text-[14px] font-normal leading-[20px] text-[#666] cursor-pointer rounded-[4px] transition-opacity hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#002d9f]/25"
         >
           <span className="whitespace-nowrap">{sort}</span>
           <CaretDown
             size={12}
             weight="regular"
-            className={`shrink-0 text-[#999] transition-transform duration-200 ${
+            className={`shrink-0 text-[#666] transition-transform duration-200 ${
               open ? "rotate-180" : ""
             } motion-reduce:transition-none`}
           />

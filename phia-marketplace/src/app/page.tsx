@@ -43,7 +43,7 @@ export default async function Home({
 
       {/* One 5-column rhythm across the page: the filter column, each of the
           four product cards, and the search field are all one column wide. */}
-      <main className="px-6 md:px-10 lg:px-[60px] pt-5">
+      <main className="px-6 md:px-10 lg:px-[60px] pt-8">
         <Breadcrumb path={categoryPath} />
 
         {/* Page heading — the unfiltered landing state */}
