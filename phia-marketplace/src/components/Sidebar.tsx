@@ -2,18 +2,13 @@
 
 import { useState } from "react";
 import { CaretDown, CheckSquare, Square, X } from "@phosphor-icons/react";
-import { brands, colors, conditions, materials, stores } from "@/lib/data";
+import Link from "next/link";
+import { brands, categoryHref, categoryMenus, colors, conditions, materials, stores } from "@/lib/data";
 import SearchField from "./SearchField";
 
-const categories = [
-  "Women",
-  "Men",
-  "Beauty",
-  "Bags",
-  "Jewelry",
-  "Shoes",
-  "Home",
-];
+// Same taxonomy as the masthead, in the same order — one source so the filter
+// column and the top nav can't drift apart.
+const categories = categoryMenus.map((c) => c.label);
 
 const womensSizes = ["XS", "S", "M", "L", "XL", "XXL"];
 const mensSizes = ["XS", "S", "M", "L", "XL", "XXL"];
@@ -294,7 +289,7 @@ export default function Sidebar() {
               key={filter.id}
               onClick={filter.onRemove}
               aria-label={`Remove ${filter.label} filter`}
-              className="filter-tag group flex items-center gap-1.5 h-[28px] pl-3 pr-2.5 rounded-full border border-[#e3e3e3] text-[12px] font-medium text-[#1a1a1a] hover:border-[#1a1a1a] transition-colors"
+              className="filter-tag group flex items-center gap-2 h-[34px] pl-4 pr-3.5 rounded-full border border-[#e3e3e3] text-[12px] font-medium text-[#1a1a1a] cursor-pointer hover:border-[#1a1a1a] transition-colors"
             >
               <span className="whitespace-nowrap">{filter.label}</span>
               <X
@@ -306,7 +301,7 @@ export default function Sidebar() {
           ))}
           <button
             onClick={clearAll}
-            className="h-[28px] px-1 text-[12px] text-[#666] underline underline-offset-[3px] hover:text-[#1a1a1a] transition-colors"
+            className="h-[34px] px-1 text-[12px] text-[#666] underline underline-offset-[3px] hover:text-[#1a1a1a] transition-colors"
           >
             Clear All
           </button>
@@ -318,12 +313,12 @@ export default function Sidebar() {
         <ul>
           {categories.map((category) => (
             <li key={category}>
-              <a
-                href="#"
+              <Link
+                href={categoryHref(category)}
                 className="block w-full py-[5px] text-[14px] font-normal leading-[20px] text-[#666] hover:text-[#1a1a1a] transition-colors"
               >
                 {category}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>

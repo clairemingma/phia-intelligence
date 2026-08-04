@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
+import CategoryNav from "./CategoryNav";
 
 const topNavLinks = ["Brands", "Editorials", "Shop", "Contact"];
-const categoryLinks = ["Women", "Men", "Beauty", "Bags", "Jewelry", "Shoes", "Home"];
 
 export default function Navbar() {
   return (
@@ -70,20 +70,8 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Masthead / category row */}
-      <div className="bg-white border-b border-[#e3e3e3] flex items-center justify-center pl-6 pr-5 py-4 w-full shrink-0 sticky top-0">
-        <div className="flex flex-1 items-center justify-center gap-[26px]">
-          {categoryLinks.map((label) => (
-            <Link
-              key={label}
-              href="#"
-              className="flex items-center text-[12px] font-medium text-black leading-none whitespace-nowrap hover:opacity-60 transition-opacity"
-            >
-              {label}
-            </Link>
-          ))}
-        </div>
-      </div>
+      {/* Masthead / category row + its hover subcategory panels */}
+      <CategoryNav />
     </header>
   );
 }

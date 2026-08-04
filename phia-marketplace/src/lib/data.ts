@@ -63,6 +63,98 @@ export const editorialCards: Editorial[] = [
   },
 ];
 
+// How many results the grid renders. Shared so the count above the grid and the
+// grid itself can never disagree.
+export const resultCount = 20;
+
+// The active category lives in the URL, so the nav, the sidebar and the
+// breadcrumb all read from one place: /?category=Women&subcategory=Jackets
+export function categoryHref(category: string, subcategory?: string) {
+  const params = new URLSearchParams({ category });
+  if (subcategory) params.set("subcategory", subcategory);
+  return `/?${params}`;
+}
+
+// The masthead taxonomy: one entry per category link, each opening a hover
+// panel of subcategory columns. Order here is the order in the nav.
+export type CategoryMenu = {
+  label: string;
+  columns: { heading: string; items: string[] }[];
+};
+
+export const categoryMenus: CategoryMenu[] = [
+  {
+    label: "Women",
+    columns: [
+      {
+        heading: "Clothing",
+        items: ["Dresses", "Tops", "Jackets & Coats", "Knitwear", "Denim", "Skirts", "Trousers", "Activewear"],
+      },
+      { heading: "Shoes", items: ["Sneakers", "Boots", "Heels", "Flats", "Sandals"] },
+      { heading: "Accessories", items: ["Bags", "Jewelry", "Belts", "Scarves", "Sunglasses"] },
+      { heading: "Shop By", items: ["New Arrivals", "Trending", "Under $100", "On Sale"] },
+    ],
+  },
+  {
+    label: "Men",
+    columns: [
+      {
+        heading: "Clothing",
+        items: ["Shirts", "Tops", "Jackets & Coats", "Knitwear", "Denim", "Trousers", "Suiting", "Activewear"],
+      },
+      { heading: "Shoes", items: ["Sneakers", "Boots", "Loafers", "Sandals"] },
+      { heading: "Accessories", items: ["Bags", "Watches", "Belts", "Hats", "Sunglasses"] },
+      { heading: "Shop By", items: ["New Arrivals", "Trending", "Under $100", "On Sale"] },
+    ],
+  },
+  {
+    label: "Accessories",
+    columns: [
+      { heading: "Bags", items: ["Totes", "Shoulder Bags", "Crossbody", "Clutches", "Backpacks", "Weekenders"] },
+      { heading: "Jewelry", items: ["Rings", "Necklaces", "Earrings", "Bracelets", "Watches"] },
+      { heading: "Leather Goods", items: ["Wallets", "Card Holders", "Belts", "Keychains"] },
+      { heading: "Hats & Eyewear", items: ["Caps", "Beanies", "Bucket Hats", "Sunglasses", "Optical"] },
+      { heading: "Shop By", items: ["New Arrivals", "Trending", "Under $150", "On Sale"] },
+    ],
+  },
+  {
+    label: "Beauty",
+    columns: [
+      { heading: "Skincare", items: ["Cleansers", "Moisturizers", "Serums", "Masks", "SPF"] },
+      { heading: "Makeup", items: ["Face", "Eyes", "Lips", "Cheeks", "Tools"] },
+      { heading: "Hair", items: ["Shampoo", "Conditioner", "Styling", "Treatments"] },
+      { heading: "Fragrance", items: ["Women's", "Men's", "Unisex", "Candles"] },
+    ],
+  },
+  {
+    label: "Home",
+    columns: [
+      { heading: "Living", items: ["Furniture", "Lighting", "Rugs", "Mirrors", "Decor"] },
+      { heading: "Kitchen & Dining", items: ["Cookware", "Tableware", "Glassware", "Barware"] },
+      { heading: "Bed & Bath", items: ["Sheets", "Duvets", "Pillows", "Towels"] },
+      { heading: "Shop By", items: ["New Arrivals", "Trending", "Under $100", "On Sale"] },
+    ],
+  },
+  {
+    label: "Shoes",
+    columns: [
+      { heading: "Women's", items: ["Sneakers", "Boots", "Heels", "Flats", "Sandals"] },
+      { heading: "Men's", items: ["Sneakers", "Boots", "Loafers", "Sandals", "Slides"] },
+      { heading: "Shop By Brand", items: ["New Balance", "adidas Originals", "Rick Owens", "Thom Browne"] },
+      { heading: "Shop By", items: ["New Arrivals", "Trending", "Under $200", "On Sale"] },
+    ],
+  },
+  {
+    label: "Sale",
+    columns: [
+      { heading: "Women", items: ["Clothing", "Shoes", "Bags", "Accessories"] },
+      { heading: "Men", items: ["Clothing", "Shoes", "Bags", "Accessories"] },
+      { heading: "Beauty & Home", items: ["Skincare", "Makeup", "Fragrance", "Home"] },
+      { heading: "By Discount", items: ["Up to 30% Off", "30–50% Off", "50–70% Off", "70% Off & More"] },
+    ],
+  },
+];
+
 export const brands = [
   "66°North", "adidas Originals", "Alpha Industries", "Basketcase",
   "Brain Dead", "C.P. Company", "Carhartt WIP", "Dime",
