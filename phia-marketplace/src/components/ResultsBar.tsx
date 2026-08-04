@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CaretDown, Check } from "@phosphor-icons/react";
+import { CaretDown } from "@phosphor-icons/react";
 
 export const sortOptions = [
   "New Arrivals",
@@ -74,7 +74,7 @@ export default function ResultsBar({ count }: { count: number | null }) {
         {open && (
           <div
             role="menu"
-            className="menu-panel absolute right-0 top-[calc(100%_+_6px)] z-40 w-[190px] bg-white border border-[#e3e3e3] rounded-[10px] py-1.5"
+            className="menu-panel absolute right-0 top-[calc(100%_+_6px)] z-40 w-[190px] bg-white border border-[#e3e3e3] rounded-[6px] py-1.5"
             style={{ boxShadow: "0px 2px 4px rgba(0,5,20,0.04), 0px 1px 1.5px rgba(0,5,20,0.06)" }}
           >
             {sortOptions.map((option) => {
@@ -82,19 +82,24 @@ export default function ResultsBar({ count }: { count: number | null }) {
               return (
                 <button
                   key={option}
-                  role="menuitem"
+                  // With the check gone, aria-checked carries the current sort
+                  // for anyone who can't see the heavier weight.
+                  role="menuitemradio"
+                  aria-checked={selected}
                   onClick={() => {
                     setSort(option);
                     setOpen(false);
                   }}
-                  className={`flex items-center justify-between gap-2 w-full px-3.5 py-[7px] text-left text-[14px] leading-[20px] cursor-pointer transition-colors ${
+                  // Same 5px row padding as a filter row in the left column, so
+                  // the two lists share one vertical rhythm. Weight alone marks
+                  // the current sort.
+                  className={`flex items-center w-full px-3.5 py-[5px] text-left text-[14px] leading-[20px] cursor-pointer transition-colors ${
                     selected
                       ? "font-medium text-[#1a1a1a]"
                       : "font-normal text-[#666] hover:text-[#1a1a1a]"
                   }`}
                 >
                   <span className="whitespace-nowrap">{option}</span>
-                  {selected && <Check size={12} weight="bold" className="shrink-0 text-[#1a1a1a]" />}
                 </button>
               );
             })}
