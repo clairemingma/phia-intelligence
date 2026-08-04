@@ -354,7 +354,7 @@ export default function Sidebar({
               ${priceMax.toLocaleString()}
             </span>
           </div>
-          <div className="relative h-[18px] mx-[9px]">
+          <div className="relative h-[16px] mx-[8px]">
             {/* Rail */}
             <div className="absolute top-1/2 -translate-y-1/2 inset-x-0 h-[2px] bg-[#e3e3e3] rounded-full" />
             {/* Selected range */}

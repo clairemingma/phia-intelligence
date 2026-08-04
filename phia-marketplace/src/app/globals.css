@@ -105,9 +105,9 @@ body {
   appearance: none;
   position: absolute;
   top: 0;
-  left: -9px;
-  width: calc(100% + 18px);
-  height: 18px;
+  left: -8px;
+  width: calc(100% + 16px);
+  height: 16px;
   margin: 0;
   padding: 0;
   background: transparent;
@@ -117,8 +117,8 @@ body {
 .price-range::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: #ffffff;
   border: 1.5px solid var(--color-charcoal);
@@ -127,8 +127,8 @@ body {
   transition: box-shadow 200ms ease, transform 200ms ease;
 }
 .price-range::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: #ffffff;
   border: 1.5px solid var(--color-charcoal);
