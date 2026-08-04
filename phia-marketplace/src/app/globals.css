@@ -96,6 +96,43 @@ body {
   }
 }
 
+/* The mobile filter sheet rises from the bottom edge on the same curve as the
+   accordion, with its scrim fading in under it. Both live inside the query
+   rather than being cancelled by an `lg:animate-none` utility: Tailwind emits
+   its lg variants before this file's rules, so a utility would lose the tie and
+   the panel would slide up on a desktop load. 63.999rem is one step below
+   Tailwind's own lg (64rem). */
+@media (max-width: 63.999rem) {
+  @keyframes filter-sheet-in {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: none;
+    }
+  }
+  .filter-sheet {
+    animation: filter-sheet-in 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes filter-scrim-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  .filter-scrim {
+    animation: filter-scrim-in 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .filter-sheet,
+    .filter-scrim {
+      animation: none;
+    }
+  }
+}
+
 /* Dual-thumb price range slider.
    Both inputs overlay the rail; only their thumbs take pointer events.
    They overhang the rail by half a thumb on each side so thumb centers

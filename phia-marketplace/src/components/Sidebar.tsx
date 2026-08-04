@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { CaretDown, CheckSquare, Square, X } from "@phosphor-icons/react";
+import { useEffect, useRef, useState } from "react";
+import { CaretDown, CheckSquare, Funnel, Square, X } from "@phosphor-icons/react";
 import Link from "next/link";
 import {
   brands,
@@ -10,6 +10,7 @@ import {
   colors,
   conditions,
   materials,
+  resultCount,
   stores,
   subcategoriesOf,
 } from "@/lib/data";
@@ -206,6 +207,50 @@ export default function Sidebar({
     showCategories ? "Categories" : "Price"
   );
 
+  // Below lg there is no room for a filter column, so the same panel becomes a
+  // bottom sheet the results summon. One instance either way — the filters keep
+  // their state across the breakpoint rather than forking into two copies.
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  // A filter changed while the sheet covered the results. Scrolling them now
+  // would be invisible, so it waits for the sheet to come down.
+  const scrollPending = useRef(false);
+
+  // At lg the panel is the column again, so the sheet state has to let go —
+  // otherwise a resize leaves the page scroll locked behind a panel that is no
+  // longer covering anything.
+  useEffect(() => {
+    const column = window.matchMedia("(min-width: 64rem)");
+    const sync = () => {
+      if (column.matches) setSheetOpen(false);
+    };
+    sync();
+    column.addEventListener("change", sync);
+    return () => column.removeEventListener("change", sync);
+  }, []);
+
+  // The page behind the sheet holds still, and Escape closes it — the way every
+  // other transient surface on the page behaves.
+  useEffect(() => {
+    if (!sheetOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    closeRef.current?.focus();
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeSheet();
+    };
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sheetOpen]);
+
   // `key` is the section's stable identity; `label` is what it displays, which
   // for Categories changes to the category you've drilled into.
   const sectionProps = (key: string, label = key) => ({
@@ -229,13 +274,32 @@ export default function Sidebar({
     return next;
   }
 
+  // Every filter change returns the shopper to the top of the results — unless
+  // the sheet is over them, in which case it waits until the sheet is down.
+  function afterFilterChange() {
+    if (sheetOpen) {
+      scrollPending.current = true;
+      return;
+    }
+    scrollToTop();
+  }
+
+  function closeSheet() {
+    setSheetOpen(false);
+    triggerRef.current?.focus();
+    if (scrollPending.current) {
+      scrollPending.current = false;
+      scrollToTop();
+    }
+  }
+
   const toggleFilter = (
     set: Set<string>,
     setter: (next: Set<string>) => void,
     item: string
   ) => {
     setter(toggleSet(set, item));
-    scrollToTop();
+    afterFilterChange();
   };
 
   const priceIsFiltered = priceMin !== PRICE_FLOOR || priceMax !== PRICE_CEILING;
@@ -275,7 +339,7 @@ export default function Sidebar({
             onRemove: () => {
               setPriceMin(PRICE_FLOOR);
               setPriceMax(PRICE_CEILING);
-              scrollToTop();
+              afterFilterChange();
             },
           },
         ]
@@ -293,11 +357,66 @@ export default function Sidebar({
     groups.forEach((g) => g.setter(new Set()));
     setPriceMin(PRICE_FLOOR);
     setPriceMax(PRICE_CEILING);
-    scrollToTop();
+    afterFilterChange();
   }
 
   return (
-    <aside className="filters-scroll w-full min-w-0 self-start sticky top-[calc(var(--nav-height)_+_16px)] max-h-[calc(100vh_-_var(--nav-height)_-_32px)] overflow-y-auto overflow-x-clip">
+    // No `self-start`: as a grid item this stretches to the row's full height,
+    // which is the containing block the sticky column needs room to travel in.
+    // Sized to its content instead, the panel would scroll away with the page.
+    <div className="w-full min-w-0">
+      {/* Below lg the column collapses to this: the count says what is on
+          without opening anything. */}
+      <button
+        ref={triggerRef}
+        onClick={() => setSheetOpen(true)}
+        aria-expanded={sheetOpen}
+        aria-controls="filter-sheet"
+        className="lg:hidden flex items-center gap-2 h-[34px] pl-4 pr-4 rounded-full border border-[#e3e3e3] text-[12px] font-medium text-[#1a1a1a] cursor-pointer hover:border-[#1a1a1a] transition-colors"
+      >
+        <Funnel size={12} weight="regular" className="shrink-0" />
+        <span className="whitespace-nowrap">
+          Filters
+          {activeFilters.length > 0 && ` (${activeFilters.length})`}
+        </span>
+      </button>
+
+      {/* Scrim — the sheet's only, so it goes when the column returns. */}
+      {sheetOpen && (
+        <div
+          onClick={closeSheet}
+          className="filter-scrim lg:hidden fixed inset-0 z-[60] bg-black/40"
+        />
+      )}
+
+      <aside
+        id="filter-sheet"
+        {...(sheetOpen ? { role: "dialog", "aria-modal": true, "aria-label": "Filters" } : {})}
+        // Two shapes, one element: a sheet pinned to the bottom edge below lg,
+        // the sticky filter column at lg and up. Closed, it is display:none on
+        // mobile — nothing to tab into — while lg:block keeps the column up
+        // regardless of the sheet's state.
+        className={`filters-scroll ${
+          sheetOpen ? "filter-sheet flex" : "hidden"
+        } fixed inset-x-0 bottom-0 z-[70] flex-col max-h-[85vh] bg-white rounded-t-[16px] overflow-hidden
+        lg:block lg:sticky lg:inset-x-auto lg:bottom-auto lg:z-auto lg:top-[calc(var(--nav-height)_+_16px)] lg:max-h-[calc(100vh_-_var(--nav-height)_-_32px)] lg:rounded-none lg:overflow-y-auto lg:overflow-x-clip`}
+      >
+        {/* Sheet header — the column needs no title, the page already gives it */}
+        <div className="lg:hidden flex items-center justify-between shrink-0 h-[52px] px-5 border-b border-[#e3e3e3]">
+          <span className="text-[14px] font-medium text-[#1a1a1a]">Filters</span>
+          <button
+            ref={closeRef}
+            onClick={closeSheet}
+            aria-label="Close filters"
+            className="flex items-center justify-center size-[32px] -mr-2 text-[#666] hover:text-[#1a1a1a] transition-colors cursor-pointer"
+          >
+            <X size={14} weight="bold" />
+          </button>
+        </div>
+
+        {/* The scrolling region is the sheet's body below lg and the whole
+            sticky column at lg, so the scroll moves with it. */}
+        <div className="filters-scroll flex-1 min-h-0 overflow-y-auto px-5 pt-4 lg:flex-none lg:min-h-0 lg:overflow-visible lg:px-0 lg:pt-0">
       {/* Selected filters — wrap as they accumulate, above the filter list */}
       {activeFilters.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 pb-4">
@@ -372,8 +491,8 @@ export default function Sidebar({
               onChange={(e) =>
                 setPriceMin(Math.min(Number(e.target.value), priceMax - PRICE_STEP))
               }
-              onPointerUp={scrollToTop}
-              onKeyUp={scrollToTop}
+              onPointerUp={afterFilterChange}
+              onKeyUp={afterFilterChange}
               className="price-range"
               // Lift the min thumb above the max thumb when both sit at the top of
               // the range, otherwise the max thumb covers it and it can't be dragged back.
@@ -389,8 +508,8 @@ export default function Sidebar({
               onChange={(e) =>
                 setPriceMax(Math.max(Number(e.target.value), priceMin + PRICE_STEP))
               }
-              onPointerUp={scrollToTop}
-              onKeyUp={scrollToTop}
+              onPointerUp={afterFilterChange}
+              onKeyUp={afterFilterChange}
               className="price-range"
               style={{ zIndex: 3 }}
             />
@@ -486,6 +605,27 @@ export default function Sidebar({
           onToggle={toggleGroup(group("condition"))}
         />
       </FilterSection>
-    </aside>
+        </div>
+
+        {/* Sheet footer — one full-width target to get back to the results, and
+            a way out of every filter at once when there is something to clear. */}
+        <div className="lg:hidden shrink-0 flex items-center gap-3 px-5 py-3 border-t border-[#e3e3e3] pb-[calc(12px_+_env(safe-area-inset-bottom))]">
+          {activeFilters.length > 0 && (
+            <button
+              onClick={clearAll}
+              className="shrink-0 h-[44px] px-1 text-[12px] text-[#666] underline underline-offset-[3px] hover:text-[#1a1a1a] transition-colors cursor-pointer"
+            >
+              Clear All
+            </button>
+          )}
+          <button
+            onClick={closeSheet}
+            className="flex-1 h-[44px] rounded-full bg-[#002d9f] text-[12px] font-medium text-white cursor-pointer"
+          >
+            Show {resultCount.toLocaleString("en-US")} results
+          </button>
+        </div>
+      </aside>
+    </div>
   );
 }
