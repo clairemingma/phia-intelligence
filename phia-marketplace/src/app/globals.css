@@ -32,13 +32,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* The filter column scrolls when a tall section is open, but shows no bar of
-   its own — only the searchable multiselect lists inside it get one.
-   overflow-x is clipped so a sub-pixel overflow can't add a bar underneath. */
-.filters-scroll {
+/* Regions that scroll without a bar of their own: the filter column when a tall
+   section is open — only the searchable multiselect lists inside it get one —
+   and the masthead's category row on a phone. */
+.no-scrollbar {
   scrollbar-width: none;
 }
-.filters-scroll::-webkit-scrollbar {
+.no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 
@@ -96,8 +96,9 @@ body {
   }
 }
 
-/* The mobile filter sheet rises from the bottom edge on the same curve as the
-   accordion, with its scrim fading in under it. Both live inside the query
+/* The panels that cover the page on a phone fly in on the same curve as the
+   accordion, under a scrim that fades in with them: the filter sheet from the
+   bottom edge, the nav drawer from the right. All of it lives inside the query
    rather than being cancelled by an `lg:animate-none` utility: Tailwind emits
    its lg variants before this file's rules, so a utility would lose the tie and
    the panel would slide up on a desktop load. 63.999rem is one step below
@@ -114,7 +115,18 @@ body {
   .filter-sheet {
     animation: filter-sheet-in 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
-  @keyframes filter-scrim-in {
+  @keyframes nav-drawer-in {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: none;
+    }
+  }
+  .nav-drawer {
+    animation: nav-drawer-in 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes sheet-scrim-in {
     from {
       opacity: 0;
     }
@@ -122,12 +134,13 @@ body {
       opacity: 1;
     }
   }
-  .filter-scrim {
-    animation: filter-scrim-in 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  .sheet-scrim {
+    animation: sheet-scrim-in 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
   @media (prefers-reduced-motion: reduce) {
     .filter-sheet,
-    .filter-scrim {
+    .nav-drawer,
+    .sheet-scrim {
       animation: none;
     }
   }

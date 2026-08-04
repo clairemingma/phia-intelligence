@@ -34,9 +34,22 @@ function pageItems(page: number): (number | "gap")[] {
   ];
 }
 
+// A phone fits five cells beside Previous and Next, so it shows a shorter run
+// than the column-width one: three consecutive pages at either end of the set,
+// or the current page alone between the first and the last. Always a subset of
+// what `pageItems` returns, so the shorter run is the longer one with cells
+// hidden rather than a second run of its own.
+function mobilePages(page: number): Set<number> {
+  if (pageCount <= RUN + 2) return new Set(range(1, pageCount));
+  if (page <= 3) return new Set([1, 2, 3, pageCount]);
+  if (page >= pageCount - 2) return new Set([1, pageCount - 2, pageCount - 1, pageCount]);
+  return new Set([1, page, pageCount]);
+}
+
 // Every page cell is a 40px square holding one 20px line of type, so the run
-// keeps its rhythm however the current page moves.
-const cell = "flex items-center justify-center size-[40px]";
+// keeps its rhythm however the current page moves. Its display comes from the
+// caller, which is what drops a cell on a phone.
+const cell = "items-center justify-center size-[40px]";
 
 const number = "text-[14px] leading-[20px] text-center";
 
@@ -47,7 +60,7 @@ const step = "text-[12px] font-medium leading-[normal]";
 // Three 2px circles land lighter than the font's 2.7px bullets.
 function Ellipsis() {
   return (
-    <span aria-hidden className={`${cell} text-[#666]`}>
+    <span aria-hidden className={`flex ${cell} text-[#666]`}>
       {/* Set on the numbers' own baseline, which sits 5px up from the bottom of
           their 20px line box, so the dots read as a typed "..." beside them. */}
       <span className="flex items-end gap-[3px] h-[20px]">
@@ -72,6 +85,7 @@ export default function Pagination({
   if (pageCount <= 1) return null;
 
   const href = (target: number) => pageHref(target, activeCategory, activeSubcategory);
+  const onPhone = mobilePages(page);
 
   // Paging lands you at the top of the new results. Next only scrolls when the
   // page leaves the viewport, and this tall a grid never does, so the scroll is
@@ -96,9 +110,12 @@ export default function Pagination({
           <span className={`${step} shrink-0 text-black/40`}>Previous</span>
         )}
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 lg:gap-4">
           {pageItems(page).map((item, i) => {
             if (item === "gap") return <Ellipsis key={`gap-${i}`} />;
+
+            // Cells outside the phone's shorter run only appear at lg.
+            const display = onPhone.has(item) ? "flex" : "hidden lg:flex";
 
             if (item === page) {
               // Weight and charcoal mark the current page, the way the sort menu
@@ -107,7 +124,7 @@ export default function Pagination({
                 <span
                   key={item}
                   aria-current="page"
-                  className={`${cell} ${number} font-medium text-[#1a1a1a]`}
+                  className={`${display} ${cell} ${number} font-medium text-[#1a1a1a]`}
                 >
                   {/* The padded number reads as "zero four" aloud, so the page
                       is announced in words alongside it. */}
@@ -123,7 +140,7 @@ export default function Pagination({
                 key={item}
                 href={href(item)}
                 aria-label={`Page ${item}`}
-                className={`${cell} ${number} font-normal text-[#666] hover:text-[#1a1a1a] transition-colors rounded-[4px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#002d9f]/25`}
+                className={`${display} ${cell} ${number} font-normal text-[#666] hover:text-[#1a1a1a] transition-colors rounded-[4px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#002d9f]/25`}
               >
                 {label(item)}
               </Link>

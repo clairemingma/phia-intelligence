@@ -69,7 +69,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
 
       {/* One 5-column rhythm across the page: the filter column, each of the
           four product cards, and the search field are all one column wide. */}
-      <main className="px-6 md:px-10 lg:px-[60px] pt-8 pb-16">
+      <main className="px-4 md:px-10 lg:px-[60px] pt-8 pb-16">
         {/* The trail sits inside the heading's column rather than above the
             grid, so the search field starts on the breadcrumb's top edge
             instead of a row below it. */}

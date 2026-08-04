@@ -47,9 +47,11 @@ export default function CategoryNav() {
 
   return (
     <div className="relative w-full" onMouseEnter={cancelClose} onMouseLeave={scheduleClose}>
-      {/* Masthead / category row */}
-      <div className="bg-white border-b border-[#e3e3e3] flex items-center justify-center pl-6 pr-5 py-4 w-full shrink-0">
-        <div className="flex flex-1 items-center justify-center gap-[26px]">
+      {/* Masthead / category row. The full taxonomy is wider than a phone, so
+          below md the row scrolls sideways from the left edge instead of
+          centring — no bar of its own, the way the filter column scrolls. */}
+      <div className="no-scrollbar bg-white border-b border-[#e3e3e3] flex items-center px-4 py-4 w-full shrink-0 overflow-x-auto md:justify-center md:overflow-x-visible md:pl-6 md:pr-5">
+        <div className="flex flex-1 items-center gap-4 md:justify-center md:gap-[26px]">
           {categoryMenus.map(({ label }) => {
             const open = openLabel === label;
             return (
@@ -63,14 +65,17 @@ export default function CategoryNav() {
                   setOpenLabel(label);
                 }}
                 onFocus={() => setOpenLabel(label)}
-                className={`relative flex items-center text-[12px] font-medium leading-none whitespace-nowrap text-black transition-opacity ${
+                className={`relative flex shrink-0 items-center text-[12px] font-medium leading-none whitespace-nowrap text-black transition-opacity ${
                   open ? "opacity-100" : "hover:opacity-60"
                 }`}
               >
                 {label}
                 {/* Active rule sits on the row's bottom border, tying the label
-                    to the panel hanging below it. */}
-                {open && <span className="absolute -bottom-4 left-0 right-0 h-px bg-[#1a1a1a]" />}
+                    to the panel hanging below it — so it appears only where that
+                    panel does, and stays out of the row a phone scrolls. */}
+                {open && (
+                  <span className="hidden md:block absolute -bottom-4 left-0 right-0 h-px bg-[#1a1a1a]" />
+                )}
               </Link>
             );
           })}

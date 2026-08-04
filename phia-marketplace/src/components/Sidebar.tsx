@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CaretDown, CheckSquare, Funnel, Square, X } from "@phosphor-icons/react";
+import { CaretDown, CheckSquare, Square, X } from "@phosphor-icons/react";
 import Link from "next/link";
 import {
   brands,
@@ -15,6 +15,7 @@ import {
   subcategoriesOf,
 } from "@/lib/data";
 import { scrollToTop } from "@/lib/scroll";
+import { useOverlay } from "@/lib/overlay";
 import SearchField from "./SearchField";
 
 // Same taxonomy as the masthead, in the same order — one source so the filter
@@ -208,8 +209,9 @@ export default function Sidebar({
   );
 
   // Below lg there is no room for a filter column, so the same panel becomes a
-  // bottom sheet the results summon. One instance either way — the filters keep
-  // their state across the breakpoint rather than forking into two copies.
+  // bottom sheet, raised by a pill floating over the results. One instance
+  // either way — the filters keep their state across the breakpoint rather than
+  // forking into two copies.
   const [sheetOpen, setSheetOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -230,26 +232,9 @@ export default function Sidebar({
     return () => column.removeEventListener("change", sync);
   }, []);
 
-  // The page behind the sheet holds still, and Escape closes it — the way every
-  // other transient surface on the page behaves.
-  useEffect(() => {
-    if (!sheetOpen) return;
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    closeRef.current?.focus();
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeSheet();
-    };
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", onKeyDown);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sheetOpen]);
+  // The page behind the sheet holds still, Escape closes it, and focus starts on
+  // the way out — the way every panel on the page behaves.
+  useOverlay({ open: sheetOpen, onDismiss: () => closeSheet(), focusRef: closeRef });
 
   // `key` is the section's stable identity; `label` is what it displays, which
   // for Categories changes to the category you've drilled into.
@@ -361,20 +346,30 @@ export default function Sidebar({
   }
 
   return (
-    // No `self-start`: as a grid item this stretches to the row's full height,
-    // which is the containing block the sticky column needs room to travel in.
-    // Sized to its content instead, the panel would scroll away with the page.
-    <div className="w-full min-w-0">
-      {/* Below lg the column collapses to this: the count says what is on
-          without opening anything. */}
+    // At lg this is the grid's first column, and with no `self-start` it
+    // stretches to the row's full height — the containing block the sticky
+    // column needs room to travel in. Below lg every child is out of flow, so
+    // `contents` keeps the collapsed column from opening a row of its own above
+    // the results.
+    <div className="contents lg:block lg:w-full lg:min-w-0">
+      {/* Below lg the column collapses to this: the header's CTA pill, in phia
+          blue and at the same size, floating clear of the bottom edge over the
+          results rather than taking a row of its own. Its count says what is on
+          without opening anything. It gives way to the sheet it raises, and
+          stays in the DOM while the sheet is up so closing the sheet has
+          somewhere to put focus back. */}
       <button
         ref={triggerRef}
         onClick={() => setSheetOpen(true)}
         aria-expanded={sheetOpen}
         aria-controls="filter-sheet"
-        className="lg:hidden flex items-center gap-2 h-[34px] pl-4 pr-4 rounded-full border border-[#e3e3e3] text-[12px] font-medium text-[#1a1a1a] cursor-pointer hover:border-[#1a1a1a] transition-colors"
+        className={`lg:hidden fixed left-1/2 -translate-x-1/2 bottom-[calc(64px_+_env(safe-area-inset-bottom))] z-40 flex items-center justify-center h-11 px-[18px] rounded-full bg-[#002d9f] text-[12px] font-medium text-white cursor-pointer transition-opacity duration-200 motion-reduce:transition-none ${
+          sheetOpen ? "opacity-0 pointer-events-none" : "opacity-100"
+        }`}
+        style={{
+          boxShadow: "0px 1px 3px rgba(0,5,20,0.06), 0px 2px 8px -1px rgba(0,5,20,0.04)",
+        }}
       >
-        <Funnel size={12} weight="regular" className="shrink-0" />
         <span className="whitespace-nowrap">
           Filters
           {activeFilters.length > 0 && ` (${activeFilters.length})`}
@@ -385,7 +380,7 @@ export default function Sidebar({
       {sheetOpen && (
         <div
           onClick={closeSheet}
-          className="filter-scrim lg:hidden fixed inset-0 z-[60] bg-black/40"
+          className="sheet-scrim lg:hidden fixed inset-0 z-[60] bg-black/40"
         />
       )}
 
@@ -396,7 +391,7 @@ export default function Sidebar({
         // the sticky filter column at lg and up. Closed, it is display:none on
         // mobile — nothing to tab into — while lg:block keeps the column up
         // regardless of the sheet's state.
-        className={`filters-scroll ${
+        className={`no-scrollbar ${
           sheetOpen ? "filter-sheet flex" : "hidden"
         } fixed inset-x-0 bottom-0 z-[70] flex-col max-h-[85vh] bg-white rounded-t-[16px] overflow-hidden
         lg:block lg:sticky lg:inset-x-auto lg:bottom-auto lg:z-auto lg:top-[calc(var(--nav-height)_+_16px)] lg:max-h-[calc(100vh_-_var(--nav-height)_-_32px)] lg:rounded-none lg:overflow-y-auto lg:overflow-x-clip`}
@@ -416,7 +411,7 @@ export default function Sidebar({
 
         {/* The scrolling region is the sheet's body below lg and the whole
             sticky column at lg, so the scroll moves with it. */}
-        <div className="filters-scroll flex-1 min-h-0 overflow-y-auto px-5 pt-4 lg:flex-none lg:min-h-0 lg:overflow-visible lg:px-0 lg:pt-0">
+        <div className="no-scrollbar flex-1 min-h-0 overflow-y-auto px-5 pt-4 lg:flex-none lg:min-h-0 lg:overflow-visible lg:px-0 lg:pt-0">
       {/* Selected filters — wrap as they accumulate, above the filter list */}
       {activeFilters.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 pb-4">
