@@ -163,6 +163,10 @@ body {
   background: transparent;
   outline: none;
   pointer-events: none;
+  /* iOS paints a grey block over whatever a finger lands on, which on a rail
+     this thin reads as a shadow behind the thumb. The :active thumb is the
+     feedback here. */
+  -webkit-tap-highlight-color: transparent;
 }
 .price-range::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -174,7 +178,7 @@ body {
   border: 1.5px solid var(--color-charcoal);
   cursor: grab;
   pointer-events: auto;
-  transition: box-shadow 200ms ease, transform 200ms ease;
+  transition: transform 200ms ease;
 }
 .price-range::-moz-range-thumb {
   width: 16px;
@@ -184,7 +188,7 @@ body {
   border: 1.5px solid var(--color-charcoal);
   cursor: grab;
   pointer-events: auto;
-  transition: box-shadow 200ms ease, transform 200ms ease;
+  transition: transform 200ms ease;
 }
 .price-range::-webkit-slider-thumb:active {
   cursor: grabbing;
@@ -194,16 +198,6 @@ body {
   cursor: grabbing;
   transform: scale(1.08);
 }
-/* The focus ring is for keyboards. Browsers treat a range slider as
-   keyboard-interactive and match :focus-visible after a plain drag too, which on
-   a touchscreen leaves the ring sitting under the thumb once the finger is
-   gone — so it is drawn only where a fine pointer, and with it a keyboard, is
-   actually in play. */
-@media (any-pointer: fine) {
-  .price-range:focus-visible::-webkit-slider-thumb {
-    box-shadow: 0 0 0 3px rgba(0, 45, 159, 0.15);
-  }
-  .price-range:focus-visible::-moz-range-thumb {
-    box-shadow: 0 0 0 3px rgba(0, 45, 159, 0.15);
-  }
-}
+/* No focus ring on the thumbs. Browsers treat a range slider as
+   keyboard-interactive and match :focus-visible after a plain drag too, so any
+   halo here follows a finger around instead of marking keyboard focus. */

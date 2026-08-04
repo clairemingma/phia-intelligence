@@ -208,7 +208,7 @@ export default function Sidebar({
   );
 
   // Below lg there is no room for a filter column, so the same panel becomes a
-  // bottom sheet, raised by a pill floating over the results. One instance
+  // full-screen page, raised by a pill floating over the results. One instance
   // either way — the filters keep their state across the breakpoint rather than
   // forking into two copies.
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -375,32 +375,29 @@ export default function Sidebar({
         </span>
       </button>
 
-      {/* Scrim — the sheet's only, so it goes when the column returns. */}
+      {/* Scrim — under the panel rather than around it now that the panel fills
+          the screen, so all it does is darken the results for the moment the
+          panel takes to rise over them. It goes when the column returns. */}
       {sheetOpen && (
-        <div
-          onClick={closeSheet}
-          className="sheet-scrim lg:hidden fixed inset-0 z-[60] bg-black/40"
-        />
+        <div aria-hidden className="sheet-scrim lg:hidden fixed inset-0 z-[60] bg-black/40" />
       )}
 
       <aside
         id="filter-sheet"
         {...(sheetOpen ? { role: "dialog", "aria-modal": true, "aria-label": "Filters" } : {})}
-        // Two shapes, one element: a sheet pinned to the bottom edge below lg,
-        // the sticky filter column at lg and up. Closed, it is display:none on
-        // mobile — nothing to tab into — while lg:block keeps the column up
-        // regardless of the sheet's state.
+        // Two shapes, one element: a page of its own below lg, filling the
+        // screen edge to edge, and the sticky filter column at lg and up.
+        // Closed, it is display:none on mobile — nothing to tab into — while
+        // lg:block keeps the column up regardless of its state.
         //
-        // The sheet's height is fixed rather than sized to its contents, so
-        // opening a short section like Price doesn't drop the sheet's top edge
-        // and slide the whole panel down under the finger — only the body inside
-        // it changes. Measured in dvh: the sheet locks the page while it is up,
-        // so the browser's chrome can't move under it, and a fixed 85vh would
-        // otherwise put the footer button behind that chrome.
+        // Anchored to the top and sized in dvh rather than stretched between
+        // both edges: on a phone browser a fixed element's bottom edge sits
+        // under the toolbar, which would take the footer's buttons with it. The
+        // page holds still while this is up, so dvh can't shift underneath it.
         className={`no-scrollbar ${
           sheetOpen ? "filter-sheet flex" : "hidden"
-        } fixed inset-x-0 bottom-0 z-[70] flex-col h-[85dvh] bg-white rounded-t-[16px] overflow-hidden
-        lg:block lg:sticky lg:inset-x-auto lg:bottom-auto lg:z-auto lg:top-[calc(var(--nav-height)_+_16px)] lg:h-auto lg:max-h-[calc(100vh_-_var(--nav-height)_-_32px)] lg:rounded-none lg:overflow-y-auto lg:overflow-x-clip`}
+        } fixed inset-x-0 top-0 z-[70] flex-col h-dvh bg-white overflow-hidden
+        lg:block lg:sticky lg:inset-x-auto lg:z-auto lg:top-[calc(var(--nav-height)_+_16px)] lg:h-auto lg:max-h-[calc(100vh_-_var(--nav-height)_-_32px)] lg:overflow-y-auto lg:overflow-x-clip`}
       >
         {/* Sheet header — the column needs no title, the page already gives it */}
         <div className="lg:hidden flex items-center justify-between shrink-0 h-[52px] px-5 border-b border-[#e3e3e3]">
