@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { CaretDown, Check } from "@phosphor-icons/react";
 
 export const sortOptions = [
+  "New Arrivals",
   "Trending",
   "Price Low to High",
   "Price High to Low",
@@ -12,8 +13,8 @@ export const sortOptions = [
 export type SortOption = (typeof sortOptions)[number];
 
 export default function ResultsBar({ count }: { count: number | null }) {
-  // Trending is the landing order: what shoppers see before touching a filter.
-  const [sort, setSort] = useState<SortOption>("Trending");
+  // New Arrivals is the landing order: what shoppers see before touching a filter.
+  const [sort, setSort] = useState<SortOption>("New Arrivals");
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -38,7 +39,7 @@ export default function ResultsBar({ count }: { count: number | null }) {
   }, [open]);
 
   return (
-    <div className="flex items-center justify-end gap-2.5 pb-5">
+    <div className="flex items-center justify-end gap-2.5 pb-4">
       {/* Result count — only once there is a count to show. Reads as one phrase
           with the sort beside it, so a dot divides them. */}
       {count !== null && (
@@ -58,13 +59,13 @@ export default function ResultsBar({ count }: { count: number | null }) {
           onClick={() => setOpen(!open)}
           aria-haspopup="menu"
           aria-expanded={open}
-          className="flex items-center gap-1.5 text-[14px] font-normal leading-[20px] text-[#666] cursor-pointer rounded-[4px] transition-opacity hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#002d9f]/25"
+          className="group flex items-center gap-1.5 text-[14px] font-normal leading-[20px] text-[#666] cursor-pointer rounded-[4px] transition-colors hover:text-[#1a1a1a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#002d9f]/25"
         >
           <span className="whitespace-nowrap">{sort}</span>
           <CaretDown
             size={12}
             weight="regular"
-            className={`shrink-0 text-[#666] transition-transform duration-200 ${
+            className={`shrink-0 text-[#666] group-hover:text-[#1a1a1a] transition-[transform,color] duration-200 ${
               open ? "rotate-180" : ""
             } motion-reduce:transition-none`}
           />

@@ -3,7 +3,16 @@
 import { useState } from "react";
 import { CaretDown, CheckSquare, Square, X } from "@phosphor-icons/react";
 import Link from "next/link";
-import { brands, categoryHref, categoryMenus, colors, conditions, materials, stores } from "@/lib/data";
+import {
+  brands,
+  categoryHref,
+  categoryMenus,
+  colors,
+  conditions,
+  materials,
+  stores,
+  subcategoriesOf,
+} from "@/lib/data";
 import SearchField from "./SearchField";
 
 // Same taxonomy as the masthead, in the same order — one source so the filter
@@ -125,16 +134,19 @@ function FilterSection({
   label,
   open,
   onToggle,
+  first = false,
   children,
 }: {
   label: string;
   open: boolean;
   onToggle: () => void;
+  first?: boolean;
   children?: React.ReactNode;
 }) {
-  // Dividers sit between sections only — the last section has no bottom rule.
+  // Dividers sit between sections, plus a rule above the first one to close the
+  // list off at the top. The last section has no bottom rule.
   return (
-    <div className="border-b border-[#e3e3e3] last:border-b-0">
+    <div className={`border-b border-[#e3e3e3] last:border-b-0 ${first ? "border-t" : ""}`}>
       <button
         onClick={onToggle}
         aria-expanded={open}
@@ -167,7 +179,13 @@ function FilterSection({
   );
 }
 
-export default function Sidebar() {
+export default function Sidebar({
+  activeCategory,
+  activeSubcategory,
+}: {
+  activeCategory?: string;
+  activeSubcategory?: string;
+}) {
   const [brandQuery, setBrandQuery] = useState("");
   const [storeQuery, setStoreQuery] = useState("");
   const [selectedBrands, setSelectedBrands] = useState<Set<string>>(new Set());
@@ -179,14 +197,28 @@ export default function Sidebar() {
   const [selectedConditions, setSelectedConditions] = useState<Set<string>>(new Set());
   const [priceMin, setPriceMin] = useState(PRICE_FLOOR);
   const [priceMax, setPriceMax] = useState(PRICE_CEILING);
-  // Accordion: at most one section open at a time, Categories open on load.
-  const [openSection, setOpenSection] = useState<string | null>("Categories");
+  // At a subcategory there is nowhere further to drill, so the Categories
+  // section is dropped and Price leads the filters instead.
+  const showCategories = !activeSubcategory;
 
-  const sectionProps = (label: string) => ({
+  // Accordion: at most one section open at a time, the first one open on load.
+  const [openSection, setOpenSection] = useState<string | null>(
+    showCategories ? "Categories" : "Price"
+  );
+
+  // `key` is the section's stable identity; `label` is what it displays, which
+  // for Categories changes to the category you've drilled into.
+  const sectionProps = (key: string, label = key) => ({
     label,
-    open: openSection === label,
-    onToggle: () => setOpenSection(openSection === label ? null : label),
+    open: openSection === key,
+    onToggle: () => setOpenSection(openSection === key ? null : key),
   });
+
+  // Inside a category the section becomes that category: its heading is the
+  // category name and its list is the taxonomy one level down. A category with
+  // nothing beneath it stays on the top-level list rather than going empty.
+  const subcategories = activeCategory ? subcategoriesOf(activeCategory) : [];
+  const drilledIn = subcategories.length > 0;
 
   const pct = (value: number) =>
     ((value - PRICE_FLOOR) / (PRICE_CEILING - PRICE_FLOOR)) * 100;
@@ -308,24 +340,30 @@ export default function Sidebar() {
         </div>
       )}
 
-      {/* Categories */}
-      <FilterSection {...sectionProps("Categories")}>
-        <ul>
-          {categories.map((category) => (
-            <li key={category}>
-              <Link
-                href={categoryHref(category)}
-                className="block w-full py-[5px] text-[14px] font-normal leading-[20px] text-[#666] hover:text-[#1a1a1a] transition-colors"
-              >
-                {category}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </FilterSection>
+      {/* Categories — or the category you're in, listing what's beneath it */}
+      {showCategories && (
+        <FilterSection
+          {...sectionProps("Categories", drilledIn ? activeCategory : "Categories")}
+          first
+        >
+          <ul>
+            {(drilledIn ? subcategories : categories).map((item) => (
+              <li key={item}>
+                <Link
+                  href={drilledIn ? categoryHref(activeCategory!, item) : categoryHref(item)}
+                  className="block w-full py-[5px] text-[14px] font-normal leading-[20px] text-[#666] hover:text-[#1a1a1a] transition-colors"
+                >
+                  {item}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </FilterSection>
+      )}
 
-      {/* Price – range slider */}
-      <FilterSection {...sectionProps("Price")}>
+      {/* Price – range slider. Leads the list, and takes the top rule, whenever
+          the Categories section is gone. */}
+      <FilterSection {...sectionProps("Price")} first={!showCategories}>
         <div className="pt-1">
           <div className="flex justify-between mb-3">
             <span className="text-[14px] font-medium text-[#1a1a1a]">

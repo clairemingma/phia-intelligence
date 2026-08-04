@@ -77,14 +77,43 @@ export function categoryHref(category: string, subcategory?: string) {
 
 // The masthead taxonomy: one entry per category link, each opening a hover
 // panel of subcategory columns. Order here is the order in the nav.
+export type CategoryColumn = {
+  heading: string;
+  items: string[];
+  // "Shop By"-style columns are merchandising shortcuts rather than taxonomy,
+  // so they appear in the hover panel but not in the sidebar's drill-down.
+  promo?: boolean;
+};
+
 export type CategoryMenu = {
   label: string;
-  columns: { heading: string; items: string[] }[];
+  // Doubles as the page's on-screen description and its meta description, so
+  // each one is written to sit inside the ~155 characters Google renders.
+  description: string;
+  columns: CategoryColumn[];
 };
+
+export function categoryDescription(category: string): string | undefined {
+  return categoryMenus.find((menu) => menu.label === category)?.description;
+}
+
+// The taxonomy one level beneath a category, e.g. Women → Clothing, Shoes,
+// Accessories. Unknown categories have none, so the caller falls back to the
+// top-level list.
+export function subcategoriesOf(category: string): string[] {
+  return (
+    categoryMenus
+      .find((menu) => menu.label === category)
+      ?.columns.filter((column) => !column.promo)
+      .map((column) => column.heading) ?? []
+  );
+}
 
 export const categoryMenus: CategoryMenu[] = [
   {
     label: "Women",
+    description:
+      "Women's clothing, shoes and accessories from 20+ retail and resale sites, compared in one place so you never overpay for the pieces you want.",
     columns: [
       {
         heading: "Clothing",
@@ -92,11 +121,13 @@ export const categoryMenus: CategoryMenu[] = [
       },
       { heading: "Shoes", items: ["Sneakers", "Boots", "Heels", "Flats", "Sandals"] },
       { heading: "Accessories", items: ["Bags", "Jewelry", "Belts", "Scarves", "Sunglasses"] },
-      { heading: "Shop By", items: ["New Arrivals", "Trending", "Under $100", "On Sale"] },
+      { heading: "Shop By", items: ["New Arrivals", "Trending", "Under $100", "On Sale"], promo: true },
     ],
   },
   {
     label: "Men",
+    description:
+      "Menswear from 20+ retail and resale sites, compared in one place — catch every markdown and never overpay for the pieces you actually want.",
     columns: [
       {
         heading: "Clothing",
@@ -104,21 +135,25 @@ export const categoryMenus: CategoryMenu[] = [
       },
       { heading: "Shoes", items: ["Sneakers", "Boots", "Loafers", "Sandals"] },
       { heading: "Accessories", items: ["Bags", "Watches", "Belts", "Hats", "Sunglasses"] },
-      { heading: "Shop By", items: ["New Arrivals", "Trending", "Under $100", "On Sale"] },
+      { heading: "Shop By", items: ["New Arrivals", "Trending", "Under $100", "On Sale"], promo: true },
     ],
   },
   {
     label: "Accessories",
+    description:
+      "Bags, jewelry and everything that finishes an outfit, priced across 20+ retail and resale sites so the cheapest listing always finds you first.",
     columns: [
       { heading: "Bags", items: ["Totes", "Shoulder Bags", "Crossbody", "Clutches", "Backpacks", "Weekenders"] },
       { heading: "Jewelry", items: ["Rings", "Necklaces", "Earrings", "Bracelets", "Watches"] },
       { heading: "Leather Goods", items: ["Wallets", "Card Holders", "Belts", "Keychains"] },
       { heading: "Hats & Eyewear", items: ["Caps", "Beanies", "Bucket Hats", "Sunglasses", "Optical"] },
-      { heading: "Shop By", items: ["New Arrivals", "Trending", "Under $150", "On Sale"] },
+      { heading: "Shop By", items: ["New Arrivals", "Trending", "Under $150", "On Sale"], promo: true },
     ],
   },
   {
     label: "Beauty",
+    description:
+      "Skincare, makeup, hair and fragrance from 20+ retailers, compared side by side so every restock lands at the lowest price available.",
     columns: [
       { heading: "Skincare", items: ["Cleansers", "Moisturizers", "Serums", "Masks", "SPF"] },
       { heading: "Makeup", items: ["Face", "Eyes", "Lips", "Cheeks", "Tools"] },
@@ -128,29 +163,35 @@ export const categoryMenus: CategoryMenu[] = [
   },
   {
     label: "Home",
+    description:
+      "Furniture, lighting, kitchen and bedding from 20+ retailers, compared side by side so the piece you've been eyeing arrives at the price you wanted.",
     columns: [
       { heading: "Living", items: ["Furniture", "Lighting", "Rugs", "Mirrors", "Decor"] },
       { heading: "Kitchen & Dining", items: ["Cookware", "Tableware", "Glassware", "Barware"] },
       { heading: "Bed & Bath", items: ["Sheets", "Duvets", "Pillows", "Towels"] },
-      { heading: "Shop By", items: ["New Arrivals", "Trending", "Under $100", "On Sale"] },
+      { heading: "Shop By", items: ["New Arrivals", "Trending", "Under $100", "On Sale"], promo: true },
     ],
   },
   {
     label: "Shoes",
+    description:
+      "Sneakers, boots and everything between, priced across 20+ retail and resale sites — including the sold-out pairs resellers still have in your size.",
     columns: [
       { heading: "Women's", items: ["Sneakers", "Boots", "Heels", "Flats", "Sandals"] },
       { heading: "Men's", items: ["Sneakers", "Boots", "Loafers", "Sandals", "Slides"] },
-      { heading: "Shop By Brand", items: ["New Balance", "adidas Originals", "Rick Owens", "Thom Browne"] },
-      { heading: "Shop By", items: ["New Arrivals", "Trending", "Under $200", "On Sale"] },
+      { heading: "Shop By Brand", items: ["New Balance", "adidas Originals", "Rick Owens", "Thom Browne"], promo: true },
+      { heading: "Shop By", items: ["New Arrivals", "Trending", "Under $200", "On Sale"], promo: true },
     ],
   },
   {
     label: "Sale",
+    description:
+      "Every markdown worth knowing about, gathered from 20+ retail and resale sites and ranked by how much you actually save.",
     columns: [
       { heading: "Women", items: ["Clothing", "Shoes", "Bags", "Accessories"] },
       { heading: "Men", items: ["Clothing", "Shoes", "Bags", "Accessories"] },
       { heading: "Beauty & Home", items: ["Skincare", "Makeup", "Fragrance", "Home"] },
-      { heading: "By Discount", items: ["Up to 30% Off", "30–50% Off", "50–70% Off", "70% Off & More"] },
+      { heading: "By Discount", items: ["Up to 30% Off", "30–50% Off", "50–70% Off", "70% Off & More"], promo: true },
     ],
   },
 ];
