@@ -134,19 +134,18 @@ function FilterSection({
   label,
   open,
   onToggle,
-  first = false,
   children,
 }: {
   label: string;
   open: boolean;
   onToggle: () => void;
-  first?: boolean;
   children?: React.ReactNode;
 }) {
-  // Dividers sit between sections, plus a rule above the first one to close the
-  // list off at the top. The last section has no bottom rule.
+  // Dividers sit between sections only — no rule above the first one, which the
+  // sticky column would leave floating under the nav on scroll, and none below
+  // the last one.
   return (
-    <div className={`border-b border-[#e3e3e3] last:border-b-0 ${first ? "border-t" : ""}`}>
+    <div className="border-b border-[#e3e3e3] last:border-b-0">
       <button
         onClick={onToggle}
         aria-expanded={open}
@@ -342,10 +341,7 @@ export default function Sidebar({
 
       {/* Categories — or the category you're in, listing what's beneath it */}
       {showCategories && (
-        <FilterSection
-          {...sectionProps("Categories", drilledIn ? activeCategory : "Categories")}
-          first
-        >
+        <FilterSection {...sectionProps("Categories", drilledIn ? activeCategory : "Categories")}>
           <ul>
             {(drilledIn ? subcategories : categories).map((item) => (
               <li key={item}>
@@ -361,9 +357,8 @@ export default function Sidebar({
         </FilterSection>
       )}
 
-      {/* Price – range slider. Leads the list, and takes the top rule, whenever
-          the Categories section is gone. */}
-      <FilterSection {...sectionProps("Price")} first={!showCategories}>
+      {/* Price – range slider. Leads the list whenever Categories is gone. */}
+      <FilterSection {...sectionProps("Price")}>
         <div className="pt-1">
           <div className="flex justify-between mb-3">
             <span className="text-[14px] font-medium text-[#1a1a1a]">
