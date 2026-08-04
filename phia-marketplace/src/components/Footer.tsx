@@ -64,7 +64,7 @@ export default function Footer() {
 
         <div className="hidden md:flex items-center gap-2">
           {/* Add to Chrome */}
-          <button className="flex items-center gap-3 h-11 px-4 rounded-full bg-[#15009c] hover:opacity-90 transition-opacity">
+          <button className="flex items-center gap-3 h-11 px-4 rounded-full bg-[#15009c] hover:opacity-90 transition-opacity cursor-pointer">
             <img
               src="/icon-chrome.svg"
               alt=""
@@ -90,7 +90,7 @@ export default function Footer() {
           </button>
 
           {/* iOS App */}
-          <button className="flex items-center gap-2 h-11 px-[18px] rounded-full border border-[#e3e3e3] text-black hover:border-[#1a1a1a] transition-colors">
+          <button className="flex items-center gap-2 h-11 px-[18px] rounded-full border border-[#e3e3e3] text-black hover:border-[#1a1a1a] transition-colors cursor-pointer">
             <img
               src="/icon-apple.svg"
               alt=""

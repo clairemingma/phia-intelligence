@@ -151,7 +151,7 @@ function FilterSection({
       <button
         onClick={onToggle}
         aria-expanded={open}
-        className="flex items-center justify-between w-full h-[41px] text-left"
+        className="flex items-center justify-between w-full h-[41px] text-left cursor-pointer"
       >
         <span className="text-[14px] font-medium text-[#1a1a1a]">{label}</span>
         <CaretIcon open={open} />
@@ -435,7 +435,7 @@ export default function Sidebar({
           ))}
           <button
             onClick={clearAll}
-            className="h-[34px] px-1 text-[12px] text-[#666] underline underline-offset-[3px] hover:text-[#1a1a1a] transition-colors"
+            className="h-[34px] px-1 text-[12px] text-[#666] underline underline-offset-[3px] hover:text-[#1a1a1a] transition-colors cursor-pointer"
           >
             Clear All
           </button>

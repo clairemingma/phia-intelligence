@@ -163,10 +163,35 @@ body {
   background: transparent;
   outline: none;
   pointer-events: none;
-  /* iOS paints a grey block over whatever a finger lands on, which on a rail
-     this thin reads as a shadow behind the thumb. The :active thumb is the
-     feedback here. */
+  /* iOS gives form controls a border and an inset shadow of its own, and paints
+     a grey block over whatever a finger lands on. Resetting the input's
+     appearance doesn't clear any of it, so on a control this short they show as
+     a grey slab behind the rail. */
+  border: none;
+  box-shadow: none;
   -webkit-tap-highlight-color: transparent;
+}
+/* The native track keeps its fill and shadow even with the input's appearance
+   reset, so it is cleared in its own right — the rail and the selected range are
+   drawn by the elements underneath. */
+.price-range::-webkit-slider-runnable-track {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 16px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+.price-range::-moz-range-track {
+  height: 16px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+/* Firefox fills the track up to the thumb; that fill is the selected range's
+   job here. */
+.price-range::-moz-range-progress {
+  background: transparent;
 }
 .price-range::-webkit-slider-thumb {
   -webkit-appearance: none;

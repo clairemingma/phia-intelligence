@@ -59,7 +59,7 @@ export default function Navbar() {
             </button>
 
             {/* iOS App */}
-            <button className="hidden md:flex items-center justify-center gap-2 h-11 px-[18px] py-[14px] rounded-full">
+            <button className="hidden md:flex items-center justify-center gap-2 h-11 px-[18px] py-[14px] rounded-full cursor-pointer">
               <img
                 src="/icon-apple.svg"
                 alt=""
@@ -71,7 +71,7 @@ export default function Navbar() {
             </button>
 
             {/* Add to Chrome */}
-            <button className="hidden md:flex items-center gap-2 h-11 px-[18px] rounded-full bg-[#002d9f]">
+            <button className="hidden md:flex items-center gap-2 h-11 px-[18px] rounded-full bg-[#002d9f] cursor-pointer">
               <div className="shrink-0 size-[15.258px] rounded-full bg-white/70 flex items-center justify-center">
                 <img
                   src="/icon-chrome.svg"

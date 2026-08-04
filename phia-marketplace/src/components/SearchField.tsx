@@ -38,7 +38,7 @@ export default function SearchField({
       {value && (
         <button
           onClick={() => onChange("")}
-          className="absolute right-3 text-[13px] text-[#999] hover:text-[#1a1a1a] transition-colors"
+          className="absolute right-3 text-[13px] text-[#999] hover:text-[#1a1a1a] transition-colors cursor-pointer"
         >
           Clear
         </button>
