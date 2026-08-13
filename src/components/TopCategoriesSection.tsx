@@ -218,6 +218,7 @@ export default function TopCategoriesSection() {
           {PRODUCTS.map((p, i) => (
             <div
               key={i}
+              className={i === 0 ? "col-span-2 sm:col-span-1" : ""}
               style={{
                 opacity: cardsVisible ? 1 : 0,
                 transform: cardsVisible ? "translateY(0)" : "translateY(16px)",

@@ -97,7 +97,7 @@ function GenderCard() {
         )}
       </div>
 
-      <div className="flex flex-col gap-[8px] w-full mt-auto mb-[84px]">
+      <div className="flex flex-col gap-[8px] w-full mt-auto lg:mb-[84px]">
         {genderData.map(({ label, pct, color }, i) => (
           <div
             key={label}
