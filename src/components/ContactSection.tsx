@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import FloatingInput from "@/components/FloatingInput";
 
 const FIELDS = [
   { id: "firstName", label: "First name*", type: "text" },
@@ -10,68 +11,6 @@ const FIELDS = [
 ] as const;
 
 type FieldId = typeof FIELDS[number]["id"];
-
-function FloatingInput({
-  id,
-  label,
-  type,
-  value,
-  onChange,
-}: {
-  id: string;
-  label: string;
-  type: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  const [focused, setFocused] = useState(false);
-  const floating = focused || value.length > 0;
-
-  return (
-    <div className="relative h-[60px] w-full shrink-0">
-      <input
-        id={id}
-        type={type}
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        className="absolute inset-0 w-full h-[60px] bg-white rounded-[6px] outline-none px-[13px] pt-[24px] pb-[8px] text-[16px] leading-[28px] tracking-[0.16px] text-[#0c0a08] transition-colors"
-        style={{
-          fontFamily: "var(--font-pp-neue-montreal), system-ui, sans-serif",
-          fontWeight: 400,
-          border: `1px solid ${focused ? "#000" : "#d2cecb"}`,
-        }}
-        placeholder=""
-      />
-      <label
-        htmlFor={id}
-        className="absolute left-[14px] pointer-events-none transition-all duration-150"
-        style={{
-          fontFamily: "var(--font-pp-neue-montreal), system-ui, sans-serif",
-          fontWeight: 400,
-          ...(floating
-            ? {
-                top: "7px",
-                fontSize: "12px",
-                lineHeight: "18px",
-                letterSpacing: "0.24px",
-                color: "rgba(12,10,8,0.6)",
-              }
-            : {
-                top: "16px",
-                fontSize: "16px",
-                lineHeight: "28px",
-                letterSpacing: "0.16px",
-                color: "rgba(12,10,8,0.6)",
-              }),
-        }}
-      >
-        {label}
-      </label>
-    </div>
-  );
-}
 
 export default function ContactSection() {
   const [values, setValues] = useState<Record<FieldId, string>>({
