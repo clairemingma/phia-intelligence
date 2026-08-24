@@ -1,33 +1,24 @@
 "use client";
 import { useState, useEffect } from "react";
+import { CATEGORIES, type Product } from "@/lib/frameCatalog";
 
 const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
 
-const CATEGORIES = [
-  { name: "Strappy Sandals",   shade: "#002D9F", subs: ["Platform Sandals", "Ankle Strap", "Toe Thong", "Gladiator"] },
-  { name: "Tote Bags",         shade: "#002D9F", subs: ["Canvas Totes", "Leather Totes", "Mini Totes", "Oversized"] },
-  { name: "Fashion Sneakers",  shade: "#002D9F", subs: ["Low Top", "High Top", "Platform", "Slip On"] },
-  { name: "Cashmere Sweaters", shade: "#002D9F", subs: ["Crewneck", "V-Neck", "Turtleneck", "Cardigan"] },
-  { name: "Linen Dresses",     shade: "#002D9F", subs: ["Maxi Dresses", "Midi Dresses", "Mini Dresses", "Wrap Dresses"] },
-];
 
-const PRODUCTS = [
-  { rank: 1, views: "480 views", name: "Multipocket Tote Bag", price: "$1,000" },
-  { rank: 2, views: "480 views", name: "Multipocket Tote Bag", price: "$1,000" },
-  { rank: 3, views: "480 views", name: "Multipocket Tote Bag", price: "$1,000" },
-];
-
-function ProductCard({ rank, views, name, price }: typeof PRODUCTS[number]) {
+function ProductCard({ rank, metric, name, price, image }: Product & { rank: number }) {
   return (
     <div className="flex flex-col items-start w-full lg:shrink-0 lg:w-[288px] lg:h-[438px] lg:justify-center">
       <div className="flex flex-col gap-[12px] items-start w-full">
-        <div className="aspect-[400/500] border border-[rgba(227,227,227,0.4)] rounded-[6px] overflow-hidden shrink-0 w-full bg-[#e5eaf5]" />
+        <div className="aspect-[400/500] border border-[rgba(227,227,227,0.4)] rounded-[6px] overflow-hidden shrink-0 w-full bg-[#e5eaf5]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={image} alt="" aria-hidden className="size-full object-cover" />
+        </div>
         <div className="flex flex-col gap-[6px] items-start overflow-hidden w-full">
           <div className="flex flex-col gap-[8px] items-start w-full">
             <div className="flex gap-[4px] items-center w-full">
               <p className="leading-none text-[#002d9f] text-[14px] overflow-hidden text-ellipsis whitespace-nowrap" style={{ fontFamily: PP, fontWeight: 500 }}>#{rank}</p>
               <p className="leading-none text-[#002d9f] text-[14px]" style={{ fontFamily: PP, fontWeight: 500 }}>·</p>
-              <p className="leading-none text-[#002d9f] text-[14px] overflow-hidden text-ellipsis whitespace-nowrap" style={{ fontFamily: PP, fontWeight: 500 }}>{views}</p>
+              <p className="leading-none text-[#002d9f] text-[14px] overflow-hidden text-ellipsis whitespace-nowrap" style={{ fontFamily: PP, fontWeight: 500 }}>{metric}</p>
             </div>
             <div className="flex flex-col gap-[4px] items-start text-[14px] w-full">
               <p className="leading-none text-[#1a1a1a] truncate w-full whitespace-nowrap" style={{ fontFamily: PP, fontWeight: 500 }}>{name}</p>
@@ -41,10 +32,10 @@ function ProductCard({ rank, views, name, price }: typeof PRODUCTS[number]) {
 }
 
 export default function TopCategoriesSection() {
-  const [active, setActive]                   = useState("Strappy Sandals");
-  const [displayedActive, setDisplayedActive] = useState("Strappy Sandals");
+  // Seeded from the data, so renaming a category cannot orphan the default.
+  const [active, setActive]                   = useState(CATEGORIES[0].name);
+  const [displayedActive, setDisplayedActive] = useState(CATEGORIES[0].name);
   const [activeSub, setActiveSub]             = useState<string | null>(null);
-  const [cardsVisible, setCardsVisible]       = useState(true);
   const [subsVisible, setSubsVisible]         = useState(true);
 
   function handleCategory(name: string) {
@@ -52,12 +43,6 @@ export default function TopCategoriesSection() {
     setActive(name);
     setActiveSub(null);
   }
-
-  useEffect(() => {
-    setCardsVisible(false);
-    const t = setTimeout(() => setCardsVisible(true), 150);
-    return () => clearTimeout(t);
-  }, [active, activeSub]);
 
   useEffect(() => {
     setSubsVisible(false);
@@ -68,6 +53,9 @@ export default function TopCategoriesSection() {
   }, [active]);
 
   const activeCat   = CATEGORIES.find(c => c.name === active)!;
+  // A chosen subcategory narrows the three cards; otherwise the category's own top three.
+  const shownProducts =
+    activeCat.subs.find((s) => s.name === activeSub)?.products ?? activeCat.products;
   const displayedCat = CATEGORIES.find(c => c.name === displayedActive)!;
 
   const SUB_START        = 220;
@@ -116,11 +104,11 @@ export default function TopCategoriesSection() {
           </div>
           <div className="flex flex-nowrap gap-[8px] items-center overflow-x-auto sm:flex-wrap sm:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {displayedCat.subs.map((sub, subIdx) => {
-              const isSubActive = activeSub === sub;
+              const isSubActive = activeSub === sub.name;
               return (
                 <button
-                  key={sub}
-                  onClick={() => setActiveSub(isSubActive ? null : sub)}
+                  key={sub.name}
+                  onClick={() => setActiveSub(isSubActive ? null : sub.name)}
                   className={`cursor-pointer outline-none flex h-[36px] items-center justify-center px-[15px] rounded-[999px] shrink-0 border${!isSubActive ? " hover:bg-[rgba(0,0,0,0.04)]" : ""}`}
                   style={{
                     ...(isSubActive ? { background: "#e5eaf5", borderColor: "#e5eaf5" } : { borderColor: "#e3e3e3" }),
@@ -134,7 +122,7 @@ export default function TopCategoriesSection() {
                   }}
                 >
                   <span className="text-[12px] whitespace-nowrap leading-none" style={{ fontFamily: PP, fontWeight: 500, color: isSubActive ? displayedCat.shade : "#666" }}>
-                    {sub}
+                    {sub.name}
                   </span>
                 </button>
               );
@@ -174,11 +162,11 @@ export default function TopCategoriesSection() {
                   <div className="overflow-hidden">
                     <div className="flex flex-wrap gap-[8px] items-start pt-[8px]">
                       {cat.subs.map((sub, subIdx) => {
-                        const isSubActive = activeSub === sub;
+                        const isSubActive = activeSub === sub.name;
                         return (
                           <button
-                            key={sub}
-                            onClick={() => setActiveSub(isSubActive ? null : sub)}
+                            key={sub.name}
+                            onClick={() => setActiveSub(isSubActive ? null : sub.name)}
                             className={`cursor-pointer outline-none active:opacity-100 flex h-[36px] items-center justify-center px-[15px] rounded-[999px] shrink-0 border${!isSubActive ? " hover:bg-[rgba(0,0,0,0.04)]" : ""}`}
                             style={{
                               ...(isSubActive
@@ -197,7 +185,7 @@ export default function TopCategoriesSection() {
                               className="text-[12px] whitespace-nowrap leading-none"
                               style={{ fontFamily: PP, fontWeight: 500, color: isSubActive ? activeCat.shade : "#666", transition: "color 0.25s ease" }}
                             >
-                              {sub}
+                              {sub.name}
                             </span>
                           </button>
                         );
@@ -212,25 +200,17 @@ export default function TopCategoriesSection() {
         </div>
       </div>
 
-      {/* Product cards — staggered float-in */}
+      {/* Product cards */}
       <div className="w-full lg:flex-1 lg:min-w-0">
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex gap-[16px] items-start">
-          {PRODUCTS.map((p, i) => (
+          {shownProducts.map((p, i) => (
             <div
               key={i}
               // At lg the row is a flex track, where items keep their content
               // width unless told otherwise — hence flex-1 and min-w-0.
               className={`lg:flex-1 lg:min-w-0 ${i === 0 ? "col-span-2 sm:col-span-1" : ""}`}
-              style={{
-                opacity: cardsVisible ? 1 : 0,
-                transform: cardsVisible ? "translateY(0)" : "translateY(16px)",
-                transition: cardsVisible
-                  ? "opacity 0.55s cubic-bezier(0.16,1,0.3,1), transform 0.55s cubic-bezier(0.16,1,0.3,1)"
-                  : "opacity 0.12s ease, transform 0.12s ease",
-                transitionDelay: cardsVisible ? `${i * 55}ms` : "0ms",
-              }}
             >
-              <ProductCard {...p} />
+              <ProductCard rank={i + 1} {...p} />
             </div>
           ))}
         </div>

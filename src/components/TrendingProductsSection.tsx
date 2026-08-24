@@ -2,19 +2,12 @@
 
 import { useState, useRef, useEffect } from "react";
 import TopCategoriesSection from "@/components/TopCategoriesSection";
+import { SORT_FILTERS, TRENDING, type Product, type SortFilter } from "@/lib/frameCatalog";
 
 const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
 const GT = "var(--font-gt-super-display), 'Playfair Display', Georgia, serif";
 
-const SORT_FILTERS = ["Impressions", "Top Selling"] as const;
-type SortFilter = typeof SORT_FILTERS[number];
 
-const PRODUCTS = Array.from({ length: 10 }, (_, i) => ({
-  rank: i + 1,
-  name: "Multipocket Tote Bag",
-  price: "$1,000",
-  views: "480 views",
-}));
 
 function ChevronDown() {
   return (
@@ -26,13 +19,16 @@ function ChevronDown() {
   );
 }
 
-function ProductCard({ name, price, views, rank }: typeof PRODUCTS[number]) {
+function ProductCard({ name, price, metric, rank, image }: Product & { rank: number }) {
   return (
     <div className="flex flex-col items-start">
       <div className="flex flex-col gap-[12px] items-start w-full">
 
         {/* 4:5 image placeholder */}
-        <div className="aspect-[400/500] border border-[rgba(227,227,227,0.4)] rounded-[6px] overflow-hidden shrink-0 w-full bg-[#e5eaf5]" />
+        <div className="aspect-[400/500] border border-[rgba(227,227,227,0.4)] rounded-[6px] overflow-hidden shrink-0 w-full bg-[#e5eaf5]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={image} alt="" aria-hidden className="size-full object-cover" />
+        </div>
 
         {/* Info */}
         <div className="flex flex-col gap-[8px] items-start w-full">
@@ -40,7 +36,7 @@ function ProductCard({ name, price, views, rank }: typeof PRODUCTS[number]) {
             className="text-[14px] leading-none truncate whitespace-nowrap"
             style={{ fontFamily: PP, fontWeight: 500, color: "#002d9f" }}
           >
-            #{rank} · {views}
+            #{rank} · {metric}
           </p>
           <div className="flex flex-col gap-[4px] items-start text-[14px] w-full">
             <p
@@ -65,14 +61,12 @@ function ProductCard({ name, price, views, rank }: typeof PRODUCTS[number]) {
 
 export default function TrendingProductsSection() {
   const [activeSort, setActiveSort] = useState<SortFilter>("Impressions");
-  const [visible, setVisible] = useState(true);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   function handleSort(f: SortFilter) {
     if (f === activeSort) return;
-    setVisible(false);
-    setTimeout(() => { setActiveSort(f); setVisible(true); }, 150);
+    setActiveSort(f);
   }
 
   useEffect(() => {
@@ -98,8 +92,8 @@ export default function TrendingProductsSection() {
             Trending Products
           </h2>
 
-          {/* Dropdown — xs and sm only */}
-          <div className="relative md:hidden" ref={dropdownRef}>
+          {/* Sort dropdown */}
+          <div className="relative shrink-0" ref={dropdownRef}>
             <button
               onClick={() => setDropdownOpen(o => !o)}
               className="cursor-pointer flex gap-[8px] h-[44px] items-center justify-center px-[18px] rounded-[6px] border border-[#e3e3e3] bg-white outline-none hover:bg-[rgba(0,0,0,0.04)] transition-colors"
@@ -134,48 +128,13 @@ export default function TrendingProductsSection() {
             )}
           </div>
 
-          {/* Button tabs — md and above */}
-          <div className="hidden md:flex gap-[8px] items-start shrink-0">
-            {SORT_FILTERS.map((f) => {
-              const isActive = activeSort === f;
-              return (
-                <button
-                  key={f}
-                  onClick={() => handleSort(f)}
-                  className={`cursor-pointer flex h-[44px] items-center justify-center px-[18px] rounded-[6px] shrink-0 outline-none transition-colors bg-white${!isActive ? " hover:bg-[rgba(0,0,0,0.04)]" : ""}`}
-                  style={{
-                    border: isActive ? "1px solid rgba(0,0,0,0.08)" : "1px solid transparent",
-                  }}
-                >
-                  <span
-                    className="text-[12px] leading-none whitespace-nowrap"
-                    style={{ fontFamily: PP, fontWeight: 500, color: isActive ? "#1a1a1a" : "#666" }}
-                  >
-                    {f}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
         </div>
       </div>
 
       {/* Products grid — 5 per row, wraps with 48px row gap */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-[16px] gap-y-[48px] w-full">
-        {PRODUCTS.map((p, i) => (
-          <div
-            key={p.rank}
-            style={{
-              opacity: visible ? 1 : 0,
-              transform: visible ? "translateY(0)" : "translateY(16px)",
-              transition: visible
-                ? "opacity 0.55s cubic-bezier(0.16,1,0.3,1), transform 0.55s cubic-bezier(0.16,1,0.3,1)"
-                : "opacity 0.12s ease, transform 0.12s ease",
-              transitionDelay: visible ? `${i * 35}ms` : "0ms",
-            }}
-          >
-            <ProductCard {...p} />
-          </div>
+        {TRENDING[activeSort].map((p, i) => (
+          <ProductCard key={p.name} rank={i + 1} {...p} />
         ))}
       </div>
 
