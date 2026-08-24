@@ -3,7 +3,7 @@ import NavBar from "@/components/NavBar";
 import SubmissionSuccess from "@/components/SubmissionSuccess";
 
 export const metadata: Metadata = {
-  title: "Request received — Phia Intelligence",
+  title: "Request received",
   description: "Your placement request is with the Phia team",
 };
 

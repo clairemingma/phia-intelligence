@@ -65,7 +65,7 @@ function Ellipsis() {
 }
 
 /**
- * Centred page navigation for the partner page's paged sections. Page numbers
+ * Centered page navigation for the partner page's paged sections. Page numbers
  * are zero-padded to two digits, matching the design.
  */
 export default function Pagination({
@@ -84,7 +84,7 @@ export default function Pagination({
 
   return (
     <nav aria-label={label} className="flex w-full flex-col items-center">
-      {/* The row is capped at the design's 800px and centred in the section */}
+      {/* The row is capped at the design's 800px and centered in the section */}
       <div className="flex w-full max-w-[800px] items-center justify-between gap-[16px] py-[12px]">
         <StepButton label="Previous" disabled={page === 1} onClick={() => onChange(page - 1)} />
 

@@ -10,8 +10,8 @@ const GT = "var(--font-gt-super-display), 'Playfair Display', Georgia, serif";
 
 /**
  * The collage, at the sizes the design lays them out. They butt up against one
- * another with no gap and are centred on their midlines, so the tall frame in
- * the middle overhangs its neighbours top and bottom.
+ * another with no gap and are centered on their midlines, so the tall frame in
+ * the middle overhangs its neighbors top and bottom.
  */
 const COLLAGE = [
   { src: "/assets/success-collage-1.png", width: 146.683, height: 220.025 },
@@ -32,7 +32,7 @@ const LINK_DELAY = 840;
  * What a brand lands on once a promote flow has been submitted.
  *
  * The collage is a fixed 742px wide, so the section clips rather than letting a
- * narrow window scroll the whole page sideways; centring keeps the crop even.
+ * narrow window scroll the whole page sideways; centering keeps the crop even.
  */
 export default function SubmissionSuccess() {
   const rowRef = useRef<HTMLDivElement>(null);

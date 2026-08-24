@@ -38,7 +38,8 @@ const gtSuperDisplay = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Phia Intelligence — Rhode",
+  // Child segments set just their page name; this appends the suffix.
+  title: { default: "Phia", template: "%s | Phia" },
   description: "Brand intelligence dashboard",
 };
 

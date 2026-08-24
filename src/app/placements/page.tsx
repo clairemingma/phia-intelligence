@@ -6,8 +6,8 @@ import PromotionsSection from "@/components/PromotionsSection";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Acne Studios — Phia Intelligence",
-  description: "Editorial placements, outfits, and promotional codes for Acne Studios",
+  title: "Placements",
+  description: "Editorial placements, outfits, and promotional codes for your brand",
 };
 
 export default function PlacementsPage() {

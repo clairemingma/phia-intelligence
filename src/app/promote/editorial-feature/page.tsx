@@ -3,7 +3,7 @@ import NavBar from "@/components/NavBar";
 import EditorialFeatureFlow from "@/components/EditorialFeatureFlow";
 
 export const metadata: Metadata = {
-  title: "Editorial Feature — Phia Intelligence",
+  title: "Editorial Feature",
   description: "Feature your brand in Phia editorial content, style guides, and trend reports",
 };
 

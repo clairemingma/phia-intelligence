@@ -3,7 +3,7 @@ import NavBar from "@/components/NavBar";
 import PromoCodeFlow from "@/components/PromoCodeFlow";
 
 export const metadata: Metadata = {
-  title: "Promotional Code — Phia Intelligence",
+  title: "Promotional Code",
   description: "Exclusive or site-wide discount codes surfaced directly to Phia shoppers",
 };
 

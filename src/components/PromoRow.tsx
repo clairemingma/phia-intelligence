@@ -10,7 +10,7 @@ export type Promo = {
   title: string;
   meta: string;
   code: string;
-  /** The lead row inverts the colours and swaps the "Code" label for a badge. */
+  /** The lead row inverts the colors and swaps the "Code" label for a badge. */
   featured?: boolean;
 };
 

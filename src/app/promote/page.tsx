@@ -4,7 +4,7 @@ import PromoteIndex from "@/components/PromoteIndex";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Promote — Phia Intelligence",
+  title: "Promote",
   description: "Editorial, outfit, and social features plus promotional codes for your brand",
 };
 

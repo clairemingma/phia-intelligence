@@ -8,7 +8,7 @@ const GT = "var(--font-gt-super-display), 'Playfair Display', Georgia, serif";
  * rows of the promote index. `action` fills the right end of the title row —
  * the blue "Create" pill on a section, a caret on a promote row.
  *
- * With a `description` the row centres on the taller left column; without one
+ * With a `description` the row centers on the taller left column; without one
  * the action sits level with the title.
  */
 export default function SectionHeading({

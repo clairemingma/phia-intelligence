@@ -6,7 +6,7 @@ const SUBTITLE =
   "Style your products into complete looks shoppers can shop in a single tap.";
 
 export const metadata: Metadata = {
-  title: "Outfit Feature — Phia Intelligence",
+  title: "Outfit Feature",
   description: SUBTITLE,
 };
 

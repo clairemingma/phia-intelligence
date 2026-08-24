@@ -6,7 +6,7 @@ const SUBTITLE =
   "Surface your social posts and creator content alongside your products.";
 
 export const metadata: Metadata = {
-  title: "Social Feature — Phia Intelligence",
+  title: "Social Feature",
   description: SUBTITLE,
 };
 
