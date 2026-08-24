@@ -20,8 +20,8 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <main className="flex flex-col items-stretch w-full">
-      <NavBar />
-      <div className="h-[68px]" />
+      {/* No spacer: the hero runs under the bar, which floats over it. */}
+      <NavBar overlayHeight={600} />
       <HeroSection />
       <MetricsSection />
       <LaunchingSoonSectionB />
