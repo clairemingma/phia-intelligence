@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import NavBar from "@/components/NavBar";
-import BrandHero from "@/components/BrandHero";
 import EditorialFeaturesSection from "@/components/EditorialFeaturesSection";
 import ProductFeaturesSection from "@/components/ProductFeaturesSection";
 import PromotionsSection from "@/components/PromotionsSection";
-import PreviouslyFeaturedSection from "@/components/PreviouslyFeaturedSection";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
@@ -13,21 +11,26 @@ export const metadata: Metadata = {
 };
 
 export default function PlacementsPage() {
-  // The design is specified at 1440px only, so the page keeps that fixed width
-  // and scrolls horizontally on anything narrower.
+  // The design is drawn at 1440px, but the bands are fluid — they fill whatever
+  // desktop width they are given, with the gutter shrinking first.
   return (
-    <div className="w-full overflow-x-auto">
-      <main className="flex flex-col items-center w-[1440px]">
-        <NavBar />
-        <div className="h-[68px] w-full" />
-        <BrandHero />
-        <EditorialFeaturesSection />
-        <ProductFeaturesSection title="Outfit Features" />
-        <ProductFeaturesSection title="Social Features" bookmarked />
-        <PromotionsSection />
-        <PreviouslyFeaturedSection />
-        <Footer />
-      </main>
-    </div>
+    <main className="flex flex-col items-stretch w-full">
+      <NavBar />
+      <div className="h-[68px] w-full" />
+      <EditorialFeaturesSection stackIndex={0} />
+      <ProductFeaturesSection
+        title="Outfit Features"
+        stackIndex={1}
+        createHref="/promote/outfit-feature"
+      />
+      <ProductFeaturesSection
+        title="Social Features"
+        bookmarked
+        stackIndex={2}
+        createHref="/promote/social-feature"
+      />
+      <PromotionsSection stackIndex={3} />
+      <Footer />
+    </main>
   );
 }

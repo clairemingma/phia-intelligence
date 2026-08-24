@@ -1,5 +1,6 @@
 import SectionHeading from "@/components/SectionHeading";
 import CreateButton from "@/components/CreateButton";
+import StackedSection from "@/components/StackedSection";
 
 const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
 
@@ -79,19 +80,24 @@ const TILES: FeatureTile[] = Array.from({ length: 4 }, () => ({
 export default function ProductFeaturesSection({
   title,
   bookmarked = false,
+  stackIndex,
+  createHref,
 }: {
   title: string;
   bookmarked?: boolean;
+  stackIndex: number;
+  /** The flow this section's Create pill opens. */
+  createHref: string;
 }) {
   return (
-    <section className="bg-white flex flex-col gap-[48px] items-start px-[120px] py-[64px] w-[1440px] overflow-hidden">
-      <SectionHeading title={title} action={<CreateButton />} />
+    <StackedSection index={stackIndex}>
+      <SectionHeading title={title} action={<CreateButton href={createHref} />} />
 
       <div className="flex gap-[16px] items-start w-full">
         {TILES.map((tile, i) => (
           <ProductFeatureCard key={i} {...tile} bookmarked={bookmarked} />
         ))}
       </div>
-    </section>
+    </StackedSection>
   );
 }

@@ -57,8 +57,9 @@ export default function EditorialGrid({
 
           {rowEndIndex === i && openIndex !== null && (
             // Negative margins cancel the section's padding so the panel
-            // spans the viewport edge to edge, as the design has it.
-            <div className="col-span-full -mx-[120px]">
+            // spans the viewport edge to edge, as the design has it. They have
+            // to track PAGE_GUTTER step for step.
+            <div className="col-span-full -mx-6 lg:-mx-16 xl:-mx-[120px]">
               <ProductHighlightStrip
                 editorial={cards[openIndex]}
                 brand={brand}

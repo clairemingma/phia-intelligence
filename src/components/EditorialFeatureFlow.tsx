@@ -1,14 +1,17 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import FloatingInput from "@/components/FloatingInput";
 import EditorialPhonePreview from "@/components/EditorialPhonePreview";
+import PromoteFlowShell, {
+  FlowSubmitButton,
+  scrollFlowToTop,
+  useFlowSubmit,
+} from "@/components/PromoteFlowShell";
 
 /* eslint-disable @next/next/no-img-element */
 
 const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
-const GT = "var(--font-gt-super-display), 'Playfair Display', Georgia, serif";
 
 const DEFAULT_TITLE = "The It Girl's Holiday Gift Guide";
 const DEFAULT_DESCRIPTION =
@@ -314,11 +317,12 @@ function StepButton({
 
 export default function EditorialFeatureFlow() {
   const [step, setStep] = useState<1 | 2>(1);
+  const submit = useFlowSubmit();
 
   // Each step reads as its own page, so land at the top of it.
   function goToStep(next: 1 | 2) {
     setStep(next);
-    window.scrollTo({ top: 0 });
+    scrollFlowToTop();
   }
 
   const [placement, setPlacement] = useState<PlacementId>("exclusive");
@@ -356,185 +360,118 @@ export default function EditorialFeatureFlow() {
   );
 
   return (
-    <section className="relative w-[1440px] bg-white px-[120px] py-[64px]">
-      {/* The wrapper takes its height from the form column, so the preview
-          field below can hang off it. */}
-      <div className="relative">
+    <PromoteFlowShell
+      title="Editorial Feature"
+      subtitle="Feature your brand in Phia editorial content, style guides, and trend reports."
+      crumbHref="/promote"
+      preview={
+        <EditorialPhonePreview
+          title={title || DEFAULT_TITLE}
+          description={description || DEFAULT_DESCRIPTION}
+          cover={cover?.url}
+        />
+      }
+    >
+      {step === 1 ? (
+      <form
+        className="flex w-full flex-col gap-[24px] items-end"
+        onSubmit={(e) => {
+          e.preventDefault();
+          goToStep(2);
+        }}
+      >
+        <div className="flex w-full gap-[16px] items-start" role="radiogroup" aria-label="Placement type">
+          {PLACEMENTS.map((p) => (
+            <PlacementCard
+              key={p.id}
+              placement={p}
+              selected={placement === p.id}
+              onSelect={() => setPlacement(p.id)}
+            />
+          ))}
+        </div>
 
-        {/* Live preview — the warm-white field runs from the navbar down to the
-            bottom of the form's action button, and off the right edge of the
-            page. */}
-        {/* The page is a fixed 1440px canvas, so a plain -120px right offset
-            would stop the field at the canvas edge and leave white beyond it on
-            a wider screen. This runs it to the viewport edge instead, and falls
-            back to the canvas edge when the window is narrower than the design. */}
-        <div
-          className="absolute -top-[64px] bottom-0 left-[632px] flex items-center justify-center bg-[#f9f8f7]"
-          style={{ right: "min(-120px, calc(1320px - 100vw))" }}
-        >
-          <EditorialPhonePreview
-            title={title || DEFAULT_TITLE}
-            description={description || DEFAULT_DESCRIPTION}
-            cover={cover?.url}
+        <FloatingInput id="editorial-title" label="Title*" value={title} onChange={setTitle} />
+        <FloatingInput
+          id="editorial-description"
+          label="Description*"
+          value={description}
+          onChange={setDescription}
+        />
+        <FloatingInput
+          id="editorial-budget"
+          label="Budget*"
+          value={budget}
+          onChange={setBudget}
+          prefix="$"
+        />
+        {/* Timeframe reads as a range, so it is two boxes on one row */}
+        <div className="flex w-full gap-[16px]">
+          <div className="min-w-0 flex-1">
+            <FloatingInput
+              id="editorial-start"
+              label="Start"
+              value={startDate}
+              onChange={setStartDate}
+            />
+          </div>
+          <div className="min-w-0 flex-1">
+            <FloatingInput
+              id="editorial-end"
+              label="End"
+              value={endDate}
+              onChange={setEndDate}
+            />
+          </div>
+        </div>
+
+        <CoverUpload
+          file={cover?.file ?? null}
+          previewUrl={cover?.url ?? null}
+          onPick={pickCover}
+          onClear={() => pickCover(null)}
+        />
+
+        <StepButton label="Select Products" direction="next" onClick={() => goToStep(2)} />
+      </form>
+      ) : (
+      <div className="flex w-full flex-col gap-[24px] items-start">
+        <StepButton label="Back" direction="back" onClick={() => goToStep(1)} />
+
+        <div className="flex h-[60px] w-full items-center gap-[10px] rounded-[999px] border border-[#d2cecb] bg-white pl-[15px] pr-[24px]">
+          <img src="/assets/icon-search.svg" alt="" aria-hidden className="block size-[16px] shrink-0" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Paste URL or search"
+            aria-label="Paste URL or search"
+            className="h-full flex-1 bg-transparent text-[16px] leading-[28px] tracking-[0.16px] text-[#0c0a08] outline-none placeholder:text-[rgba(12,10,8,0.6)]"
+            style={{ fontFamily: PP, fontWeight: 400 }}
           />
         </div>
 
-        {/* Step 1 is the taller step; pinning its height here keeps the preview
-            field — and so the phone inside it — from shifting between steps. */}
-        <div className="relative flex min-h-[819px] w-[568px] flex-col gap-[64px] items-start">
-
-          {/* Header */}
-          <div className="flex w-full flex-col gap-[24px] items-start">
-            <div className="flex w-full items-center gap-[10px] py-[4px] pr-[12px]">
-              <Link
-                href="/promote/editorial-feature"
-                className="text-[12px] leading-[16px] tracking-[-0.154px] text-[#1a1a1a] transition-opacity hover:opacity-60"
-                style={{ fontFamily: PP, fontWeight: 500 }}
-              >
-                Promote
-              </Link>
-              <span
-                className="text-[14px] leading-[21px] tracking-[-0.154px] text-[#1a1a1a] opacity-50"
-                style={{ fontFamily: PP, fontWeight: 500 }}
-              >
-                /
-              </span>
-              <span
-                className="text-[12px] leading-[16px] tracking-[-0.154px] text-[#1a1a1a]"
-                style={{ fontFamily: PP, fontWeight: 500 }}
-              >
-                Editorial Feature
-              </span>
-            </div>
-
-            <div className="flex w-full flex-col gap-[12px] items-start">
-              <h1
-                className="text-[56px] leading-[1.1] tracking-[-2.24px] text-[#292929] whitespace-nowrap"
-                style={{ fontFamily: GT, fontWeight: 300 }}
-              >
-                Editorial Feature
-              </h1>
-              <p
-                className="text-[16px] leading-[20px] text-[#6b7280]"
-                style={{ fontFamily: PP, fontWeight: 400 }}
-              >
-                Feature your brand in Phia editorial content, style guides, and trend reports.
-              </p>
-            </div>
+        {/* Clipped to the search field's width; the row scrolls within it */}
+        <div className="w-full overflow-x-auto pb-[4px]">
+          <div className="flex w-max gap-[16px] items-start">
+            {CANDIDATES.map((p) => (
+              <ProductCard
+                key={p.id}
+                name={p.name}
+                price={p.price}
+                selected={picked.includes(p.id)}
+                onToggle={() =>
+                  setPicked((prev) =>
+                    prev.includes(p.id) ? prev.filter((x) => x !== p.id) : [...prev, p.id],
+                  )
+                }
+              />
+            ))}
           </div>
-
-          {step === 1 ? (
-            <form
-              className="flex w-full flex-col gap-[24px] items-end"
-              onSubmit={(e) => {
-                e.preventDefault();
-                goToStep(2);
-              }}
-            >
-              <div className="flex w-full gap-[16px] items-start" role="radiogroup" aria-label="Placement type">
-                {PLACEMENTS.map((p) => (
-                  <PlacementCard
-                    key={p.id}
-                    placement={p}
-                    selected={placement === p.id}
-                    onSelect={() => setPlacement(p.id)}
-                  />
-                ))}
-              </div>
-
-              <FloatingInput id="editorial-title" label="Title*" value={title} onChange={setTitle} />
-              <FloatingInput
-                id="editorial-description"
-                label="Description*"
-                value={description}
-                onChange={setDescription}
-              />
-              <FloatingInput
-                id="editorial-budget"
-                label="Budget*"
-                value={budget}
-                onChange={setBudget}
-                prefix="$"
-              />
-              {/* Timeframe reads as a range, so it is two boxes on one row */}
-              <div className="flex w-full gap-[16px]">
-                <div className="min-w-0 flex-1">
-                  <FloatingInput
-                    id="editorial-start"
-                    label="Start"
-                    value={startDate}
-                    onChange={setStartDate}
-                  />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <FloatingInput
-                    id="editorial-end"
-                    label="End"
-                    value={endDate}
-                    onChange={setEndDate}
-                  />
-                </div>
-              </div>
-
-              <CoverUpload
-                file={cover?.file ?? null}
-                previewUrl={cover?.url ?? null}
-                onPick={pickCover}
-                onClear={() => pickCover(null)}
-              />
-
-              <StepButton label="Select Products" direction="next" onClick={() => goToStep(2)} />
-            </form>
-          ) : (
-            <div className="flex w-full flex-col gap-[24px] items-start">
-              <StepButton label="Back" direction="back" onClick={() => goToStep(1)} />
-
-              <div className="flex h-[60px] w-full items-center gap-[10px] rounded-[999px] border border-[#d2cecb] bg-white pl-[15px] pr-[24px]">
-                <img src="/assets/icon-search.svg" alt="" aria-hidden className="block size-[16px] shrink-0" />
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Paste URL or search"
-                  aria-label="Paste URL or search"
-                  className="h-full flex-1 bg-transparent text-[16px] leading-[28px] tracking-[0.16px] text-[#0c0a08] outline-none placeholder:text-[rgba(12,10,8,0.6)]"
-                  style={{ fontFamily: PP, fontWeight: 400 }}
-                />
-              </div>
-
-              {/* Clipped to the search field's width; the row scrolls within it */}
-              <div className="w-full overflow-x-auto pb-[4px]">
-                <div className="flex w-max gap-[16px] items-start">
-                  {CANDIDATES.map((p) => (
-                    <ProductCard
-                      key={p.id}
-                      name={p.name}
-                      price={p.price}
-                      selected={picked.includes(p.id)}
-                      onToggle={() =>
-                        setPicked((prev) =>
-                          prev.includes(p.id) ? prev.filter((x) => x !== p.id) : [...prev, p.id],
-                        )
-                      }
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <button
-                type="button"
-                className="flex h-[48px] shrink-0 cursor-pointer items-center justify-center rounded-full bg-black px-[20px] transition-opacity hover:opacity-80"
-              >
-                <span
-                  className="text-[14px] leading-[11.673px] tracking-[-0.2335px] text-white whitespace-nowrap"
-                  style={{ fontFamily: PP, fontWeight: 500 }}
-                >
-                  Submit
-                </span>
-              </button>
-            </div>
-          )}
         </div>
+
+        <FlowSubmitButton type="button" onClick={submit} />
       </div>
-    </section>
+      )}
+    </PromoteFlowShell>
   );
 }

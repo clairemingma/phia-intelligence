@@ -61,7 +61,7 @@ export default function ProductHighlightStrip({
   return (
     // Padding mirrors the section it breaks out of, so the 4-column content
     // lands on the same grid as the editorials above it.
-    <section className="relative bg-[#f9f8f7] flex flex-col gap-[64px] items-center justify-center px-[120px] py-[64px] w-full overflow-hidden">
+    <section className="relative bg-[#f9f8f7] flex flex-col gap-[64px] items-center justify-center px-6 lg:px-16 xl:px-[120px] py-[64px] w-full overflow-hidden">
 
       <div className="grid grid-cols-4 gap-[16px] items-start w-full">
 

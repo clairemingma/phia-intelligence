@@ -218,7 +218,9 @@ export default function TopCategoriesSection() {
           {PRODUCTS.map((p, i) => (
             <div
               key={i}
-              className={i === 0 ? "col-span-2 sm:col-span-1" : ""}
+              // At lg the row is a flex track, where items keep their content
+              // width unless told otherwise — hence flex-1 and min-w-0.
+              className={`lg:flex-1 lg:min-w-0 ${i === 0 ? "col-span-2 sm:col-span-1" : ""}`}
               style={{
                 opacity: cardsVisible ? 1 : 0,
                 transform: cardsVisible ? "translateY(0)" : "translateY(16px)",

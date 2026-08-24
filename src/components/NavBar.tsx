@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 const navLinks = [
   { label: "Performance", href: "/" },
   { label: "Placements", href: "/placements" },
-  { label: "Promote", href: "/promote/editorial-feature" },
+  { label: "Promote", href: "/promote" },
 ];
 
 const montreal = { fontFamily: "var(--font-pp-neue-montreal), system-ui, sans-serif" };

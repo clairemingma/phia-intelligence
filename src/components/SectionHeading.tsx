@@ -1,28 +1,47 @@
 import type { ReactNode } from "react";
 
+const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
 const GT = "var(--font-gt-super-display), 'Playfair Display', Georgia, serif";
 
 /**
- * Rule + 36px display title, shared by every partner-page section.
- * `action` fills the right end of the title row (the blue "Create" pill).
+ * Rule + 36px display title, shared by every partner-page section and by the
+ * rows of the promote index. `action` fills the right end of the title row —
+ * the blue "Create" pill on a section, a caret on a promote row.
+ *
+ * With a `description` the row centres on the taller left column; without one
+ * the action sits level with the title.
  */
 export default function SectionHeading({
   title,
+  description,
   action,
 }: {
   title: string;
+  description?: string;
   action?: ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-[16px] items-start w-full shrink-0">
       <div className="w-full h-px bg-[#999999]" />
-      <div className="flex items-start justify-between w-full">
-        <h2
-          className="text-[36px] leading-[40px] tracking-[-0.72px] text-[#1a1a1a] whitespace-nowrap"
-          style={{ fontFamily: GT, fontWeight: 300 }}
-        >
-          {title}
-        </h2>
+      <div
+        className={`flex justify-between w-full ${description ? "items-center" : "items-start"}`}
+      >
+        <div className="flex flex-col gap-[8px] items-start min-w-0">
+          <h2
+            className="text-[36px] leading-[40px] tracking-[-0.72px] text-[#1a1a1a] whitespace-nowrap"
+            style={{ fontFamily: GT, fontWeight: 300 }}
+          >
+            {title}
+          </h2>
+          {description && (
+            <p
+              className="text-[16px] leading-[20px] text-[#6b7280]"
+              style={{ fontFamily: PP, fontWeight: 400 }}
+            >
+              {description}
+            </p>
+          )}
+        </div>
         {action}
       </div>
     </div>

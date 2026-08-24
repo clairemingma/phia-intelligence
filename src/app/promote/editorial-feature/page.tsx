@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import NavBar from "@/components/NavBar";
 import EditorialFeatureFlow from "@/components/EditorialFeatureFlow";
-import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "Editorial Feature — Phia Intelligence",
@@ -9,14 +8,16 @@ export const metadata: Metadata = {
 };
 
 export default function EditorialFeaturePage() {
-  // Matches /placements: the design is specified at 1440px only.
+  // The flow fills whatever desktop width it is given, as /placements does.
+  // Unlike the other pages, this one scrolls inside the wrapper rather than
+  // down the document: the wrapper is the sticky preview column's scroll
+  // container, so giving it a height is what lets that column stick.
   return (
-    <div className="w-full overflow-x-auto">
-      <main className="flex flex-col items-center w-[1440px]">
+    <div data-page-scroll className="h-screen w-full overflow-auto">
+      <main className="flex flex-col items-stretch w-full">
         <NavBar />
         <div className="h-[68px] w-full" />
         <EditorialFeatureFlow />
-        <Footer />
       </main>
     </div>
   );
