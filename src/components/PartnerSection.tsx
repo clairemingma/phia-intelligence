@@ -8,15 +8,10 @@ export default function PartnerSection() {
 
         {/* Left — avatar + name */}
         <div className="flex flex-[1_0_0] gap-[24px] items-start min-w-0 w-full">
-          {/* Circular avatar — 3-layer composite */}
+          {/* Circular avatar over a flat tint, which shows only while the
+              photograph is still loading. */}
           <div className="relative rounded-full shrink-0 size-[100px] overflow-hidden">
             <div aria-hidden className="absolute inset-0 pointer-events-none">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                alt=""
-                className="absolute inset-0 max-w-none object-cover size-full"
-                src="/assets/partner-avatar-bg.jpg"
-              />
               <div className="absolute bg-[#e5eaf5] inset-0" />
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
