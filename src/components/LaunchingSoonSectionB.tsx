@@ -14,20 +14,13 @@ export default function LaunchingSoonSectionB() {
     <section className="bg-[#f9f8f7] flex flex-col items-center py-[64px] px-6 lg:px-16 xl:px-[120px] w-full">
       <div className="flex flex-col-reverse lg:flex-row gap-[64px] items-start w-full max-w-[1200px]">
 
-        {/* Left — Figma mockup, exact positioning, sticky */}
-        <div className="sticky top-[96px] shrink-0 aspect-square w-full max-w-[625px] mx-auto lg:mx-0 lg:w-[568px] overflow-hidden bg-[#0e0e0e] relative">
-
-          {/* Film grain noise overlay */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)'/%3E%3C/svg%3E")`,
-              backgroundSize: "256px 256px",
-              opacity: 0.09,
-              mixBlendMode: "screen",
-              zIndex: 1,
-            }}
-          />
+        {/* Left — Figma mockup, exact positioning, sticky. The backdrop is the
+            same gradient the browser tiles are drawn on, so the device shots
+            cut out over it sit on one continuous surface. */}
+        <div
+          className="sticky top-[96px] shrink-0 aspect-square w-full max-w-[625px] mx-auto lg:mx-0 lg:w-[568px] overflow-hidden relative"
+          style={{ background: "linear-gradient(to bottom, #565656 0%, #3c3c3c 100%)" }}
+        >
 
           {/* One layer per surface, cross-fading on the active index. Each
               carries its own placement — see the section data. */}
