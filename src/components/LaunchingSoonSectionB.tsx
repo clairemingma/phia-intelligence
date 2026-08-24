@@ -29,50 +29,23 @@ export default function LaunchingSoonSectionB() {
             }}
           />
 
-          {/* Phia.com — coords as % of 568px base */}
-          <div
-            className="absolute inset-0 transition-opacity duration-500 ease-in-out"
-            style={{ opacity: activeIdx === 0 ? 1 : 0, zIndex: 2 }}
-          >
-            <img
-              src="/assets/phia-browser-v2.png"
-              alt="Phia.com"
-              className="absolute"
-              style={{
-                width: "70.42%",
-                height: "96.83%",
-                left: "50%",
-                top: "11.27%",
-                transform: "translateX(-50%)",
-              }}
-            />
-          </div>
-
-          {/* Digital Closet — coords as % of 568px base */}
-          <div
-            className="absolute inset-0 transition-opacity duration-500 ease-in-out"
-            style={{ opacity: activeIdx === 1 ? 1 : 0, zIndex: 2 }}
-          >
-            <img
-              src="/assets/phone-closet-v2.png"
-              alt="Digital Closet"
-              className="absolute pointer-events-none"
-              style={{ left: "20.42%", top: "8.1%", width: "59.15%", height: "120.95%" }}
-            />
-          </div>
-
-          {/* Creator Network — coords as % of 568px base */}
-          <div
-            className="absolute inset-0 transition-opacity duration-500 ease-in-out"
-            style={{ opacity: activeIdx === 2 ? 1 : 0, zIndex: 2 }}
-          >
-            <img
-              src="/assets/phone-creator.png"
-              alt="Creator Network"
-              className="absolute pointer-events-none"
-              style={{ left: "50%", top: "8.1%", width: "59.15%", height: "120.95%", transform: "translateX(-50%)" }}
-            />
-          </div>
+          {/* One layer per surface, cross-fading on the active index. Each
+              carries its own placement — see the section data. */}
+          {SECTIONS.map((section, i) => (
+            <div
+              key={section.label}
+              className="absolute inset-0 transition-opacity duration-500 ease-in-out"
+              style={{ opacity: activeIdx === i ? 1 : 0, zIndex: 2 }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={section.image}
+                alt={section.label}
+                className="absolute pointer-events-none"
+                style={section.imageStyle}
+              />
+            </div>
+          ))}
 
         </div>
 
@@ -90,7 +63,7 @@ export default function LaunchingSoonSectionB() {
               letterSpacing: "-1.76px",
             }}
           >
-            <p className="opacity-30">Launching Soon</p>
+            <p className="opacity-30">{SECTIONS[activeIdx].status}</p>
             <p>{SECTIONS[activeIdx].label}</p>
           </div>
 

@@ -25,7 +25,7 @@ export default function LaunchingSoonSection() {
             letterSpacing: "-1.76px",
           }}
         >
-          <p className="opacity-30">Launching Soon</p>
+          <p className="opacity-30">{SECTIONS[activeIdx].status}</p>
           <p className="transition-all duration-300">{SECTIONS[activeIdx].label}</p>
         </div>
 
