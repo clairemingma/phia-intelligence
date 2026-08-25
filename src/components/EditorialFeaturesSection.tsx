@@ -6,26 +6,13 @@ import CreateButton from "@/components/CreateButton";
 import EditorialGrid from "@/components/EditorialGrid";
 import Pagination from "@/components/Pagination";
 import StackedSection from "@/components/StackedSection";
-import type { EditorialCardData } from "@/components/EditorialCard";
+import { EDITORIALS, EDITORIALS_PER_PAGE as PER_PAGE } from "@/lib/editorialData";
 
-const LOREM =
-  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et massa mi. Aliquam in hendrerit urna.";
-
-/** Two rows of four, as the design pages them. */
-const PER_PAGE = 8;
-const TOTAL_PAGES = 10;
-
-/** The lead slot of the first page is the exclusive placement. */
-function cardsForPage(page: number): EditorialCardData[] {
-  return Array.from({ length: PER_PAGE }, (_, i) => ({
-    eyebrow: page === 1 && i === 0 ? "Exclusive" : "Featured",
-    title: "Multipocket Tote Bag",
-    description: LOREM,
-  }));
-}
+const TOTAL_PAGES = Math.ceil(EDITORIALS.length / PER_PAGE);
 
 export default function EditorialFeaturesSection({ stackIndex }: { stackIndex: number }) {
   const [page, setPage] = useState(1);
+  const start = (page - 1) * PER_PAGE;
 
   return (
     <StackedSection index={stackIndex}>
@@ -38,9 +25,9 @@ export default function EditorialFeaturesSection({ stackIndex }: { stackIndex: n
           belongs to a card that is no longer on screen. */}
       <EditorialGrid
         key={page}
-        cards={cardsForPage(page)}
+        cards={EDITORIALS.slice(start, start + PER_PAGE)}
         columnsClass="grid grid-cols-4 gap-x-[16px] gap-y-[48px] w-full"
-        brand="Acne Studios"
+        brand="FRAME"
       />
 
       <Pagination

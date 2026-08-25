@@ -1,18 +1,28 @@
 const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
 
+/* eslint-disable @next/next/no-img-element */
+
 export type EditorialCardData = {
   eyebrow: string;
   title: string;
   description: string;
+  image: string;
 };
 
-export default function EditorialCard({ eyebrow, title, description }: EditorialCardData) {
+export default function EditorialCard({ eyebrow, title, description, image }: EditorialCardData) {
   return (
     <div className="flex flex-col gap-[12px] items-start w-full">
 
-      {/* 4:3 image well */}
-      <div className="aspect-[388/291] flex flex-col items-start w-full shrink-0">
-        <div className="bg-[#e5eaf5] flex-1 min-h-px rounded-[6px] w-full" />
+      {/* 4:3 image well. The cover is positioned against this box rather than
+          sized in flow — a percentage height inside a flex child resolves to
+          auto, which lets each cover's own proportions set the well's height. */}
+      <div className="relative aspect-[388/291] w-full shrink-0 overflow-hidden rounded-[6px] bg-[#e5eaf5]">
+        <img
+          src={image}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 size-full object-cover"
+        />
       </div>
 
       {/* Info — capped at the designed 283px text column */}
