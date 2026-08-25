@@ -79,7 +79,7 @@ export default function TrendingProductsSection() {
   }, [dropdownOpen]);
 
   return (
-    <div className="flex flex-col gap-[48px] items-start justify-center px-[120px] py-[64px] w-full">
+    <div className="flex flex-col gap-[48px] items-start justify-center px-6 lg:px-[120px] py-[64px] w-full">
 
       {/* Section title + sort controls */}
       <div className="flex flex-col gap-[16px] items-start w-full shrink-0">
@@ -132,7 +132,7 @@ export default function TrendingProductsSection() {
       </div>
 
       {/* Products grid — 5 per row, wraps with 48px row gap */}
-      <div className="grid grid-cols-5 gap-x-[16px] gap-y-[48px] w-full">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-x-[16px] gap-y-[48px] w-full">
         {TRENDING[activeSort].map((p, i) => (
           <ProductCard key={p.name} rank={i + 1} {...p} />
         ))}

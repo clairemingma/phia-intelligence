@@ -13,8 +13,7 @@ const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
 export default function Footer() {
   return (
     <footer
-      className="relative w-full overflow-hidden bg-white"
-      style={{ paddingTop: 300, paddingBottom: 80, paddingLeft: 100, paddingRight: 100 }}
+      className="relative w-full overflow-hidden bg-white pt-[160px] lg:pt-[300px] pb-[64px] lg:pb-[80px] px-6 lg:px-[100px]"
     >
       {/* Background phia wordmark */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -48,10 +47,10 @@ export default function Footer() {
       />
 
       {/* Content row */}
-      <div className="relative" style={{ height: 208 }}>
+      <div className="relative flex flex-col-reverse gap-[40px] lg:block lg:h-[208px]">
 
         {/* Left column: logo → social icons → copyright */}
-        <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between items-start">
+        <div className="static lg:absolute lg:left-0 lg:top-0 lg:bottom-0 flex flex-col gap-[24px] lg:gap-0 lg:justify-between items-start">
           {/* Logo + socials group */}
           <div className="flex flex-col gap-[16px] items-start">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -81,8 +80,8 @@ export default function Footer() {
 
         {/* Nav columns */}
         <div
-          className="absolute top-0 flex items-start"
-          style={{ left: 724.13, gap: 75 }}
+          className="static lg:absolute lg:top-0 flex flex-wrap lg:flex-nowrap items-start gap-x-[40px] gap-y-[32px] lg:gap-x-[75px]"
+          style={{ left: 724.13 }}
         >
           {navColumns.map(({ heading, items }) => (
             <div key={heading} className="flex flex-col gap-[12px] items-start">

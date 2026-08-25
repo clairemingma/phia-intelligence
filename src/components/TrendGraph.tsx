@@ -204,20 +204,26 @@ export default function TrendGraph({ metricLabel, timeFilter, customRange }: Pro
         </AreaChart>
       </div>
 
-      {/* X-axis: 12 evenly-spaced labels */}
-      <div
-        className="flex"
-        style={{ justifyContent: "space-between", marginLeft: Y_AXIS_WIDTH, marginRight: CHART_RIGHT_MARGIN, marginTop: 16, height: 16 }}
-      >
-        {Array.from({ length: 12 }, (_, idx) => {
-          const labelIdx = Math.round(idx * (labels.length - 1) / 11);
-          return (
-            <span key={idx} style={{ fontFamily: PP, fontWeight: 500, fontSize: 12, lineHeight: "16px", color: AXIS_COLOR, whiteSpace: "nowrap" }}>
-              {labels[labelIdx]}
-            </span>
-          );
-        })}
-      </div>
+      {/* X-axis labels: twelve fit a desktop chart, six fit a phone. */}
+      {([
+        { count: 6,  cls: "flex lg:hidden" },
+        { count: 12, cls: "hidden lg:flex" },
+      ] as const).map(({ count, cls }) => (
+        <div
+          key={count}
+          className={cls}
+          style={{ justifyContent: "space-between", marginLeft: Y_AXIS_WIDTH, marginRight: CHART_RIGHT_MARGIN, marginTop: 16, height: 16 }}
+        >
+          {Array.from({ length: count }, (_, idx) => {
+            const labelIdx = Math.round(idx * (labels.length - 1) / (count - 1));
+            return (
+              <span key={idx} style={{ fontFamily: PP, fontWeight: 500, fontSize: 12, lineHeight: "16px", color: AXIS_COLOR, whiteSpace: "nowrap" }}>
+                {labels[labelIdx]}
+              </span>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }

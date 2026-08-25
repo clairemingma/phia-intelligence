@@ -53,14 +53,14 @@ export default function NavBar({
       }`}
     >
       <div
-        className={`flex h-[69px] items-center justify-center border-b pl-[24px] pr-[20px] py-[12px] transition-colors duration-300 ${
+        className={`flex h-[69px] items-center justify-center border-b pl-4 lg:pl-[24px] pr-4 lg:pr-[20px] py-[12px] transition-colors duration-300 ${
           overlaid ? "bg-transparent border-transparent" : "bg-white border-[#e3e3e3]"
         }`}
       >
         <div className="flex flex-1 items-center min-w-0">
 
           {/* Logo */}
-          <div className="flex flex-1 min-w-0">
+          <div className="flex shrink-0 lg:flex-1 min-w-0">
             <Link href="/" className="shrink-0">
               {/* Black artwork, so it is inverted to sit on the photo */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -77,7 +77,7 @@ export default function NavBar({
           </div>
 
           {/* Nav links */}
-          <div className="flex flex-1 items-center justify-center gap-[26px] min-w-0">
+          <div className="flex flex-1 items-center justify-center gap-[16px] lg:gap-[26px] min-w-0">
             {navLinks.map(({ label, href }) => {
               const active = pathname === href;
               return (
@@ -104,7 +104,7 @@ export default function NavBar({
           </div>
 
           {/* CTA */}
-          <div className="flex flex-1 items-center justify-end min-w-0">
+          <div className="flex shrink-0 lg:flex-1 items-center justify-end min-w-0">
             <button
               className={`flex size-[32px] shrink-0 items-center justify-center p-[6px] rounded-full text-[14px] leading-[16px] tracking-[0.28px] transition-colors duration-300 ${
                 overlaid

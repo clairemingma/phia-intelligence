@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import FloatingInput from "@/components/FloatingInput";
+import SuccessOverlay from "@/components/SuccessOverlay";
 
 const FIELDS = [
   { id: "firstName", label: "First name*", type: "text" },
@@ -12,17 +13,20 @@ const FIELDS = [
 
 type FieldId = typeof FIELDS[number]["id"];
 
+const BLANK: Record<FieldId, string> = {
+  firstName: "",
+  lastName:  "",
+  email:     "",
+  company:   "",
+  message:   "",
+};
+
 export default function ContactSection() {
-  const [values, setValues] = useState<Record<FieldId, string>>({
-    firstName: "",
-    lastName:  "",
-    email:     "",
-    company:   "",
-    message:   "",
-  });
+  const [values, setValues] = useState<Record<FieldId, string>>(BLANK);
+  const [submitted, setSubmitted] = useState(false);
 
   return (
-    <div className="flex flex-col items-start px-[120px] py-[96px] w-full">
+    <div id="get-in-touch" className="flex flex-col items-start px-6 lg:px-[120px] py-[96px] w-full scroll-mt-[96px]">
       <div className="flex flex-col gap-[64px] items-start w-full">
 
         {/* Heading */}
@@ -54,7 +58,11 @@ export default function ContactSection() {
         <div className="flex flex-col items-center w-full">
           <form
             className="flex flex-col gap-[24px] items-start w-full max-w-[800px]"
-            onSubmit={e => e.preventDefault()}
+            onSubmit={e => {
+              e.preventDefault();
+              setSubmitted(true);
+              setValues(BLANK);
+            }}
           >
             {FIELDS.map(({ id, label, type }) => (
               <FloatingInput
@@ -69,7 +77,7 @@ export default function ContactSection() {
 
             <button
               type="submit"
-              className="flex h-[48px] items-center justify-center px-[20px] bg-black rounded-full shrink-0"
+              className="flex h-[48px] items-center justify-center px-[20px] bg-black rounded-full shrink-0 cursor-pointer transition-opacity hover:opacity-80"
             >
               <span
                 className="text-[14px] text-white whitespace-nowrap tracking-[-0.2335px]"
@@ -86,6 +94,8 @@ export default function ContactSection() {
         </div>
 
       </div>
+
+      {submitted && <SuccessOverlay onDone={() => setSubmitted(false)} />}
     </div>
   );
 }

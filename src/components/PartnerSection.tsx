@@ -3,8 +3,8 @@ const GT = "var(--font-gt-super-display), 'Playfair Display', Georgia, serif";
 
 export default function PartnerSection() {
   return (
-    <div className="bg-[#f9f8f7] flex flex-col items-start justify-center px-[120px] py-[64px] w-full">
-      <div className="flex flex-row items-start w-full gap-0">
+    <div className="bg-[#f9f8f7] flex flex-col items-start justify-center px-6 lg:px-[120px] py-[64px] w-full">
+      <div className="flex flex-col lg:flex-row items-start w-full gap-[32px] lg:gap-0">
 
         {/* Left — avatar + name */}
         <div className="flex flex-[1_0_0] gap-[24px] items-start min-w-0 w-full">
@@ -40,7 +40,9 @@ export default function PartnerSection() {
           >
             Regina is here for anything, partnerships, campaigns, or questions.
           </p>
-          <div className="bg-black flex h-[44px] items-center justify-center px-[18px] rounded-full shrink-0">
+          {/* Presentational: it carries the same hover and cursor as the other
+              black pills, but deliberately goes nowhere. */}
+          <div className="bg-black flex h-[44px] items-center justify-center px-[18px] rounded-full shrink-0 cursor-pointer transition-opacity hover:opacity-80">
             <span
               className="text-[12px] text-white whitespace-nowrap leading-none"
               style={{ fontFamily: PP, fontWeight: 500 }}

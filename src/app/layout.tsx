@@ -51,7 +51,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${ppNeueMontreal.variable} ${gtSuperDisplay.variable} ${inter.variable} ${robotoMono.variable} h-full antialiased`}
+      className={`${ppNeueMontreal.variable} ${gtSuperDisplay.variable} ${inter.variable} ${robotoMono.variable} h-full antialiased motion-safe:scroll-smooth`}
     >
       <body className="min-h-full flex flex-col bg-white">{children}</body>
     </html>

@@ -29,12 +29,22 @@ const HEADLINE_DELAY = 700;
 const LINK_DELAY = 840;
 
 /**
- * What a brand lands on once a promote flow has been submitted.
+ * What a brand lands on once a promote flow has been submitted, and — as the
+ * overlay variant — what the contact form flashes up on submit. The overlay
+ * drops the back link and the navbar spacing, since it is centred in the
+ * viewport and clears itself.
  *
  * The collage is a fixed 742px wide, so the section clips rather than letting a
  * narrow window scroll the whole page sideways; centering keeps the crop even.
  */
-export default function SubmissionSuccess() {
+export default function SubmissionSuccess({
+  variant = "page",
+}: {
+  variant?: "page" | "overlay";
+}) {
+  const overlay = variant === "overlay";
+  // The page owns the document heading; a transient announcement does not.
+  const Headline = overlay ? "p" : "h1";
   const rowRef = useRef<HTMLDivElement>(null);
 
   // The frames arrive in a fresh random order on every visit. The shuffle has
@@ -73,7 +83,11 @@ export default function SubmissionSuccess() {
     // 64px of air between the navbar and the top of the tallest frame. The bar
     // is 69px tall but the page spacer above this is 68px, so the padding
     // carries the extra pixel.
-    <section className="flex w-full flex-col items-center overflow-hidden px-[64px] pt-[65px] pb-[60px]">
+    <section
+      className={`flex w-full flex-col items-center overflow-hidden ${
+        overlay ? "px-6 py-0" : "px-[64px] pt-[65px] pb-[60px]"
+      }`}
+    >
       <div className="flex flex-col gap-[48px] items-center">
 
         <div ref={rowRef} className="flex items-center justify-center">
@@ -89,15 +103,16 @@ export default function SubmissionSuccess() {
           ))}
         </div>
 
-        <h1
-          className="rise-in text-[56px] leading-[1.1] tracking-[-2.24px] text-[#292929] text-center"
+        <Headline
+          className="rise-in text-[32px] lg:text-[56px] leading-[1.1] tracking-[-1.28px] lg:tracking-[-2.24px] text-[#292929] text-center"
           style={{ fontFamily: GT, fontWeight: 300, animationDelay: `${HEADLINE_DELAY}ms` }}
         >
           Thanks for your request.
           <br />
           Our team will be in touch.
-        </h1>
+        </Headline>
 
+        {!overlay && (
         <Link
           href="/promote"
           className="rise-in text-[14px] leading-[16px] tracking-[0.14px] text-[#666] underline underline-offset-2 transition-opacity hover:opacity-60"
@@ -105,6 +120,7 @@ export default function SubmissionSuccess() {
         >
           Back to Promote
         </Link>
+        )}
       </div>
     </section>
   );

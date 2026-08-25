@@ -7,7 +7,7 @@ const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
 
 function ProductCard({ rank, metric, name, price, image }: Product & { rank: number }) {
   return (
-    <div className="flex flex-col items-start shrink-0 w-[288px] h-[438px] justify-center">
+    <div className="flex flex-col items-start shrink-0 w-full lg:w-[288px] h-auto lg:h-[438px] justify-center">
       <div className="flex flex-col gap-[12px] items-start w-full">
         <div className="aspect-[400/500] border border-[rgba(227,227,227,0.4)] rounded-[6px] overflow-hidden shrink-0 w-full bg-[#e5eaf5]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -31,6 +31,51 @@ function ProductCard({ rank, metric, name, price, image }: Product & { rank: num
   );
 }
 
+const NO_SCROLLBAR = "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]";
+
+function CategoryPill({
+  name, shade, active, onClick,
+}: { name: string; shade: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`cursor-pointer outline-none flex h-[44px] items-center justify-center px-[19px] rounded-[999px] shrink-0 border transition-colors${!active ? " hover:bg-[rgba(0,0,0,0.04)]" : ""}`}
+      style={{
+        background:  active ? shade : undefined,
+        borderColor: active ? shade : "#e3e3e3",
+        transition:  "background 0.25s ease, border-color 0.25s ease",
+      }}
+    >
+      <span className="text-[14px] whitespace-nowrap leading-none" style={{ fontFamily: PP, fontWeight: 500, color: active ? "#fff" : "#000" }}>
+        {name}
+      </span>
+    </button>
+  );
+}
+
+function SubPill({
+  name, shade, active, onClick, style,
+}: { name: string; shade: string; active: boolean; onClick: () => void; style?: React.CSSProperties }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`cursor-pointer outline-none active:opacity-100 flex h-[36px] items-center justify-center px-[15px] rounded-[999px] shrink-0 border${!active ? " hover:bg-[rgba(0,0,0,0.04)]" : ""}`}
+      style={{
+        ...(active ? { background: "#e5eaf5", borderColor: "#e5eaf5" } : { borderColor: "#e3e3e3" }),
+        WebkitTapHighlightColor: "transparent",
+        ...style,
+      }}
+    >
+      <span
+        className="text-[12px] whitespace-nowrap leading-none"
+        style={{ fontFamily: PP, fontWeight: 500, color: active ? shade : "#666", transition: "color 0.25s ease" }}
+      >
+        {name}
+      </span>
+    </button>
+  );
+}
+
 export default function TopCategoriesSection() {
   // Seeded from the data, so renaming a category cannot orphan the default.
   const [active, setActive]                   = useState(CATEGORIES[0].name);
@@ -51,10 +96,10 @@ export default function TopCategoriesSection() {
   const SUB_STEP         = 70;
 
   return (
-    <div className="flex flex-row gap-[16px] items-start w-full">
+    <div className="flex flex-col lg:flex-row gap-[24px] lg:gap-[16px] items-start w-full">
 
       {/* Left panel */}
-      <div className="flex flex-col gap-[16px] items-start shrink-0 w-[288px] h-[439px]">
+      <div className="flex flex-col gap-[16px] items-start shrink-0 w-full lg:w-[288px] h-auto lg:h-[439px]">
 
         {/* Static header */}
         <div className="flex flex-col gap-[4px] items-start text-[14px] w-full shrink-0">
@@ -66,26 +111,45 @@ export default function TopCategoriesSection() {
           </p>
         </div>
 
-        {/* Category list; the active one expands to show its subcategories. */}
-        <div className="flex flex-col gap-[8px] items-start w-full overflow-y-auto flex-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        {/* On a phone: every category on one scrolling line, the active one's
+            subcategories on another beneath it. */}
+        <div className="flex flex-col gap-[8px] w-full lg:hidden">
+          <div className={`flex gap-[8px] items-center overflow-x-auto ${NO_SCROLLBAR}`}>
+            {CATEGORIES.map((cat) => (
+              <CategoryPill
+                key={cat.name}
+                name={cat.name}
+                shade={cat.shade}
+                active={active === cat.name}
+                onClick={() => handleCategory(cat.name)}
+              />
+            ))}
+          </div>
+          <div className={`flex gap-[8px] items-center overflow-x-auto ${NO_SCROLLBAR}`}>
+            {activeCat.subs.map((sub) => (
+              <SubPill
+                key={sub.name}
+                name={sub.name}
+                shade={activeCat.shade}
+                active={activeSub === sub.name}
+                onClick={() => setActiveSub(activeSub === sub.name ? null : sub.name)}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* From lg: a vertical list, each category expanding its own subcategories. */}
+        <div className={`hidden lg:flex flex-col gap-[8px] items-start w-full overflow-y-auto flex-1 ${NO_SCROLLBAR}`}>
           {CATEGORIES.map((cat) => {
             const isActive = active === cat.name;
             return (
               <div key={cat.name} className="flex flex-col items-start shrink-0">
-
-                <button
+                <CategoryPill
+                  name={cat.name}
+                  shade={cat.shade}
+                  active={isActive}
                   onClick={() => handleCategory(cat.name)}
-                  className={`cursor-pointer outline-none flex h-[44px] items-center justify-center px-[19px] rounded-[999px] shrink-0 border transition-colors${!isActive ? " hover:bg-[rgba(0,0,0,0.04)]" : ""}`}
-                  style={{
-                    background:  isActive ? cat.shade : undefined,
-                    borderColor: isActive ? cat.shade : "#e3e3e3",
-                    transition:  "background 0.25s ease, border-color 0.25s ease",
-                  }}
-                >
-                  <span className="text-[14px] whitespace-nowrap leading-none" style={{ fontFamily: PP, fontWeight: 500, color: isActive ? "#fff" : "#000" }}>
-                    {cat.name}
-                  </span>
-                </button>
+                />
 
                 <div
                   className={`grid transition-[grid-template-rows] ease-[cubic-bezier(0.22,1,0.36,1)] ${isActive ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
@@ -93,39 +157,26 @@ export default function TopCategoriesSection() {
                 >
                   <div className="overflow-hidden">
                     <div className="flex flex-wrap gap-[8px] items-start pt-[8px]">
-                      {cat.subs.map((sub, subIdx) => {
-                        const isSubActive = activeSub === sub.name;
-                        return (
-                          <button
-                            key={sub.name}
-                            onClick={() => setActiveSub(isSubActive ? null : sub.name)}
-                            className={`cursor-pointer outline-none active:opacity-100 flex h-[36px] items-center justify-center px-[15px] rounded-[999px] shrink-0 border${!isSubActive ? " hover:bg-[rgba(0,0,0,0.04)]" : ""}`}
-                            style={{
-                              ...(isSubActive
-                                ? { background: "#e5eaf5", borderColor: "#e5eaf5" }
-                                : { borderColor: "#e3e3e3" }),
-                              WebkitTapHighlightColor: "transparent",
-                              opacity: isActive ? 1 : 0,
-                              transition: [
-                                `opacity 0.55s cubic-bezier(0.4,0,0.2,1) ${isActive ? SUB_START + subIdx * SUB_STEP : 0}ms`,
-                                `background 0.25s ease 0ms`,
-                                `border-color 0.25s ease 0ms`,
-                              ].join(", "),
-                            }}
-                          >
-                            <span
-                              className="text-[12px] whitespace-nowrap leading-none"
-                              style={{ fontFamily: PP, fontWeight: 500, color: isSubActive ? activeCat.shade : "#666", transition: "color 0.25s ease" }}
-                            >
-                              {sub.name}
-                            </span>
-                          </button>
-                        );
-                      })}
+                      {cat.subs.map((sub, subIdx) => (
+                        <SubPill
+                          key={sub.name}
+                          name={sub.name}
+                          shade={activeCat.shade}
+                          active={activeSub === sub.name}
+                          onClick={() => setActiveSub(activeSub === sub.name ? null : sub.name)}
+                          style={{
+                            opacity: isActive ? 1 : 0,
+                            transition: [
+                              `opacity 0.55s cubic-bezier(0.4,0,0.2,1) ${isActive ? SUB_START + subIdx * SUB_STEP : 0}ms`,
+                              "background 0.25s ease 0ms",
+                              "border-color 0.25s ease 0ms",
+                            ].join(", "),
+                          }}
+                        />
+                      ))}
                     </div>
                   </div>
                 </div>
-
               </div>
             );
           })}
@@ -133,14 +184,14 @@ export default function TopCategoriesSection() {
       </div>
 
       {/* Product cards */}
-      <div className="flex-1 min-w-0">
-        <div className="flex gap-[16px] items-start">
+      <div className="w-full lg:flex-1 lg:min-w-0">
+        <div className="grid grid-cols-2 lg:flex gap-[16px] items-start">
           {shownProducts.map((p, i) => (
             <div
               key={i}
               // At lg the row is a flex track, where items keep their content
               // width unless told otherwise — hence flex-1 and min-w-0.
-              className="flex-1 min-w-0"
+              className="w-full lg:flex-1 lg:min-w-0"
             >
               <ProductCard rank={i + 1} {...p} />
             </div>

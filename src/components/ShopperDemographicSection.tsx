@@ -25,7 +25,7 @@ const CX = 150, CY = 150, IR = 110, OR = 130;
 
 /** Height of the artwork band. Every card reserves the same, so the first
     legend/list row lines up across the row. */
-const ART_H = 280;
+const ART_BAND = "flex-1 min-h-0 lg:flex-none lg:h-[280px]";
 
 function polarToCart(cx: number, cy: number, r: number, deg: number) {
   const rad = (deg * Math.PI) / 180;
@@ -81,7 +81,7 @@ function DonutCard({
 
   return (
     <div
-      className="flex w-[540px] shrink-0 aspect-square flex-col gap-[16px] items-start p-[21px] rounded-[6px]"
+      className="flex w-full lg:w-[540px] shrink-0 aspect-square flex-col gap-[16px] items-start p-[21px] rounded-[6px]"
       style={{ border: "1px solid rgba(0,0,0,0.08)" }}
     >
       <div className="flex flex-col gap-[4px] w-full">
@@ -94,8 +94,7 @@ function DonutCard({
       </div>
 
       <div
-        className="shrink-0 flex items-center justify-center w-full relative"
-        style={{ height: ART_H }}
+        className={`flex items-center justify-center w-full relative ${ART_BAND}`}
         onMouseMove={e => {
           const r = e.currentTarget.getBoundingClientRect();
           setCursor({ x: e.clientX - r.left, y: e.clientY - r.top });
@@ -179,7 +178,7 @@ function LocationsCard() {
 
   return (
     <div
-      className="flex w-[540px] shrink-0 aspect-square flex-col gap-[16px] items-center p-[21px] rounded-[6px]"
+      className="flex w-full lg:w-[540px] shrink-0 aspect-square flex-col gap-[16px] items-center p-[21px] rounded-[6px]"
       style={{ border: "1px solid rgba(0,0,0,0.08)" }}
     >
       <div className="flex flex-col gap-[4px] w-full">
@@ -193,7 +192,7 @@ function LocationsCard() {
 
       {/* The wrapper owns the leftover height; the map fits inside it by
           height, so the card can stay square however tall the list gets. */}
-      <div className="shrink-0 w-full flex items-center justify-center" style={{ height: ART_H }}>
+      <div className={`w-full flex items-center justify-center ${ART_BAND}`}>
       <div
         className="relative overflow-hidden"
         style={{ aspectRatio: `${MAP_W}/${MAP_H}`, height: "100%", maxWidth: "100%" }}
@@ -240,11 +239,16 @@ function LocationsCard() {
   );
 }
 
+/**
+ * FRAME's nearest neighbours: premium denim-led labels at the same price and,
+ * for the last two, the elevated contemporary a FRAME shopper buys alongside.
+ * `mark` is a monogram standing in for a logo we do not have artwork for.
+ */
 const BRANDS = [
-  { name: "Reformation", overlap: "41% shopper overlap", logo: "/assets/brand-reformation.png", logoW: 58.846, logoH: 7.444 },
-  { name: "COS",         overlap: "34% shopper overlap", logo: "/assets/brand-cos.png",         logoW: 51.923, logoH: 18.462 },
-  { name: "Mango",       overlap: "28% shopper overlap", logo: "/assets/brand-mango.png",       logoW: 71.538, logoH: 9.05 },
-  { name: "Mango",       overlap: "28% shopper overlap", logo: "/assets/brand-mango.png",       logoW: 71.538, logoH: 9.05 },
+  { name: "AGOLDE",     mark: "AG", overlap: "44% shopper overlap" },
+  { name: "MOTHER",     mark: "MO", overlap: "37% shopper overlap" },
+  { name: "rag & bone", mark: "RB", overlap: "31% shopper overlap" },
+  { name: "NILI LOTAN", mark: "NL", overlap: "24% shopper overlap" },
 ];
 
 export default function ShopperDemographicSection() {
@@ -263,7 +267,7 @@ export default function ShopperDemographicSection() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-[48px] items-center py-[64px] px-[120px] w-full">
+    <div className="flex flex-col gap-[48px] items-center py-[64px] px-6 lg:px-[120px] w-full">
 
       {/* Section title */}
       <div className="flex flex-col gap-[16px] items-start w-full">
@@ -276,7 +280,7 @@ export default function ShopperDemographicSection() {
       {/* Cards row */}
       {/* items-start, not stretch: stretching sets each card's height and would
           override the square aspect. */}
-      <div className="flex flex-row gap-[16px] items-start w-full overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      <div className="grid grid-cols-1 gap-[16px] w-full lg:flex lg:flex-row lg:items-start lg:overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <DonutCard title="Gender" subtitle="By reported identity" data={genderData} />
         <LocationsCard />
         <DonutCard title="Retail vs Brand" subtitle="Where shoppers buy you" data={channelData} />
@@ -293,11 +297,11 @@ export default function ShopperDemographicSection() {
             </p>
           </div>
 
-          <div ref={brandsRef} className="flex flex-row gap-[24px] items-start w-full overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            {BRANDS.map(({ name, overlap, logo, logoW, logoH }, i) => (
+          <div ref={brandsRef} className="flex flex-col lg:flex-row gap-[24px] items-start w-full lg:overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            {BRANDS.map(({ name, mark, overlap }, i) => (
               <div
                 key={i}
-                className="flex flex-1 shrink-0 min-w-max items-center"
+                className="flex shrink-0 items-center w-full lg:w-auto lg:flex-1 lg:min-w-max"
                 style={{
                   opacity: visible ? 1 : 0,
                   transform: visible ? "translateY(0)" : "translateY(16px)",
@@ -306,12 +310,18 @@ export default function ShopperDemographicSection() {
                 }}
               >
                 <div className="flex gap-[16px] items-center shrink-0">
+                  {/* The name sits right beside it, so the monogram is decoration. */}
                   <div
-                    className="bg-white flex items-center justify-center overflow-hidden rounded-full shrink-0 size-[75px]"
-                    style={{ border: "1px solid rgba(0,0,0,0.08)", padding: "1.611px" }}
+                    aria-hidden
+                    className="bg-white flex items-center justify-center rounded-full shrink-0 size-[75px]"
+                    style={{ border: "1px solid rgba(0,0,0,0.08)" }}
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={logo} alt={name} style={{ width: logoW, height: logoH, objectFit: "cover" }} />
+                    <span
+                      className="text-[18px] leading-none tracking-[1px] text-[#1a1a1a]"
+                      style={{ fontFamily: PP, fontWeight: 500 }}
+                    >
+                      {mark}
+                    </span>
                   </div>
                   <div className="flex flex-col gap-[6px] items-start overflow-hidden shrink-0">
                     <p className="text-[14px] leading-[20px] text-[#1a1a1a] whitespace-nowrap" style={{ fontFamily: PP, fontWeight: 500 }}>{name}</p>

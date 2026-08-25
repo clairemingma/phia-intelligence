@@ -8,7 +8,7 @@ const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
  */
 export default function HeroSection() {
   return (
-    <section className="relative h-[600px] w-full overflow-hidden">
+    <section className="relative h-[420px] lg:h-[600px] w-full overflow-hidden">
 
       {/* The design crops its 600px band out of a much taller photo. Cover
           scales it to exactly that height, and the vertical offset lands on
@@ -22,26 +22,28 @@ export default function HeroSection() {
       />
       <div className="absolute inset-0 bg-[rgba(0,0,0,0.2)] pointer-events-none" aria-hidden />
 
-      {/* Brand mark, on the vertical centre of the band. The artwork is drawn
-          with preserveAspectRatio="none", so the width scales with the height
-          to keep the letterforms from squashing. */}
-      <img
-        src="/assets/frame-logo.svg"
-        alt="FRAME"
-        className="absolute left-[64px] top-1/2 block h-[40px] w-[266.666px] max-w-none -translate-y-1/2"
-      />
+      {/* One line from lg up, mark and standing pushed to opposite gutters.
+          Narrower than that they stack, since the two together are wider than
+          a phone. The mark is drawn with preserveAspectRatio="none", so its
+          width scales with its height to keep the letterforms from squashing. */}
+      <div className="absolute inset-0 flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-[16px] lg:gap-0 px-6 lg:px-[64px]">
+        <img
+          src="/assets/frame-logo.svg"
+          alt="FRAME"
+          className="block h-[30px] w-[200px] lg:h-[40px] lg:w-[266.666px] max-w-none shrink-0"
+        />
 
-      {/* Standing, against the opposite gutter */}
-      <div className="absolute right-[64px] top-1/2 flex -translate-y-1/2 items-center gap-[4px]">
-        {["#5 in Trending Brands", "·", "145K visits"].map((part) => (
-          <p
-            key={part}
-            className="text-[14px] leading-[14px] text-white whitespace-nowrap"
-            style={{ fontFamily: PP, fontWeight: 500 }}
-          >
-            {part}
-          </p>
-        ))}
+        <div className="flex shrink-0 items-center gap-[4px]">
+          {["#5 in Trending Brands", "·", "145K visits"].map((part) => (
+            <p
+              key={part}
+              className="text-[14px] leading-[14px] text-white whitespace-nowrap"
+              style={{ fontFamily: PP, fontWeight: 500 }}
+            >
+              {part}
+            </p>
+          ))}
+        </div>
       </div>
     </section>
   );
