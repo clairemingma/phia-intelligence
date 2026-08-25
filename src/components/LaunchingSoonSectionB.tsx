@@ -11,14 +11,14 @@ export default function LaunchingSoonSectionB() {
   const [activeIdx, setActiveIdx] = useState(0);
 
   return (
-    <section className="bg-[#f9f8f7] flex flex-col items-center py-[64px] px-6 lg:px-16 xl:px-[120px] w-full">
-      <div className="flex flex-col-reverse lg:flex-row gap-[64px] items-start w-full max-w-[1200px]">
+    <section className="bg-[#f9f8f7] flex flex-col items-center py-[64px] px-[120px] w-full">
+      <div className="flex flex-row gap-[64px] items-start w-full max-w-[1200px]">
 
         {/* Left — Figma mockup, exact positioning, sticky. The backdrop is the
             same gradient the browser tiles are drawn on, so the device shots
             cut out over it sit on one continuous surface. */}
         <div
-          className="sticky top-[96px] shrink-0 aspect-square w-full max-w-[625px] mx-auto lg:mx-0 lg:w-[568px] overflow-hidden relative"
+          className="sticky top-[96px] shrink-0 aspect-square w-[568px] overflow-hidden relative"
           style={{ background: "linear-gradient(to bottom, #565656 0%, #3c3c3c 100%)" }}
         >
 

@@ -343,7 +343,7 @@ export default function MetricsSection() {
     : undefined;
 
   return (
-    <div className="flex flex-col gap-[48px] items-end px-6 lg:px-16 xl:px-[120px] py-[64px] w-full">
+    <div className="flex flex-col gap-[48px] items-end px-[120px] py-[64px] w-full">
 
       {/* Title row */}
       <div className="flex flex-col gap-[16px] items-start w-full">
@@ -415,7 +415,7 @@ export default function MetricsSection() {
       </div>
 
       {/* Metric cards */}
-      <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-[16px] w-full">
+      <div ref={gridRef} className="grid grid-cols-5 gap-[16px] w-full">
         {METRICS.map((m, i) => {
           const isActive = i === activeMetric;
           return (

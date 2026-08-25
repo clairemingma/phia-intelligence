@@ -22,7 +22,7 @@ export default function ContactSection() {
   });
 
   return (
-    <div className="flex flex-col items-start px-6 lg:px-16 xl:px-[120px] py-[96px] w-full">
+    <div className="flex flex-col items-start px-[120px] py-[96px] w-full">
       <div className="flex flex-col gap-[64px] items-start w-full">
 
         {/* Heading */}

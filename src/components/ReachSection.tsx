@@ -4,8 +4,8 @@ const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
 
 export default function ReachSection() {
   return (
-    <div className="flex flex-col items-center py-[96px] px-6 lg:px-16 xl:px-[120px] w-full">
-      <div className="flex flex-col lg:flex-row gap-[64px] items-start w-full max-w-[1200px]">
+    <div className="flex flex-col items-center py-[96px] px-[120px] w-full">
+      <div className="flex flex-row gap-[64px] items-start w-full max-w-[1200px]">
 
         {/* Left — copy */}
         <div className="flex flex-1 flex-col h-full items-start min-w-0">
@@ -53,7 +53,7 @@ export default function ReachSection() {
 
         {/* Right — dark box with phone mockup */}
         <div
-          className="relative bg-[#1a1a1a] overflow-hidden aspect-square w-full max-w-[625px] mx-auto lg:mx-0 lg:shrink-0 lg:w-[625px]"
+          className="relative bg-[#1a1a1a] overflow-hidden aspect-square w-[625px] shrink-0"
           style={{ border: "1px solid rgba(0,0,0,0.08)" }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
