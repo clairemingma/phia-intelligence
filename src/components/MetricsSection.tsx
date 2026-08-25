@@ -348,7 +348,7 @@ export default function MetricsSection() {
       {/* Title row */}
       <div className="flex flex-col gap-[16px] items-start w-full">
         {/* Separator */}
-        <div className="w-full h-px bg-[#1a1a1a]" />
+        <div className="w-full h-px bg-[#999999]" />
 
         <div className="flex items-center justify-between w-full">
           <p

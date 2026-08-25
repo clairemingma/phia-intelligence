@@ -22,11 +22,13 @@ export default function HeroSection() {
       />
       <div className="absolute inset-0 bg-[rgba(0,0,0,0.2)] pointer-events-none" aria-hidden />
 
-      {/* Brand mark, on the vertical centre of the band */}
+      {/* Brand mark, on the vertical centre of the band. The artwork is drawn
+          with preserveAspectRatio="none", so the width scales with the height
+          to keep the letterforms from squashing. */}
       <img
         src="/assets/frame-logo.svg"
         alt="FRAME"
-        className="absolute left-[64px] top-1/2 block h-[50px] w-[333.333px] max-w-none -translate-y-1/2"
+        className="absolute left-[64px] top-1/2 block h-[40px] w-[266.666px] max-w-none -translate-y-1/2"
       />
 
       {/* Standing, against the opposite gutter */}

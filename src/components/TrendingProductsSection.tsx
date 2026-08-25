@@ -83,7 +83,7 @@ export default function TrendingProductsSection() {
 
       {/* Section title + sort controls */}
       <div className="flex flex-col gap-[16px] items-start w-full shrink-0">
-        <div className="w-full h-px bg-[#1a1a1a]" />
+        <div className="w-full h-px bg-[#999999]" />
         <div className="flex items-start justify-between w-full">
           <h2
             className="text-[36px] leading-[40px] tracking-[-0.72px] text-[#1a1a1a]"
