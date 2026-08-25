@@ -26,7 +26,7 @@ export default function EditorialFeaturesSection({ stackIndex }: { stackIndex: n
       <EditorialGrid
         key={page}
         cards={EDITORIALS.slice(start, start + PER_PAGE)}
-        columnsClass="grid grid-cols-4 gap-x-[16px] gap-y-[48px] w-full"
+        columnsClass="grid grid-cols-2 lg:grid-cols-4 gap-x-[16px] gap-y-[32px] lg:gap-y-[48px] w-full"
         brand="FRAME"
       />
 

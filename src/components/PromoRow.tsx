@@ -38,7 +38,9 @@ export default function PromoRow({ promo }: { promo: Promo }) {
         featured ? "bg-[#e5eaf5]" : "border border-[rgba(0,0,0,0.08)]"
       }`}
     >
-      <div className="flex gap-[24px] items-center p-[16px] w-full">
+      <div className="flex flex-col lg:flex-row gap-[16px] lg:gap-[24px] items-start lg:items-center p-[16px] w-full">
+
+        <div className="flex gap-[16px] items-center w-full lg:contents">
 
         {/* Amount tile */}
         <div
@@ -102,10 +104,12 @@ export default function PromoRow({ promo }: { promo: Promo }) {
           </div>
         </div>
 
+        </div>
+
         {/* Code chip. The design leaves a 160px slot with the chip at its right
             end; the copy button fills that slot on hover so the code stays
             legible at rest. */}
-        <div className="group/code relative h-[44px] w-[160px] shrink-0">
+        <div className="group/code relative h-[44px] w-full lg:w-[160px] shrink-0">
           <div className="absolute right-0 top-0 flex h-[44px] items-center justify-center rounded-full bg-[#e5eaf5] border border-dashed border-[#002d9f] px-[11px] py-px overflow-hidden">
             <span
               className="text-[12px] leading-[12px] tracking-[-0.154px] text-[#002092] whitespace-nowrap"

@@ -24,11 +24,11 @@ export default function SectionHeading({
     <div className="flex flex-col gap-[16px] items-start w-full shrink-0">
       <div className="w-full h-px bg-[#999999]" />
       <div
-        className={`flex justify-between w-full ${description ? "items-center" : "items-start"}`}
+        className={`flex gap-[16px] justify-between w-full ${description ? "items-center" : "items-start"}`}
       >
         <div className="flex flex-col gap-[8px] items-start min-w-0">
           <h2
-            className="text-[36px] leading-[40px] tracking-[-0.72px] text-[#1a1a1a] whitespace-nowrap"
+            className="text-[28px] lg:text-[36px] leading-[32px] lg:leading-[40px] tracking-[-0.72px] text-[#1a1a1a] lg:whitespace-nowrap"
             style={{ fontFamily: GT, fontWeight: 300 }}
           >
             {title}

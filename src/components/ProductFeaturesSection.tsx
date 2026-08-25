@@ -91,7 +91,7 @@ export default function ProductFeaturesSection({
     <StackedSection index={stackIndex}>
       <SectionHeading title={title} action={<CreateButton href={createHref} />} />
 
-      <div className="grid grid-cols-4 gap-[16px] items-start w-full">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-[16px] items-start w-full">
         {tiles.map((tile, i) => (
           <ProductFeatureCard key={i} {...tile} bookmarked={bookmarked} />
         ))}

@@ -63,10 +63,10 @@ export default function ProductHighlightStrip({
     // lands on the same grid as the editorials above it.
     <section className="relative bg-[#f9f8f7] flex flex-col gap-[64px] items-center justify-center px-6 lg:px-16 xl:px-[120px] py-[64px] w-full overflow-hidden">
 
-      <div className="grid grid-cols-4 gap-[16px] items-start w-full">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-[16px] items-start w-full">
 
         {/* Editorial blurb + link */}
-        <div className="flex flex-col gap-[16px] items-start w-full min-w-0">
+        <div className="col-span-2 lg:col-span-1 flex flex-col gap-[16px] items-start w-full min-w-0">
           <div className="flex flex-col gap-[4px] items-start text-[14px] w-full">
             <p
               className="leading-none text-[#002d9f] truncate whitespace-nowrap"
@@ -101,11 +101,11 @@ export default function ProductHighlightStrip({
         ))}
       </div>
 
-      <CarouselCaret className="absolute right-[74px] top-1/2 -translate-y-1/2" />
+      <CarouselCaret className="hidden lg:block absolute right-[74px] top-1/2 -translate-y-1/2" />
 
       <button
         onClick={onClose}
-        className="absolute right-[43px] top-[36px] cursor-pointer text-[12px] leading-none text-[#999] underline whitespace-nowrap hover:text-[#666] transition-colors"
+        className="absolute right-6 lg:right-[43px] top-[24px] lg:top-[36px] cursor-pointer text-[12px] leading-none text-[#999] underline whitespace-nowrap hover:text-[#666] transition-colors"
         style={{ fontFamily: PP, fontWeight: 500 }}
       >
         Close
