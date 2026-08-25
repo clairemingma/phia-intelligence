@@ -272,7 +272,7 @@ export default function ShopperDemographicSection() {
       {/* Section title */}
       <div className="flex flex-col gap-[16px] items-start w-full">
         <div className="w-full h-px bg-[#999999]" />
-        <h2 className="text-[36px] leading-[40px] tracking-[-0.72px] text-[#1a1a1a]" style={{ fontFamily: GT, fontWeight: 300 }}>
+        <h2 className="text-[28px] lg:text-[36px] leading-[32px] lg:leading-[40px] tracking-[-0.56px] lg:tracking-[-0.72px] text-[#1a1a1a]" style={{ fontFamily: GT, fontWeight: 300 }}>
           Shopper Demographic
         </h2>
       </div>

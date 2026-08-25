@@ -352,7 +352,7 @@ export default function MetricsSection() {
 
         <div className="flex items-center justify-between w-full">
           <p
-            className="text-[#1a1a1a] text-[36px] leading-[40px] tracking-[-0.72px] font-light whitespace-nowrap"
+            className="text-[#1a1a1a] text-[28px] lg:text-[36px] leading-[32px] lg:leading-[40px] tracking-[-0.56px] lg:tracking-[-0.72px] font-light whitespace-nowrap"
             style={{ fontFamily: GT }}
           >
             Performance

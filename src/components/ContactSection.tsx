@@ -32,7 +32,7 @@ export default function ContactSection() {
         {/* Heading */}
         <div className="flex flex-col gap-[12px] items-center w-full">
           <p
-            className="text-[56px] leading-[1.1] tracking-[-2.24px] text-[#292929] whitespace-nowrap"
+            className="text-[36px] lg:text-[56px] leading-[1.1] tracking-[-1.44px] lg:tracking-[-2.24px] text-[#292929] whitespace-nowrap"
             style={{
               fontFamily: "var(--font-gt-super-display), 'Playfair Display', Georgia, serif",
               fontWeight: 300,

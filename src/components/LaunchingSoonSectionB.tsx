@@ -47,14 +47,8 @@ export default function LaunchingSoonSectionB() {
 
           {/* Launching Soon / active label */}
           <div
-            className="flex flex-col gap-[4px] text-black w-full"
-            style={{
-              fontFamily: GT,
-              fontWeight: 300,
-              fontSize: 44,
-              lineHeight: 1.16,
-              letterSpacing: "-1.76px",
-            }}
+            className="flex flex-col gap-[4px] text-black w-full text-[32px] lg:text-[44px] leading-[1.16] tracking-[-1.28px] lg:tracking-[-1.76px]"
+            style={{ fontFamily: GT, fontWeight: 300 }}
           >
             <p className="opacity-30">{SECTIONS[activeIdx].status}</p>
             <p>{SECTIONS[activeIdx].label}</p>

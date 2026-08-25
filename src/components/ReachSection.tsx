@@ -13,7 +13,7 @@ export default function ReachSection() {
 
             <div className="flex flex-col gap-[36px] items-start w-full">
               <div
-                className="flex flex-col gap-[4px] text-[44px] leading-[1.16] tracking-[-1.76px] text-black w-full"
+                className="flex flex-col gap-[4px] text-[32px] lg:text-[44px] leading-[1.16] tracking-[-1.28px] lg:tracking-[-1.76px] text-black w-full"
                 style={{ fontFamily: "var(--font-gt-super-display), 'Playfair Display', Georgia, serif", fontWeight: 300 }}
               >
                 <p className="opacity-30 w-full">Unlock Opportunities</p>

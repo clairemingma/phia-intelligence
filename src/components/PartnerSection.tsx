@@ -24,7 +24,7 @@ export default function PartnerSection() {
 
           {/* Name block */}
           <div
-            className="flex flex-[1_0_0] flex-col gap-[4px] items-center justify-center self-stretch min-w-0 text-[36px] leading-[40px] tracking-[-0.72px] text-black"
+            className="flex flex-[1_0_0] flex-col gap-[4px] items-center justify-center self-stretch min-w-0 text-[28px] lg:text-[36px] leading-[32px] lg:leading-[40px] tracking-[-0.56px] lg:tracking-[-0.72px] text-black"
             style={{ fontFamily: GT, fontWeight: 300 }}
           >
             <p className="opacity-30 w-full">Your Partner at Phia</p>

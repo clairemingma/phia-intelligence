@@ -86,7 +86,7 @@ export default function TrendingProductsSection() {
         <div className="w-full h-px bg-[#999999]" />
         <div className="flex items-start justify-between w-full">
           <h2
-            className="text-[36px] leading-[40px] tracking-[-0.72px] text-[#1a1a1a]"
+            className="text-[28px] lg:text-[36px] leading-[32px] lg:leading-[40px] tracking-[-0.56px] lg:tracking-[-0.72px] text-[#1a1a1a]"
             style={{ fontFamily: GT, fontWeight: 300 }}
           >
             Trending Products
