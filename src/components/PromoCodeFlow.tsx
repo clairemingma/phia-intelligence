@@ -12,9 +12,9 @@ const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
 
 /* The preview stands in with the design's sample offer until the brand types
    over it, matching how the editorial flow seeds its phone. */
-const DEFAULT_TITLE = "Extra 20% off full-price Acne Studios";
-const DEFAULT_DESCRIPTION = "841 shoppers saved with this code in the last 24 hours";
-const DEFAULT_CODE = "ACNE20";
+const DEFAULT_TITLE = "20% off full-price denim";
+const DEFAULT_DESCRIPTION = "841 shoppers saved with this code today";
+const DEFAULT_CODE = "PHIA20";
 
 /* ------------------------------------------------------------------ */
 /* Offer type                                                           */
