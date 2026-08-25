@@ -53,6 +53,28 @@ const AXIS_COLOR  = "#999999";
 const Y_AXIS_WIDTH = 40;
 const CHART_RIGHT_MARGIN = 8;
 
+/** The plot area inside the 320px chart — 8px of top margin, 16px of bottom. */
+const PLOT_TOP = 8;
+const PLOT_BOTTOM = 304;
+
+/**
+ * The fill under the curve. A straight two-stop fade came out far paler than
+ * the design, so these stops trace the falloff sampled off it: at a twentieth
+ * of the way down from the peak the design reads rgb(85,116,192) where the
+ * two-stop version gave rgb(151,169,216). Offsets run top of plot to baseline.
+ */
+const FILL_STOPS: [number, number][] = [
+  [0,    0.78],
+  [0.09, 0.67],
+  [0.23, 0.49],
+  [0.38, 0.34],
+  [0.52, 0.22],
+  [0.67, 0.13],
+  [0.81, 0.06],
+  [0.96, 0.02],
+  [1,    0.01],
+];
+
 interface Props {
   metricLabel: string;
   timeFilter: string;
@@ -159,9 +181,10 @@ export default function TrendGraph({ metricLabel, timeFilter, customRange }: Pro
           onMouseLeave={() => setIsHovering(false)}
         >
           <defs>
-            <linearGradient id="phia-fill" x1="0" y1="-24" x2="0" y2="304" gradientUnits="userSpaceOnUse">
-              <stop offset="0%"   stopColor={FILL_START} stopOpacity={1} />
-              <stop offset="100%" stopColor="white"      stopOpacity={0.01} />
+            <linearGradient id="phia-fill" x1="0" y1={PLOT_TOP} x2="0" y2={PLOT_BOTTOM} gradientUnits="userSpaceOnUse">
+              {FILL_STOPS.map(([offset, opacity]) => (
+                <stop key={offset} offset={offset} stopColor={FILL_START} stopOpacity={opacity} />
+              ))}
             </linearGradient>
           </defs>
 
@@ -197,6 +220,9 @@ export default function TrendGraph({ metricLabel, timeFilter, customRange }: Pro
             strokeWidth={2}
             strokeLinecap="round"
             fill="url(#phia-fill)"
+            // Recharts defaults an Area to 0.6, which would scale every stop
+            // above; the falloff is carried by the gradient itself.
+            fillOpacity={1}
             dot={renderDot}
             isAnimationActive={false}
             activeDot={{ r: 5, fill: LINE_COLOR, stroke: "none" }}
