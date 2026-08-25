@@ -5,12 +5,27 @@ import { useState, useEffect, useRef } from "react";
 const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
 const GT = "var(--font-gt-super-display), 'Playfair Display', Georgia, serif";
 
-const genderData = [
-  { label: "Women", pct: "68%", value: 68, color: "#1a42a9" },
-  { label: "Men",   pct: "32%", value: 32, color: "#6681c5" },
+type Slice = { label: string; pct: string; value: number; color: string };
+
+/* Two-slot categorical order, shared by every donut in this section so the
+   same visual weight always means "the larger share". */
+const SLICE_COLORS = ["#1a42a9", "#6681c5"] as const;
+
+const genderData: Slice[] = [
+  { label: "Women", pct: "68%", value: 68, color: SLICE_COLORS[0] },
+  { label: "Men",   pct: "32%", value: 32, color: SLICE_COLORS[1] },
+];
+
+const channelData: Slice[] = [
+  { label: "Retail partners", pct: "59%", value: 59, color: SLICE_COLORS[0] },
+  { label: "Brand direct",    pct: "41%", value: 41, color: SLICE_COLORS[1] },
 ];
 
 const CX = 150, CY = 150, IR = 110, OR = 130;
+
+/** Height of the artwork band. Every card reserves the same, so the first
+    legend/list row lines up across the row. */
+const ART_H = 280;
 
 function polarToCart(cx: number, cy: number, r: number, deg: number) {
   const rad = (deg * Math.PI) / 180;
@@ -32,10 +47,16 @@ function annularSector(cx: number, cy: number, ir: number, or: number, startDeg:
   ].join(" ");
 }
 
-const SEGMENTS = [
-  { ...genderData[0], startDeg: 0,     endDeg: 244.8 },
-  { ...genderData[1], startDeg: 244.8, endDeg: 360   },
-];
+/** Lays slices clockwise from twelve o'clock, sized by share of the total. */
+function toSegments(data: Slice[]) {
+  const total = data.reduce((sum, d) => sum + d.value, 0);
+  let cursor = 0;
+  return data.map((d) => {
+    const startDeg = cursor;
+    cursor += (d.value / total) * 360;
+    return { ...d, startDeg, endDeg: cursor };
+  });
+}
 
 const locationData = [
   { rank: 1, city: "New York",    pct: "18%", x: 502, y: 110 },
@@ -45,35 +66,45 @@ const locationData = [
   { rank: 5, city: "Miami",       pct: "5%",  x: 477, y: 303 },
 ];
 
-function GenderCard() {
+function DonutCard({
+  title,
+  subtitle,
+  data,
+}: {
+  title: string;
+  subtitle: string;
+  data: Slice[];
+}) {
+  const segments = toSegments(data);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
 
   return (
     <div
-      className="flex flex-1 flex-col gap-[16px] items-start min-w-0 p-[21px] rounded-[6px]"
+      className="flex w-[540px] shrink-0 aspect-square flex-col gap-[16px] items-start p-[21px] rounded-[6px]"
       style={{ border: "1px solid rgba(0,0,0,0.08)" }}
     >
       <div className="flex flex-col gap-[4px] w-full">
         <p className="text-[14px] leading-none text-[#1a1a1a] truncate" style={{ fontFamily: PP, fontWeight: 500 }}>
-          Gender
+          {title}
         </p>
         <p className="text-[14px] leading-[20px] text-[#666] truncate" style={{ fontFamily: PP, fontWeight: 400 }}>
-          By reported identity
+          {subtitle}
         </p>
       </div>
 
       <div
-        className="flex-1 flex items-center justify-center w-full relative"
+        className="shrink-0 flex items-center justify-center w-full relative"
+        style={{ height: ART_H }}
         onMouseMove={e => {
           const r = e.currentTarget.getBoundingClientRect();
           setCursor({ x: e.clientX - r.left, y: e.clientY - r.top });
         }}
         onMouseLeave={() => { setCursor(null); setActiveIndex(null); }}
       >
-        <svg viewBox="0 0 300 300" style={{ width: "min(300px, 100%)", height: "auto" }}>
+        <svg viewBox="0 0 300 300" className="w-full h-full">
           <circle cx={CX} cy={CY} r={(IR + OR) / 2} stroke="rgba(0,0,0,0.06)" strokeWidth={OR - IR} fill="none" />
-          {SEGMENTS.map((seg, i) => (
+          {segments.map((seg, i) => (
             <path
               key={seg.label}
               d={annularSector(CX, CY, IR, OR, seg.startDeg, seg.endDeg)}
@@ -91,14 +122,14 @@ function GenderCard() {
             className="absolute pointer-events-none z-10 bg-[#1a1a1a] text-white rounded-[6px] px-[10px] py-[6px] whitespace-nowrap"
             style={{ left: cursor.x, top: cursor.y - 40, transform: "translateX(-50%)", fontFamily: PP }}
           >
-            <span className="text-[12px] font-medium">{genderData[activeIndex].label}</span>
-            <span className="text-[12px] opacity-60 ml-[6px]">{genderData[activeIndex].pct}</span>
+            <span className="text-[12px] font-medium">{data[activeIndex].label}</span>
+            <span className="text-[12px] opacity-60 ml-[6px]">{data[activeIndex].pct}</span>
           </div>
         )}
       </div>
 
-      <div className="flex flex-col gap-[8px] w-full mt-auto lg:mb-[84px]">
-        {genderData.map(({ label, pct, color }, i) => (
+      <div className="flex flex-col gap-[8px] w-full">
+        {data.map(({ label, pct, color }, i) => (
           <div
             key={label}
             className="flex gap-[8px] items-center w-full cursor-default transition-opacity"
@@ -148,7 +179,7 @@ function LocationsCard() {
 
   return (
     <div
-      className="flex flex-1 flex-col gap-[20px] items-center min-w-0 p-[21px] rounded-[6px]"
+      className="flex w-[540px] shrink-0 aspect-square flex-col gap-[16px] items-center p-[21px] rounded-[6px]"
       style={{ border: "1px solid rgba(0,0,0,0.08)" }}
     >
       <div className="flex flex-col gap-[4px] w-full">
@@ -160,9 +191,12 @@ function LocationsCard() {
         </p>
       </div>
 
+      {/* The wrapper owns the leftover height; the map fits inside it by
+          height, so the card can stay square however tall the list gets. */}
+      <div className="shrink-0 w-full flex items-center justify-center" style={{ height: ART_H }}>
       <div
-        className="relative w-full max-w-[550px] mx-auto overflow-hidden"
-        style={{ aspectRatio: `${MAP_W}/${MAP_H}` }}
+        className="relative overflow-hidden"
+        style={{ aspectRatio: `${MAP_W}/${MAP_H}`, height: "100%", maxWidth: "100%" }}
         onMouseMove={handleMapMouseMove}
         onMouseLeave={() => setHovered(null)}
       >
@@ -184,8 +218,9 @@ function LocationsCard() {
           />
         )}
       </div>
+      </div>
 
-      <div className="flex flex-col gap-[8px] w-full mt-auto">
+      <div className="flex flex-col gap-[8px] w-full shrink-0">
         {locationData.map(({ rank, city, pct }, i) => (
           <div
             key={rank}
@@ -228,10 +263,10 @@ export default function ShopperDemographicSection() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-[48px] items-center py-[64px] px-6 lg:px-16 xl:px-[120px] w-full">
+    <div className="flex flex-col gap-[48px] items-center py-[64px] px-[120px] w-full">
 
       {/* Section title */}
-      <div className="flex flex-col gap-[16px] items-start w-full max-w-full max-w-[1200px]">
+      <div className="flex flex-col gap-[16px] items-start w-full">
         <div className="w-full h-px bg-[#999999]" />
         <h2 className="text-[36px] leading-[40px] tracking-[-0.72px] text-[#1a1a1a]" style={{ fontFamily: GT, fontWeight: 300 }}>
           Shopper Demographic
@@ -239,13 +274,16 @@ export default function ShopperDemographicSection() {
       </div>
 
       {/* Cards row */}
-      <div className="flex flex-col lg:flex-row gap-[16px] items-stretch w-full max-w-[1200px]">
-        <GenderCard />
+      {/* items-start, not stretch: stretching sets each card's height and would
+          override the square aspect. */}
+      <div className="flex flex-row gap-[16px] items-start w-full overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <DonutCard title="Gender" subtitle="By reported identity" data={genderData} />
         <LocationsCard />
+        <DonutCard title="Retail vs Brand" subtitle="Where shoppers buy you" data={channelData} />
       </div>
 
       {/* Similar Brands */}
-      <div className="flex flex-col gap-[24px] items-start py-[48px] w-full max-w-[1200px]">
+      <div className="flex flex-col gap-[24px] items-start py-[48px] w-full">
           <div className="flex flex-col gap-[4px]">
             <p className="text-[14px] leading-none text-[#1a1a1a]" style={{ fontFamily: PP, fontWeight: 500 }}>
               Similar Brands on Phia
@@ -255,11 +293,11 @@ export default function ShopperDemographicSection() {
             </p>
           </div>
 
-          <div ref={brandsRef} className="flex flex-col sm:flex-row gap-[16px] sm:gap-[24px] items-start w-full sm:overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div ref={brandsRef} className="flex flex-row gap-[24px] items-start w-full overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {BRANDS.map(({ name, overlap, logo, logoW, logoH }, i) => (
               <div
                 key={i}
-                className="flex w-full sm:flex-1 sm:shrink-0 sm:min-w-max items-center"
+                className="flex flex-1 shrink-0 min-w-max items-center"
                 style={{
                   opacity: visible ? 1 : 0,
                   transform: visible ? "translateY(0)" : "translateY(16px)",
