@@ -3,6 +3,7 @@ import NavBar from "@/components/NavBar";
 import EditorialFeaturesSection from "@/components/EditorialFeaturesSection";
 import ProductFeaturesSection from "@/components/ProductFeaturesSection";
 import PromotionsSection from "@/components/PromotionsSection";
+import { OUTFIT_FEATURES, SOCIAL_FEATURES } from "@/lib/featureTiles";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
@@ -20,11 +21,13 @@ export default function PlacementsPage() {
       <EditorialFeaturesSection stackIndex={0} />
       <ProductFeaturesSection
         title="Outfit Features"
+        tiles={OUTFIT_FEATURES}
         stackIndex={1}
         createHref="/promote/outfit-feature"
       />
       <ProductFeaturesSection
         title="Social Features"
+        tiles={SOCIAL_FEATURES}
         bookmarked
         stackIndex={2}
         createHref="/promote/social-feature"

@@ -1,6 +1,7 @@
 import SectionHeading from "@/components/SectionHeading";
 import CreateButton from "@/components/CreateButton";
 import StackedSection from "@/components/StackedSection";
+import type { FeatureTile } from "@/lib/featureTiles";
 
 const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
 
@@ -21,23 +22,23 @@ function BookmarkIcon() {
   );
 }
 
-export type FeatureTile = {
-  title: string;
-  description: string;
-};
-
 function ProductFeatureCard({
   title,
   description,
+  image,
   bookmarked,
 }: FeatureTile & { bookmarked?: boolean }) {
   return (
-    <div className="flex flex-col flex-1 min-w-0 items-start justify-center">
+    <div className="flex flex-col min-w-0 items-start justify-center">
       <div className="relative flex flex-col gap-[12px] items-start w-full">
 
-        {/* 4:5 image well */}
-        <div className="aspect-[400/500] flex flex-col items-start w-full shrink-0 rounded-[6px] overflow-hidden border border-[rgba(227,227,227,0.4)]">
-          <div className="bg-[#e5eaf5] flex-1 min-h-px w-full" />
+        {/* 4:5 image well. The artwork is positioned against this box rather
+            than sized in flow, so its own proportions cannot stretch the well. */}
+        <div className="relative aspect-[400/500] w-full shrink-0 rounded-[6px] overflow-hidden border border-[rgba(227,227,227,0.4)] bg-[#e5eaf5]">
+          {image && (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={image} alt="" aria-hidden className="absolute inset-0 size-full object-cover" />
+          )}
         </div>
 
         {bookmarked && (
@@ -68,22 +69,19 @@ function ProductFeatureCard({
   );
 }
 
-const TILES: FeatureTile[] = Array.from({ length: 4 }, () => ({
-  title: "Title",
-  description: "Description",
-}));
-
 /**
  * Row of four 4:5 product tiles. Shared by "Outfit Features" and
  * "Social Features" — identical but for the title and the bookmark overlay.
  */
 export default function ProductFeaturesSection({
   title,
+  tiles,
   bookmarked = false,
   stackIndex,
   createHref,
 }: {
   title: string;
+  tiles: FeatureTile[];
   bookmarked?: boolean;
   stackIndex: number;
   /** The flow this section's Create pill opens. */
@@ -93,8 +91,8 @@ export default function ProductFeaturesSection({
     <StackedSection index={stackIndex}>
       <SectionHeading title={title} action={<CreateButton href={createHref} />} />
 
-      <div className="flex gap-[16px] items-start w-full">
-        {TILES.map((tile, i) => (
+      <div className="grid grid-cols-4 gap-[16px] items-start w-full">
+        {tiles.map((tile, i) => (
           <ProductFeatureCard key={i} {...tile} bookmarked={bookmarked} />
         ))}
       </div>
