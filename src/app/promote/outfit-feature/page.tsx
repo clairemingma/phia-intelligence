@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import NavBar from "@/components/NavBar";
-import FeatureRequestFlow from "@/components/FeatureRequestFlow";
+import OutfitFeatureFlow from "@/components/OutfitFeatureFlow";
 
 const SUBTITLE =
   "Style your products into complete looks shoppers can shop in a single tap.";
@@ -18,7 +18,7 @@ export default function OutfitFeaturePage() {
       <main className="flex flex-col items-stretch w-full">
         <NavBar />
         <div className="h-[68px] w-full" />
-        <FeatureRequestFlow title="Outfit Feature" subtitle={SUBTITLE} idPrefix="outfit" />
+        <OutfitFeatureFlow />
       </main>
     </div>
   );

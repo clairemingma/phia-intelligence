@@ -28,7 +28,7 @@ export default function FeatureRequestFlow({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [budget, setBudget] = useState("");
-  const submit = useFlowSubmit();
+  const { submit, overlay } = useFlowSubmit();
 
   return (
     <PromoteFlowShell title={title} subtitle={subtitle} crumbHref="/promote" preview={null}>
@@ -61,6 +61,8 @@ export default function FeatureRequestFlow({
 
         <FlowSubmitButton />
       </form>
+
+      {overlay}
     </PromoteFlowShell>
   );
 }

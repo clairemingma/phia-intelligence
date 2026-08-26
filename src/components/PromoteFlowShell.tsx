@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import SuccessOverlay from "@/components/SuccessOverlay";
 
 const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
 const GT = "var(--font-gt-super-display), 'Playfair Display', Georgia, serif";
@@ -10,16 +10,21 @@ const GT = "var(--font-gt-super-display), 'Playfair Display', Georgia, serif";
 /** The left half of the page gutter — these flows only have a left one. */
 const PAGE_GUTTER_LEFT = "pl-6 lg:pl-16 xl:pl-[120px]";
 
-/** Where every promote flow lands once its form has been submitted. */
-export const PROMOTE_SUCCESS_HREF = "/promote/thank-you";
-
 /**
- * Hands back the "this flow is done" action. The flows have nowhere to send a
- * submission yet, so it goes straight to the success screen.
+ * Hands back the "this flow is done" action, plus the acknowledgement it
+ * raises. Submitting flashes the success overlay over the form and clears
+ * itself, rather than navigating away — so the brand keeps its place and its
+ * work stays on screen behind it.
+ *
+ * Render `overlay` anywhere in the flow; it is fixed to the viewport, so it
+ * takes no part in the form's layout.
  */
-export function useFlowSubmit() {
-  const router = useRouter();
-  return () => router.push(PROMOTE_SUCCESS_HREF);
+export function useFlowSubmit(): { submit: () => void; overlay: ReactNode } {
+  const [submitted, setSubmitted] = useState(false);
+  return {
+    submit: () => setSubmitted(true),
+    overlay: submitted ? <SuccessOverlay onDone={() => setSubmitted(false)} /> : null,
+  };
 }
 
 /** The black pill that closes every promote flow. */

@@ -1,11 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef } from "react";
 
 /* eslint-disable @next/next/no-img-element */
 
-const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
 const GT = "var(--font-gt-super-display), 'Playfair Display', Georgia, serif";
 
 /**
@@ -26,25 +24,16 @@ const STAGGER_MS = 150;
 
 /** The copy follows the collage in, once the last frames are landing. */
 const HEADLINE_DELAY = 700;
-const LINK_DELAY = 840;
 
 /**
- * What a brand lands on once a promote flow has been submitted, and — as the
- * overlay variant — what the contact form flashes up on submit. The overlay
- * drops the back link and the navbar spacing, since it is centred in the
- * viewport and clears itself.
+ * What a submitted form flashes up: the collage assembles, the copy follows,
+ * and the whole thing clears itself. It carries no controls — there is nothing
+ * to confirm and nowhere to go, since the brand never left the page.
  *
  * The collage is a fixed 742px wide, so the section clips rather than letting a
  * narrow window scroll the whole page sideways; centering keeps the crop even.
  */
-export default function SubmissionSuccess({
-  variant = "page",
-}: {
-  variant?: "page" | "overlay";
-}) {
-  const overlay = variant === "overlay";
-  // The page owns the document heading; a transient announcement does not.
-  const Headline = overlay ? "p" : "h1";
+export default function SubmissionSuccess() {
   const rowRef = useRef<HTMLDivElement>(null);
 
   // The frames arrive in a fresh random order on every visit. The shuffle has
@@ -80,14 +69,7 @@ export default function SubmissionSuccess({
   }, []);
 
   return (
-    // 64px of air between the navbar and the top of the tallest frame. The bar
-    // is 69px tall but the page spacer above this is 68px, so the padding
-    // carries the extra pixel.
-    <section
-      className={`flex w-full flex-col items-center overflow-hidden ${
-        overlay ? "px-6 py-0" : "px-[64px] pt-[65px] pb-[60px]"
-      }`}
-    >
+    <section className="flex w-full flex-col items-center overflow-hidden px-6">
       <div className="flex flex-col gap-[48px] items-center">
 
         <div ref={rowRef} className="flex items-center justify-center">
@@ -103,24 +85,15 @@ export default function SubmissionSuccess({
           ))}
         </div>
 
-        <Headline
+        {/* A transient announcement, so it is not the document's heading */}
+        <p
           className="rise-in text-[32px] lg:text-[56px] leading-[1.1] tracking-[-1.28px] lg:tracking-[-2.24px] text-[#292929] text-center"
           style={{ fontFamily: GT, fontWeight: 300, animationDelay: `${HEADLINE_DELAY}ms` }}
         >
           Thanks for your request.
           <br />
           Our team will be in touch.
-        </Headline>
-
-        {!overlay && (
-        <Link
-          href="/promote"
-          className="rise-in text-[14px] leading-[16px] tracking-[0.14px] text-[#666] underline underline-offset-2 transition-opacity hover:opacity-60"
-          style={{ fontFamily: PP, fontWeight: 500, animationDelay: `${LINK_DELAY}ms` }}
-        >
-          Back to Promote
-        </Link>
-        )}
+        </p>
       </div>
     </section>
   );

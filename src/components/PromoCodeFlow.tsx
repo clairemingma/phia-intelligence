@@ -93,7 +93,7 @@ export default function PromoCodeFlow() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [notes, setNotes] = useState("");
-  const submit = useFlowSubmit();
+  const { submit, overlay } = useFlowSubmit();
 
   const previewTitle = title || DEFAULT_TITLE;
 
@@ -181,6 +181,8 @@ export default function PromoCodeFlow() {
 
         <FlowSubmitButton />
       </form>
+
+      {overlay}
     </PromoteFlowShell>
   );
 }

@@ -88,7 +88,7 @@ export default function SuccessOverlay({ onDone }: { onDone: () => void }) {
       className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-white transition-opacity motion-reduce:transition-none"
       style={{ opacity: visible ? 1 : 0, transitionDuration: `${FADE_MS}ms` }}
     >
-      <SubmissionSuccess variant="overlay" />
+      <SubmissionSuccess />
     </div>
   );
 }
