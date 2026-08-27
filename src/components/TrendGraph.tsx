@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import {
   AreaChart,
   Area,
@@ -8,7 +8,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
-import { MetricKey, buildData, buildCustomLabels, TOOLTIP_FORMAT, CURRENT_VALUES } from "@/lib/trendData";
+import { MetricKey, buildData, TOOLTIP_FORMAT, CURRENT_VALUES } from "@/lib/trendData";
 
 function niceAxisTicks(max: number): number[] {
   if (max <= 0) return [0, 0, 0, 0, 0, 0];
@@ -58,6 +58,9 @@ const PLOT_TOP = 8;
 const PLOT_BOTTOM_MARGIN = 16;
 const DEFAULT_CHART_HEIGHT = 320;
 
+/** Long enough to follow the line, short enough not to delay a comparison. */
+const ANIMATION_MS = 600;
+
 /**
  * The fill under the curve. A straight two-stop fade came out far paler than
  * the design, so these stops trace the falloff sampled off it: at a twentieth
@@ -82,7 +85,6 @@ interface Props {
    *  chrome leaves, so the caller does not have to know what that is. */
   outerHeight?: number;
   timeFilter: string;
-  customRange?: { start: string; end: string };
 }
 
 interface YTickProps {
@@ -139,7 +141,7 @@ function CustomTooltip({ active, payload, formatValue }: CustomTooltipProps) {
   );
 }
 
-export default function TrendGraph({ metricLabel, timeFilter, customRange, outerHeight }: Props) {
+export default function TrendGraph({ metricLabel, timeFilter, outerHeight }: Props) {
   const [isHovering, setIsHovering] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [chartWidth, setChartWidth] = useState(0);
@@ -162,8 +164,12 @@ export default function TrendGraph({ metricLabel, timeFilter, customRange, outer
 
   const metric    = metricLabel as MetricKey;
   const niceTicks = niceAxisTicks(CURRENT_VALUES[metric]);
-  const customLabels = customRange ? buildCustomLabels(customRange.start, customRange.end) : undefined;
-  const data      = buildData(metric, timeFilter, customLabels);
+
+  // Held steady between renders. The chart animates whenever this changes, so
+  // rebuilding it on every render — hovering included — would replay the
+  // animation constantly.
+  const data = useMemo(() => buildData(metric, timeFilter), [metric, timeFilter]);
+
   const labels    = data.map(d => d.label);
   const lastIndex = data.length - 1;
 
@@ -243,7 +249,12 @@ export default function TrendGraph({ metricLabel, timeFilter, customRange, outer
             // above; the falloff is carried by the gradient itself.
             fillOpacity={1}
             dot={renderDot}
-            isAnimationActive={false}
+            // The line travels to its new shape when the metric or the
+            // timeframe changes, so the switch reads as the same line moving
+            // rather than a different chart appearing.
+            isAnimationActive
+            animationDuration={ANIMATION_MS}
+            animationEasing="ease-out"
             activeDot={{ r: 5, fill: LINE_COLOR, stroke: "none" }}
           />
         </AreaChart>

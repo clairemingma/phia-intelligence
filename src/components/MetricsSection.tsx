@@ -1,8 +1,6 @@
 "use client";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import TrendGraph from "./TrendGraph";
-import { MONTH_NAMES, maskMMDDYYYY, parseMMDDYYYY, sameDay } from "@/lib/dates";
-
 /** The gap between metric cards, which the graph has to span as well. */
 const GRID_GAP = 16;
 
@@ -27,238 +25,6 @@ function ChevronDown() {
   );
 }
 
-function DateInput({
-  label,
-  value,
-  active,
-  onChange,
-  onClick,
-}: {
-  label: string;
-  value: string;
-  active: boolean;
-  onChange: (next: string) => void;
-  onClick: () => void;
-}) {
-  const [focused, setFocused] = useState(false);
-  const floating = active || focused || value.length > 0;
-  return (
-    <div
-      className="relative h-[44px] w-[140px] shrink-0 cursor-pointer select-none"
-      onClick={onClick}
-      style={{
-        background: "white",
-        border: `1px solid ${active ? "#000" : "rgba(0,0,0,0.08)"}`,
-        borderRadius: 6,
-      }}
-    >
-      <span
-        className="absolute left-[14px] pointer-events-none transition-all duration-150"
-        style={{
-          fontFamily: PP, fontWeight: 400, color: "rgba(12,10,8,0.6)",
-          ...(floating
-            ? { top: "6px",  fontSize: "10px", lineHeight: "14px", letterSpacing: "0.24px" }
-            : { top: "14px", fontSize: "12px", lineHeight: "16px" }),
-        }}
-      >
-        {label}
-      </span>
-      {/* Typeable as well as pickable, matching the create flows. Always present
-          so it can be tabbed into; its own clicks are held back so typing
-          cannot toggle the calendar shut. */}
-      <input
-        value={value}
-        inputMode="numeric"
-        autoComplete="off"
-        placeholder={floating ? "MM/DD/YYYY" : ""}
-        onChange={(e) => onChange(maskMMDDYYYY(e.target.value))}
-        onClick={(e) => e.stopPropagation()}
-        onFocus={() => { setFocused(true); if (!active) onClick(); }}
-        onBlur={() => setFocused(false)}
-        className="absolute left-[14px] right-[10px] bg-transparent p-0 outline-none placeholder:text-[rgba(12,10,8,0.35)]"
-        style={{
-          fontFamily: PP, fontWeight: 400, fontSize: 12, lineHeight: "16px", color: "#0c0a08",
-          top: floating ? 22 : 14,
-        }}
-      />
-    </div>
-  );
-}
-
-function MonthPanel({
-  year, month, startDate, endDate, today, onDateClick,
-}: {
-  year: number; month: number;
-  startDate: Date | null; endDate: Date | null; today: Date;
-  onDateClick: (d: Date) => void;
-}) {
-  const firstDow    = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const daysInPrev  = new Date(year, month, 0).getDate();
-  const totalCells  = Math.ceil((firstDow + daysInMonth) / 7) * 7;
-  const cells: { day: number; inMonth: boolean }[] = [];
-  for (let i = firstDow - 1; i >= 0; i--) cells.push({ day: daysInPrev - i, inMonth: false });
-  for (let d = 1; d <= daysInMonth; d++)   cells.push({ day: d, inMonth: true });
-  let nd = 1;
-  while (cells.length < totalCells)        cells.push({ day: nd++, inMonth: false });
-
-  const rangeActive = !!startDate && !!endDate && !sameDay(startDate, endDate);
-
-  return (
-    <div style={{ width: 252, fontFamily: PP }}>
-      <div className="grid grid-cols-7 mb-[4px]">
-        {["S","M","T","W","T","F","S"].map((d, i) => (
-          <div key={i} className="flex items-center justify-center h-[32px] text-[12px]" style={{ color: "#999", fontWeight: 400 }}>
-            {d}
-          </div>
-        ))}
-      </div>
-      <div className="grid grid-cols-7">
-        {cells.map((cell, i) => {
-          if (!cell.inMonth) return <div key={i} className="h-[40px]" />;
-          const date       = new Date(year, month, cell.day);
-          const isToday    = sameDay(date, today);
-          const isStart    = !!startDate && sameDay(date, startDate);
-          const isEnd      = !!endDate   && sameDay(date, endDate);
-          const isFuture   = date > today && !isToday;
-          const inRange    = rangeActive && date > startDate! && date < endDate!;
-          const isEndpoint = isStart || isEnd;
-          const showBand   = rangeActive && (inRange || isStart || isEnd);
-
-          const col  = i % 7;
-          const isFirstDay = cell.day === 1;
-          const isLastDay  = cell.day === daysInMonth;
-          const leftRound  = !isStart && !isEnd && (col === 0 || isFirstDay);
-          const rightRound = !isStart && !isEnd && (col === 6 || isLastDay);
-          const bandRadius = isStart ? "999px 0 0 999px"
-                           : isEnd   ? "0 999px 999px 0"
-                           : `${leftRound ? "8px" : "0"} ${rightRound ? "8px" : "0"} ${rightRound ? "8px" : "0"} ${leftRound ? "8px" : "0"}`;
-
-          return (
-            <div
-              key={i}
-              className="h-[40px] flex items-center justify-center"
-              onClick={() => !isFuture && onDateClick(date)}
-              style={{ cursor: isFuture ? "default" : "pointer" }}
-            >
-              <div style={{
-                width: 36, height: 36, position: "relative",
-                background: showBand ? "rgba(0,0,0,0.04)" : "transparent",
-                borderRadius: bandRadius,
-              }}>
-                <div style={{
-                  position: "absolute", inset: 0, borderRadius: "50%",
-                  background: isEndpoint ? "#1a1a1a" : "transparent",
-                  boxShadow: isToday && !isEndpoint ? "0 0 0 1px rgba(0,0,0,0.3)" : "none",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 14, lineHeight: "20px",
-                  fontWeight: isEndpoint || isToday ? 500 : 400,
-                  color: isEndpoint ? "white" : isFuture ? "rgba(0,0,0,0.25)" : "#1a1a1a",
-                }}>
-                  {cell.day}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function DualCalendar({
-  initStart, initEnd, onConfirm, onClose,
-}: {
-  initStart: string; initEnd: string;
-  onConfirm: (start: string, end: string) => void;
-  onClose: () => void;
-}) {
-  const today = new Date();
-  const [leftYear,  setLeftYear]  = useState(today.getMonth() === 0 ? today.getFullYear() - 1 : today.getFullYear());
-  const [leftMonth, setLeftMonth] = useState(today.getMonth() === 0 ? 11 : today.getMonth() - 1);
-  const rightMonth = (leftMonth + 1) % 12;
-  const rightYear  = leftMonth === 11 ? leftYear + 1 : leftYear;
-
-  function prevPair() {
-    if (leftMonth === 0) { setLeftMonth(11); setLeftYear(y => y - 1); }
-    else setLeftMonth(m => m - 1);
-  }
-  function nextPair() {
-    if (leftMonth === 11) { setLeftMonth(0); setLeftYear(y => y + 1); }
-    else setLeftMonth(m => m + 1);
-  }
-
-  const [tempStart, setTempStart] = useState(initStart);
-  const [tempEnd,   setTempEnd]   = useState(initEnd);
-  const startDate = parseMMDDYYYY(tempStart);
-  const endDate   = parseMMDDYYYY(tempEnd);
-
-  function fmt(d: Date) {
-    return `${String(d.getMonth() + 1).padStart(2,"0")}/${String(d.getDate()).padStart(2,"0")}/${d.getFullYear()}`;
-  }
-  function handleDateClick(date: Date) {
-    if (!startDate || (startDate && endDate)) { setTempStart(fmt(date)); setTempEnd(""); }
-    else { if (date >= startDate) setTempEnd(fmt(date)); else { setTempStart(fmt(date)); setTempEnd(""); } }
-  }
-
-  const NAV_BTN = "w-[28px] h-[28px] flex items-center justify-center rounded-[4px] hover:bg-[rgba(0,0,0,0.04)] transition-colors shrink-0 cursor-pointer";
-
-  return (
-    <div
-      className="absolute right-0 top-[calc(100%+4px)] z-[60] bg-white rounded-[8px] select-none"
-      style={{
-        border: "1px solid rgba(0,0,0,0.08)",
-        boxShadow: "0px 1px 3px rgba(0,5,20,0.06), 0px 2px 8px -1px rgba(0,5,20,0.04)",
-        padding: "25px",
-        width: 603,
-        fontFamily: PP,
-      }}
-    >
-      {/* Headers */}
-      <div className="flex items-center gap-[24px]">
-        <div className="flex items-center flex-1 min-w-0">
-          <button onClick={prevPair} className={NAV_BTN}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <g transform="translate(4.5, 2.5)">
-                <path d="M5.85414 10.1465C5.9006 10.193 5.93745 10.2481 5.96259 10.3088C5.98773 10.3695 6.00067 10.4346 6.00067 10.5003C6.00067 10.566 5.98773 10.631 5.96259 10.6917C5.93745 10.7524 5.9006 10.8076 5.85414 10.854C5.80769 10.9005 5.75254 10.9373 5.69184 10.9625C5.63115 10.9876 5.56609 11.0006 5.50039 11.0006C5.4347 11.0006 5.36964 10.9876 5.30895 10.9625C5.24825 10.9373 5.1931 10.9005 5.14664 10.854L0.146643 5.85403C0.100155 5.80759 0.0632757 5.75245 0.0381136 5.69175C0.0129514 5.63105 0 5.56599 0 5.50028C0 5.43457 0.0129514 5.36951 0.0381136 5.30881C0.0632757 5.24811 0.100155 5.19296 0.146643 5.14653L5.14664 0.146528C5.24046 0.0527077 5.36771 0 5.50039 0C5.63308 0 5.76032 0.0527077 5.85414 0.146528C5.94796 0.240348 6.00067 0.367596 6.00067 0.500278C6.00067 0.63296 5.94796 0.760208 5.85414 0.854028L1.20727 5.50028L5.85414 10.1465Z" fill="#1A1A1A"/>
-              </g>
-            </svg>
-          </button>
-          <span className="flex-1 text-center" style={{ fontSize: 14, fontWeight: 500, color: "#1a1a1a", lineHeight: "normal" }}>
-            {MONTH_NAMES[leftMonth]} {leftYear}
-          </span>
-        </div>
-        <div style={{ width: 1 }} />
-        <div className="flex items-center flex-1 min-w-0">
-          <span className="flex-1 text-center" style={{ fontSize: 14, fontWeight: 500, color: "#1a1a1a", lineHeight: "normal" }}>
-            {MONTH_NAMES[rightMonth]} {rightYear}
-          </span>
-          <button onClick={nextPair} className={NAV_BTN}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <g transform="translate(5.5, 2.5)">
-                <path d="M5.85403 5.85403L0.854028 10.854C0.807573 10.9005 0.752423 10.9373 0.691726 10.9625C0.63103 10.9876 0.565975 11.0006 0.500278 11.0006C0.434581 11.0006 0.369526 10.9876 0.30883 10.9625C0.248133 10.9373 0.192983 10.9005 0.146528 10.854C0.100073 10.8076 0.0632225 10.7524 0.0380812 10.6917C0.0129398 10.631 0 10.566 0 10.5003C0 10.4346 0.0129398 10.3695 0.0380812 10.3088C0.0632225 10.2481 0.100073 10.193 0.146528 10.1465L4.7934 5.50028L0.146528 0.854028C0.0527074 0.760208 0 0.63296 0 0.500278C0 0.367596 0.0527074 0.240348 0.146528 0.146528C0.240348 0.0527077 0.367596 0 0.500278 0C0.63296 0 0.760208 0.0527077 0.854028 0.146528L5.85403 5.14653C5.90052 5.19296 5.9374 5.24811 5.96256 5.30881C5.98772 5.36951 6.00067 5.43457 6.00067 5.50028C6.00067 5.56599 5.98772 5.63105 5.96256 5.69175C5.9374 5.75245 5.90052 5.80759 5.85403 5.85403Z" fill="#1A1A1A"/>
-              </g>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      {/* Month grids */}
-      <div className="flex items-start gap-[24px] mt-[8px]">
-        <MonthPanel year={leftYear}  month={leftMonth}  startDate={startDate} endDate={endDate} today={today} onDateClick={handleDateClick} />
-        <div style={{ width: 1, alignSelf: "stretch", background: "rgba(0,0,0,0.08)" }} />
-        <MonthPanel year={rightYear} month={rightMonth} startDate={startDate} endDate={endDate} today={today} onDateClick={handleDateClick} />
-      </div>
-
-      {/* Footer */}
-      <div className="flex items-center justify-end gap-[20px] mt-[16px]">
-        <button onClick={onClose}                                             className="text-[14px] cursor-pointer hover:opacity-60 transition-opacity" style={{ fontFamily: PP, fontWeight: 500, color: "#1a1a1a" }}>Cancel</button>
-        <button onClick={() => { onConfirm(tempStart, tempEnd); onClose(); }} className="text-[14px] cursor-pointer hover:opacity-60 transition-opacity" style={{ fontFamily: PP, fontWeight: 500, color: "#1a1a1a" }}>Apply</button>
-      </div>
-    </div>
-  );
-}
-
 function CaretDown({ color }: { color: string }) {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0 size-[16px]">
@@ -267,7 +33,7 @@ function CaretDown({ color }: { color: string }) {
   );
 }
 
-const TIME_FILTERS = ["7D", "30D", "90D", "180D", "YTD", "All Time", "Custom Range"];
+const TIME_FILTERS = ["7D", "30D", "90D", "180D", "YTD", "All Time"];
 
 const METRICS = [
   { label: "Product Views",       value: "48,390",  change: "22%", positive: true  },
@@ -281,12 +47,8 @@ export default function MetricsSection() {
   const [activeFilter, setActiveFilter] = useState("7D");
   const [activeMetric, setActiveMetric] = useState(0);
   const [dropdownOpen, setDropdownOpen]   = useState(false);
-  const [calendarOpen, setCalendarOpen]   = useState(false);
-  const [customStart,  setCustomStart]    = useState("");
-  const [customEnd,    setCustomEnd]      = useState("");
 
   const dropdownRef     = useRef<HTMLDivElement>(null);
-  const calendarWrapRef = useRef<HTMLDivElement>(null);
   const gridRef         = useRef<HTMLDivElement>(null);
 
   /** The height the cards settle on, which the graph is sized against below lg. */
@@ -329,32 +91,10 @@ export default function MetricsSection() {
     return () => { document.removeEventListener("mousedown", onClickOutside); window.removeEventListener("scroll", onScroll, true); };
   }, [dropdownOpen]);
 
-  useEffect(() => {
-    if (!calendarOpen) return;
-    function onClickOutside(e: MouseEvent) {
-      if (calendarWrapRef.current && !calendarWrapRef.current.contains(e.target as Node)) setCalendarOpen(false);
-    }
-    function onScroll() { setCalendarOpen(false); }
-    document.addEventListener("mousedown", onClickOutside);
-    window.addEventListener("scroll", onScroll, true);
-    return () => { document.removeEventListener("mousedown", onClickOutside); window.removeEventListener("scroll", onScroll, true); };
-  }, [calendarOpen]);
-
   function selectFilter(f: string) {
     setActiveFilter(f);
     setDropdownOpen(false);
-    if (f !== "Custom Range") {
-      setCalendarOpen(false);
-      setCustomStart("");
-      setCustomEnd("");
-    }
   }
-
-  const startDate  = parseMMDDYYYY(customStart);
-  const endDate    = parseMMDDYYYY(customEnd);
-  const customRange = activeFilter === "Custom Range" && startDate && endDate
-    ? { start: customStart, end: customEnd }
-    : undefined;
 
   return (
     <div className="flex flex-col gap-[48px] items-start lg:items-end px-6 lg:px-[120px] py-[64px] w-full">
@@ -373,21 +113,6 @@ export default function MetricsSection() {
           </p>
 
           <div className="flex items-center gap-[8px]">
-            {activeFilter === "Custom Range" && (
-              <div className="relative flex items-center gap-[8px]" ref={calendarWrapRef}>
-                <DateInput label="Start date" value={customStart} active={calendarOpen} onChange={setCustomStart} onClick={() => setCalendarOpen(o => !o)} />
-                <DateInput label="End date"   value={customEnd}   active={calendarOpen} onChange={setCustomEnd}   onClick={() => setCalendarOpen(o => !o)} />
-                {calendarOpen && (
-                  <DualCalendar
-                    initStart={customStart}
-                    initEnd={customEnd}
-                    onConfirm={(s, e) => { setCustomStart(s); setCustomEnd(e); }}
-                    onClose={() => setCalendarOpen(false)}
-                  />
-                )}
-              </div>
-            )}
-
             {/* Dropdown trigger */}
             <div className="relative" ref={dropdownRef}>
               <button
@@ -486,7 +211,6 @@ export default function MetricsSection() {
       <TrendGraph
         metricLabel={METRICS[activeMetric].label}
         timeFilter={activeFilter}
-        customRange={customRange}
         outerHeight={twoUp && cardHeight ? cardHeight * 2 + GRID_GAP : undefined}
       />
 

@@ -44,29 +44,15 @@ export const X_LABELS: Record<string, string[]> = {
   "180D":         ["Jan 23", "Feb 8", "Feb 24", "Mar 13", "Mar 29", "Apr 14", "May 1", "May 17", "Jun 2", "Jun 19", "Jul 5", "Jul 22"],
   "YTD":          ["Jan 1", "Jan 19", "Feb 6", "Feb 25", "Mar 15", "Apr 3", "Apr 21", "May 10", "May 28", "Jun 16", "Jul 4", "Jul 22"],
   "All Time":     ["Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
-  "Custom Range": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
 };
 
-const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-
-export function buildCustomLabels(start: string, end: string): string[] {
-  const s = new Date(start);
-  const e = new Date(end);
-  if (isNaN(s.getTime()) || isNaN(e.getTime()) || s >= e) return X_LABELS["Custom Range"];
-  const n = 12;
-  const step = (e.getTime() - s.getTime()) / (n - 1);
-  const diffDays = (e.getTime() - s.getTime()) / 86_400_000;
-  return Array.from({ length: n }, (_, i) => {
-    const d = new Date(s.getTime() + step * i);
-    if (diffDays > 365) return `${MONTHS[d.getMonth()]} '${String(d.getFullYear()).slice(2)}`;
-    return `${MONTHS[d.getMonth()]} ${d.getDate()}`;
-  });
-}
-
-export function buildData(metric: MetricKey, timeFilter: string, customLabels?: string[]) {
-  const labels = customLabels ?? X_LABELS[timeFilter] ?? X_LABELS["All Time"];
+export function buildData(metric: MetricKey, timeFilter: string) {
+  const labels = X_LABELS[timeFilter] ?? X_LABELS["All Time"];
   const n      = labels.length;
   const seed   = METRIC_KEYS.indexOf(metric);
+  // Every window is twelve points, so without a phase of its own each
+  // timeframe drew the same line under different labels.
+  const windowPhase = Math.max(0, Object.keys(X_LABELS).indexOf(timeFilter)) * 1.9;
   const { positive } = CHANGES[metric];
   const current = CURRENT_VALUES[metric];
   const { pct } = CHANGES[metric];
@@ -76,8 +62,8 @@ export function buildData(metric: MetricKey, timeFilter: string, customLabels?: 
     const t = i / Math.max(n - 1, 1);
     const trend = positive ? t * 0.55 : (1 - t) * 0.55;
     const wave  =
-      Math.sin(seed * 2.1 + i * 1.4) * 0.22 +
-      Math.cos(seed * 3.7 + i * 2.8) * 0.13;
+      Math.sin(seed * 2.1 + windowPhase + i * 1.4) * 0.22 +
+      Math.cos(seed * 3.7 + windowPhase + i * 2.8) * 0.13;
     return Math.max(0.03, Math.min(0.97, 0.22 + trend + wave));
   });
 
