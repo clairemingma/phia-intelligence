@@ -15,10 +15,14 @@ export default function SectionHeading({
   title,
   description,
   action,
+  shrinkOnMobile = false,
 }: {
   title: string;
   description?: string;
   action?: ReactNode;
+  /** Steps the title down on phones. For the promote index, whose headings
+   *  are list rows rather than section banners. */
+  shrinkOnMobile?: boolean;
 }) {
   return (
     <div className="flex flex-col gap-[16px] items-start w-full shrink-0">
@@ -28,7 +32,11 @@ export default function SectionHeading({
       >
         <div className="flex flex-col gap-[8px] items-start min-w-0">
           <h2
-            className="text-[28px] lg:text-[36px] leading-[32px] lg:leading-[40px] tracking-[-0.72px] text-[#1a1a1a] lg:whitespace-nowrap"
+            className={`${
+              shrinkOnMobile
+                ? "text-[28px] leading-[32px] lg:text-[36px] lg:leading-[40px]"
+                : "text-[36px] leading-[40px]"
+            } tracking-[-0.72px] text-[#1a1a1a] lg:whitespace-nowrap`}
             style={{ fontFamily: GT, fontWeight: 300 }}
           >
             {title}

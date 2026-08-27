@@ -1,12 +1,15 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useId, useRef, useState, type ReactNode } from "react";
 import { PillAction, PILL_ICON_REMOVE } from "@/components/CoverUpload";
+import { isOwnBrand } from "@/lib/brand";
 
 /* eslint-disable @next/next/no-img-element */
 
 const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
 const MONO = "var(--font-roboto-mono), ui-monospace, monospace";
+
+
 
 /**
  * What a slot can hold. Both the outfit rail and the editorial grid pick from
@@ -53,16 +56,21 @@ export default function ProductSearchField({
   available,
   onSelect,
   onRemove,
+  grip,
 }: {
   /** Catalogue entries not already placed in another row. */
   available: PickableProduct[];
   onSelect: (productId: string) => void;
   /** Omitted on the first slot, which the form always keeps. */
   onRemove?: () => void;
+  /** The handle this row is dragged by, where the run can be reordered. */
+  grip?: ReactNode;
 }) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
+  // Only arrow-key navigation is marked; pointing at a row is not.
+  const [viaKeyboard, setViaKeyboard] = useState(false);
   const listId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -88,6 +96,7 @@ export default function ProductSearchField({
       }
       if (!results.length) return;
       const step = e.key === "ArrowDown" ? 1 : -1;
+      setViaKeyboard(true);
       setActive((activeIndex + step + results.length) % results.length);
       return;
     }
@@ -111,7 +120,7 @@ export default function ProductSearchField({
         }}
         // The open row has to outrank its siblings, or a later row's field
         // paints over the list and takes the clicks meant for it.
-        className={`absolute inset-x-0 top-0 overflow-hidden border bg-white transition-colors ${
+        className={`group absolute inset-x-0 top-0 overflow-hidden border bg-white transition-colors ${
           open
             ? "z-30 rounded-[30px] border-[#1a1a1a]"
             : "z-10 rounded-[999px] border-[#d2cecb]"
@@ -122,7 +131,7 @@ export default function ProductSearchField({
             the bins line up down the column. */}
         <div
           className={`flex h-[58px] items-center gap-[10px] pl-[15px] ${
-            onRemove ? "pr-[18px]" : "pr-[24px]"
+            onRemove || grip ? "pr-[18px]" : "pr-[24px]"
           }`}
         >
           <img
@@ -144,21 +153,24 @@ export default function ProductSearchField({
             onChange={(e) => {
               setQuery(e.target.value);
               setActive(0);
+              setViaKeyboard(false);
               setOpen(true);
             }}
             onFocus={() => setOpen(true)}
             onBlur={() => setOpen(false)}
             onKeyDown={onKeyDown}
-            placeholder="Paste URL or search"
-            aria-label="Paste URL or search"
+            placeholder="Search for a product or paste a URL"
+            aria-label="Search for a product or paste a URL"
             className="h-full min-w-0 flex-1 bg-transparent text-[16px] leading-[28px] tracking-[0.16px] text-[#0c0a08] outline-none placeholder:text-[rgba(12,10,8,0.6)]"
             style={{ fontFamily: PP, fontWeight: 400 }}
           />
+          {grip}
           {onRemove && (
             <PillAction
               icon={PILL_ICON_REMOVE}
               label="Remove this product slot"
               onClick={onRemove}
+              revealOnHover
             />
           )}
         </div>
@@ -189,10 +201,12 @@ export default function ProductSearchField({
                   <button
                     type="button"
                     onMouseDown={(e) => e.preventDefault()}
-                    onMouseEnter={() => setActive(i)}
+                    // Pointing still aims Enter at the row, but leaves no mark.
+                    onMouseEnter={() => {
+                      setActive(i);
+                      setViaKeyboard(false);
+                    }}
                     onClick={() => choose(p)}
-                    // The row is marked on the type rather than with a block of
-                    // fill, so the list stays as quiet as the rest of the form.
                     className="flex w-full cursor-pointer items-center gap-[10px] py-[8px] pr-[24px] pl-[15px] text-left"
                   >
                     <img
@@ -200,7 +214,7 @@ export default function ProductSearchField({
                       alt=""
                       className="size-[28px] shrink-0 rounded-full bg-[#f2f0ee] object-cover"
                     />
-                    {p.brand && (
+                    {p.brand && !isOwnBrand(p.brand) && (
                       <span
                         className="shrink-0 text-[11px] leading-[20px] tracking-[0.66px] whitespace-nowrap uppercase text-[#929292]"
                         style={{ fontFamily: MONO, fontWeight: 400 }}
@@ -210,7 +224,7 @@ export default function ProductSearchField({
                     )}
                     <span
                       className={`min-w-0 flex-1 truncate text-[14px] leading-[20px] text-[#1a1a1a] ${
-                        i === activeIndex ? "underline underline-offset-[3px]" : ""
+                        viaKeyboard && i === activeIndex ? "underline underline-offset-[3px]" : ""
                       }`}
                       style={{ fontFamily: PP, fontWeight: 500 }}
                     >
@@ -218,7 +232,7 @@ export default function ProductSearchField({
                     </span>
                     <span
                       className={`shrink-0 text-[14px] leading-[20px] transition-colors ${
-                        i === activeIndex ? "text-[#1a1a1a]" : "text-[#666]"
+                        viaKeyboard && i === activeIndex ? "text-[#1a1a1a]" : "text-[#666]"
                       }`}
                       style={{ fontFamily: PP, fontWeight: 400 }}
                     >

@@ -2,14 +2,26 @@
 
 import { useEffect, useRef, useState } from "react";
 import FloatingInput from "@/components/FloatingInput";
-import CoverUpload from "@/components/CoverUpload";
+import DateField from "@/components/DateField";
+import CoverUpload, {
+  FilledPill,
+  GripAction,
+  PillAction,
+  PILL_ICON_EDIT,
+  PILL_ICON_REMOVE,
+} from "@/components/CoverUpload";
 import StepButton from "@/components/StepButton";
-import { useProductSlots } from "@/components/ProductSlots";
-import EditorialPhonePreview from "@/components/EditorialPhonePreview";
+import ProductSearchField from "@/components/ProductSearchField";
+import { useReorder } from "@/components/useReorder";
+import { AddButton } from "@/components/ProductSlots";
+import EditorialPhonePreview, {
+  type EditorialBlockView,
+} from "@/components/EditorialPhonePreview";
 import {
   EDITORIAL_PLACEMENTS,
   type EditorialPlacement,
 } from "@/lib/editorialPlacements";
+import { isOwnBrand } from "@/lib/brand";
 import PromoteFlowShell, {
   FlowSubmitButton,
   scrollFlowToTop,
@@ -23,6 +35,29 @@ const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
 /* ------------------------------------------------------------------ */
 
 type PlacementId = EditorialPlacement["id"];
+
+/**
+ * The editorial body is built a block at a time — a header, a line of copy, or
+ * a product — so the brand can order them however the piece reads rather than
+ * filling a fixed shape.
+ */
+type BlockKind = "header" | "description" | "product";
+type EditorialBlock = {
+  key: string;
+  kind: BlockKind;
+  /** Copy, for a header or a description. */
+  text: string;
+  /** What a product block holds, once chosen. */
+  productId: string | null;
+};
+
+let blockSeed = 0;
+const newBlock = (kind: BlockKind): EditorialBlock => ({
+  key: `block-${++blockSeed}`,
+  kind,
+  text: "",
+  productId: null,
+});
 
 /** Plain bordered card; selecting it fills the whole card phia blue. */
 function PlacementCard({
@@ -40,7 +75,7 @@ function PlacementCard({
       role="radio"
       aria-checked={selected}
       onClick={onSelect}
-      className={`flex h-[120px] flex-1 min-w-0 cursor-pointer flex-col items-start justify-center gap-[4px] rounded-[6px] border px-[18px] py-[14px] text-left transition-colors duration-200 ${
+      className={`flex min-h-[120px] flex-1 min-w-0 cursor-pointer flex-col items-start justify-center gap-[4px] rounded-[6px] border px-[14px] py-[14px] text-left transition-colors duration-200 lg:h-[120px] lg:px-[18px] ${
         selected
           ? "border-[#002d9f] bg-[#002d9f]"
           : "border-[#e3e3e3] bg-white hover:border-[#9a9a9a]"
@@ -88,12 +123,93 @@ export default function EditorialFeatureFlow() {
   const [budget, setBudget] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  // The picker offers whatever the selected editorial is made of, and starts
-  // over when that changes.
-  const { picked, node: productSlots } = useProductSlots({
-    catalogue: placement.products,
-    resetOn: placement.id,
-  });
+
+  const [blocks, setBlocks] = useState<EditorialBlock[]>([newBlock("product")]);
+
+  // Switching placement would leave blocks holding products that no longer
+  // exist, so they start over. Adjusting during render rather than in an effect
+  // keeps the stale rows from painting first.
+  const [placementToken, setPlacementToken] = useState(placement.id);
+  if (placementToken !== placement.id) {
+    setPlacementToken(placement.id);
+    setBlocks([newBlock("product")]);
+  }
+
+  const updateBlock = (key: string, patch: Partial<EditorialBlock>) =>
+    setBlocks((prev) => prev.map((b) => (b.key === key ? { ...b, ...patch } : b)));
+  const removeBlock = (key: string) =>
+    setBlocks((prev) => prev.filter((b) => b.key !== key));
+  const addBlock = (kind: BlockKind) => setBlocks((prev) => [...prev, newBlock(kind)]);
+  // Lifted out and put back, so a block can be dragged anywhere in the run.
+  const moveBlock = (from: number, to: number) =>
+    setBlocks((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+  const reorder = useReorder({ items: blocks, onMove: moveBlock });
+
+  // A brand places its own products and no one else's. In an inclusion the
+  // peers are already in the edit — Phia put them there.
+  const ownProducts = placement.products.filter((p) => isOwnBrand(p.brand));
+  const peerProducts = placement.products.filter((p) => !isOwnBrand(p.brand));
+
+  const chosenIds = blocks.flatMap((b) => (b.productId ? [b.productId] : []));
+
+  // Until the brand has authored something, the preview shows the editorial as
+  // it already stands rather than an empty shell.
+  const touched = blocks.some((b) => b.text.trim() || b.productId);
+
+  // Consecutive products become one grid, so a run of them reads as a set
+  // rather than a column of single tiles.
+  const authoredBlocks: EditorialBlockView[] = blocks.reduce<EditorialBlockView[]>(
+    (out, b) => {
+      if (b.kind === "product") {
+        const product = placement.products.find((p) => p.id === b.productId);
+        if (!product) return out;
+        const last = out.at(-1);
+        if (last?.kind === "products") {
+          out[out.length - 1] = { kind: "products", products: [...last.products, product] };
+        } else {
+          out.push({ kind: "products", products: [product] });
+        }
+        return out;
+      }
+      if (!b.text.trim()) return out;
+      out.push({ kind: b.kind, text: b.text.trim() });
+      return out;
+    },
+    [],
+  );
+
+  /**
+   * The peers belong to the edit whatever the brand does — Phia placed them —
+   * so they follow whatever it puts in, rather than vanishing the moment it
+   * starts picking.
+   */
+  const withPeers = (list: EditorialBlockView[]): EditorialBlockView[] => {
+    if (!peerProducts.length) return list;
+    const lastGrid = list.map((b) => b.kind).lastIndexOf("products");
+    if (lastGrid === -1) return [...list, { kind: "products", products: peerProducts }];
+    return list.map((b, i) =>
+      i === lastGrid && b.kind === "products"
+        ? { kind: "products", products: [...b.products, ...peerProducts] }
+        : b,
+    );
+  };
+
+  const previewBlocks: EditorialBlockView[] = touched
+    ? withPeers(authoredBlocks)
+    : [
+        ...(placement.section
+          ? ([
+              { kind: "header", text: placement.section.title },
+              { kind: "description", text: placement.section.body },
+            ] as EditorialBlockView[])
+          : []),
+        { kind: "products", products: placement.products },
+      ];
 
   const [cover, setCover] = useState<{ file: File; url: string } | null>(null);
 
@@ -128,12 +244,12 @@ export default function EditorialFeatureFlow() {
       preview={
         <EditorialPhonePreview
           placement={placement}
-          // Nothing chosen yet still needs to read as an editorial, so the
-          // preview shows the whole edit until the brand starts picking.
-          products={picked.length ? picked : placement.products}
+          // Each step is a fresh thing to scroll, so the hint plays again.
+          replayHintOn={`${placement.id}-${step}`}
+          blocks={previewBlocks}
           title={title || placement.title}
           description={description || placement.description}
-          cover={cover?.url}
+          cover={placement.authoredByBrand ? cover?.url : undefined}
         />
       }
     >
@@ -145,7 +261,11 @@ export default function EditorialFeatureFlow() {
           goToStep(2);
         }}
       >
-        <div className="flex w-full gap-[16px] items-start" role="radiogroup" aria-label="Placement type">
+        <div
+          className="flex w-full gap-[16px] items-stretch"
+          role="radiogroup"
+          aria-label="Placement type"
+        >
           {EDITORIAL_PLACEMENTS.map((p) => (
             <PlacementCard
               key={p.id}
@@ -171,31 +291,37 @@ export default function EditorialFeatureFlow() {
           prefix="$"
         />
         {/* Timeframe reads as a range, so it is two boxes on one row */}
-        <div className="flex w-full gap-[16px]">
+        <div className="flex w-full flex-col gap-[16px] lg:flex-row">
           <div className="min-w-0 flex-1">
-            <FloatingInput
+            <DateField
               id="editorial-start"
-              label="Start"
+              label="Start date"
               value={startDate}
               onChange={setStartDate}
             />
           </div>
           <div className="min-w-0 flex-1">
-            <FloatingInput
+            <DateField
               id="editorial-end"
-              label="End"
+              label="End date"
               value={endDate}
               onChange={setEndDate}
+              // An end cannot precede the start it belongs to.
+              min={startDate}
             />
           </div>
         </div>
 
-        <CoverUpload
-          file={cover?.file ?? null}
-          previewUrl={cover?.url ?? null}
-          onPick={pickCover}
-          onClear={() => pickCover(null)}
-        />
+        {/* Phia shoots an inclusion, so there is no cover for the brand to
+            give — and no section copy for it to write. */}
+        {placement.authoredByBrand && (
+          <CoverUpload
+            file={cover?.file ?? null}
+            previewUrl={cover?.url ?? null}
+            onPick={pickCover}
+            onClear={() => pickCover(null)}
+          />
+        )}
 
         <StepButton label="Select Products" direction="next" onClick={() => goToStep(2)} />
       </form>
@@ -203,7 +329,98 @@ export default function EditorialFeatureFlow() {
       <div className="flex w-full flex-col gap-[24px] items-start">
         <StepButton label="Back" direction="back" onClick={() => goToStep(1)} />
 
-        {productSlots}
+        {/* The body in the order it will read. Every block can be dropped, so
+            an editorial can be emptied and started again. */}
+        <div className="flex w-full flex-col items-start gap-[16px]">
+          {blocks.map((block, i) => {
+            const product = placement.products.find((p) => p.id === block.productId);
+            // Only worth a handle once there is another row to trade with.
+            const grip =
+              blocks.length > 1 ? (
+                <GripAction
+                  label="Drag to reorder"
+                  active={reorder.dragKey === block.key}
+                  handlers={reorder.gripProps(block.key)}
+                />
+              ) : null;
+
+            if (block.kind === "product") {
+              return (
+                <div
+                  key={block.key}
+                  {...reorder.rowProps(block.key, i)}
+                  {...reorder.rowDragProps(block.key)}
+                >
+                  {product ? (
+                    <FilledPill
+                      image={product.image}
+                      name={`${product.name} · ${product.price}`}
+                    >
+                      {grip}
+                      <PillAction
+                        icon={PILL_ICON_EDIT}
+                        label={`Change ${product.name}`}
+                        onClick={() => updateBlock(block.key, { productId: null })}
+                        revealOnHover
+                      />
+                      <PillAction
+                        icon={PILL_ICON_REMOVE}
+                        label={`Remove ${product.name}`}
+                        onClick={() => removeBlock(block.key)}
+                        revealOnHover
+                      />
+                    </FilledPill>
+                  ) : (
+                    <ProductSearchField
+                      available={ownProducts.filter((p) => !chosenIds.includes(p.id))}
+                      onSelect={(productId) => updateBlock(block.key, { productId })}
+                      grip={grip}
+                      onRemove={() => removeBlock(block.key)}
+                    />
+                  )}
+                </div>
+              );
+            }
+
+            const isHeader = block.kind === "header";
+            return (
+              <div
+                  key={block.key}
+                  {...reorder.rowProps(block.key, i)}
+                  {...reorder.rowDragProps(block.key)}
+                >
+                <FloatingInput
+                  id={`editorial-${block.key}`}
+                  label={isHeader ? "Header" : "Description"}
+                  value={block.text}
+                  onChange={(v) => updateBlock(block.key, { text: v })}
+                  trailing={
+                    <>
+                      {grip}
+                      <PillAction
+                        icon={PILL_ICON_REMOVE}
+                        label={isHeader ? "Remove header" : "Remove description"}
+                        onClick={() => removeBlock(block.key)}
+                        revealOnHover
+                      />
+                    </>
+                  }
+                />
+              </div>
+            );
+          })}
+
+          {/* The three things a body is made of, on one line */}
+          <div className="flex flex-wrap items-center gap-[8px]">
+            <AddButton label="Add product" onClick={() => addBlock("product")} />
+            {placement.authoredByBrand && (
+              <>
+                <AddButton label="Add header" onClick={() => addBlock("header")} />
+                <AddButton label="Add description" onClick={() => addBlock("description")} />
+              </>
+            )}
+          </div>
+        </div>
 
         <FlowSubmitButton type="button" onClick={submit} />
 

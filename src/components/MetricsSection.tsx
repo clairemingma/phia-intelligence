@@ -1,6 +1,10 @@
 "use client";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import TrendGraph from "./TrendGraph";
+import { MONTH_NAMES, maskMMDDYYYY, parseMMDDYYYY, sameDay } from "@/lib/dates";
+
+/** The gap between metric cards, which the graph has to span as well. */
+const GRID_GAP = 16;
 
 const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
 const GT = "var(--font-gt-super-display), Georgia, serif";
@@ -23,30 +27,21 @@ function ChevronDown() {
   );
 }
 
-const MONTH_NAMES = [
-  "January","February","March","April","May","June",
-  "July","August","September","October","November","December",
-];
-
-function parseMMDDYYYY(s: string): Date | null {
-  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (!m) return null;
-  const d = new Date(+m[3], +m[1] - 1, +m[2]);
-  return isFinite(d.getTime()) ? d : null;
-}
-
 function DateInput({
   label,
   value,
   active,
+  onChange,
   onClick,
 }: {
   label: string;
   value: string;
   active: boolean;
+  onChange: (next: string) => void;
   onClick: () => void;
 }) {
-  const hasContent = active || value.length > 0;
+  const [focused, setFocused] = useState(false);
+  const floating = active || focused || value.length > 0;
   return (
     <div
       className="relative h-[44px] w-[140px] shrink-0 cursor-pointer select-none"
@@ -61,21 +56,31 @@ function DateInput({
         className="absolute left-[14px] pointer-events-none transition-all duration-150"
         style={{
           fontFamily: PP, fontWeight: 400, color: "rgba(12,10,8,0.6)",
-          ...(hasContent
+          ...(floating
             ? { top: "6px",  fontSize: "10px", lineHeight: "14px", letterSpacing: "0.24px" }
             : { top: "14px", fontSize: "12px", lineHeight: "16px" }),
         }}
       >
         {label}
       </span>
-      {hasContent && (
-        <span
-          className="absolute left-[14px] pointer-events-none"
-          style={{ fontFamily: PP, fontWeight: 400, top: "22px", fontSize: "12px", lineHeight: "16px", color: "#0c0a08" }}
-        >
-          {value || "MM/DD/YYYY"}
-        </span>
-      )}
+      {/* Typeable as well as pickable, matching the create flows. Always present
+          so it can be tabbed into; its own clicks are held back so typing
+          cannot toggle the calendar shut. */}
+      <input
+        value={value}
+        inputMode="numeric"
+        autoComplete="off"
+        placeholder={floating ? "MM/DD/YYYY" : ""}
+        onChange={(e) => onChange(maskMMDDYYYY(e.target.value))}
+        onClick={(e) => e.stopPropagation()}
+        onFocus={() => { setFocused(true); if (!active) onClick(); }}
+        onBlur={() => setFocused(false)}
+        className="absolute left-[14px] right-[10px] bg-transparent p-0 outline-none placeholder:text-[rgba(12,10,8,0.35)]"
+        style={{
+          fontFamily: PP, fontWeight: 400, fontSize: 12, lineHeight: "16px", color: "#0c0a08",
+          top: floating ? 22 : 14,
+        }}
+      />
     </div>
   );
 }
@@ -87,9 +92,6 @@ function MonthPanel({
   startDate: Date | null; endDate: Date | null; today: Date;
   onDateClick: (d: Date) => void;
 }) {
-  function sameDay(a: Date, b: Date) {
-    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-  }
   const firstDow    = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const daysInPrev  = new Date(year, month, 0).getDate();
@@ -287,9 +289,15 @@ export default function MetricsSection() {
   const calendarWrapRef = useRef<HTMLDivElement>(null);
   const gridRef         = useRef<HTMLDivElement>(null);
 
+  /** The height the cards settle on, which the graph is sized against below lg. */
+  const [cardHeight, setCardHeight] = useState(0);
+  /** Below lg the cards sit two to a row, which is the layout this applies to. */
+  const [twoUp, setTwoUp] = useState(false);
+
   useLayoutEffect(() => {
     const el = gridRef.current;
     if (!el) return;
+    const narrow = window.matchMedia("(max-width: 1023px)");
     function equalizeHeights() {
       if (!el) return;
       el.style.gridAutoRows = "auto";
@@ -298,10 +306,16 @@ export default function MetricsSection() {
       const maxH = Math.max(0, ...Array.from(el.children).map(c => (c as HTMLElement).offsetHeight));
       el.style.gridAutoRows = `${maxH}px`;
       el.style.alignItems   = "stretch";
+      setCardHeight(maxH);
+      setTwoUp(narrow.matches);
     }
     equalizeHeights();
     window.addEventListener("resize", equalizeHeights);
-    return () => window.removeEventListener("resize", equalizeHeights);
+    narrow.addEventListener("change", equalizeHeights);
+    return () => {
+      window.removeEventListener("resize", equalizeHeights);
+      narrow.removeEventListener("change", equalizeHeights);
+    };
   }, []);
 
   useEffect(() => {
@@ -361,8 +375,8 @@ export default function MetricsSection() {
           <div className="flex items-center gap-[8px]">
             {activeFilter === "Custom Range" && (
               <div className="relative flex items-center gap-[8px]" ref={calendarWrapRef}>
-                <DateInput label="Start*" value={customStart} active={calendarOpen} onClick={() => setCalendarOpen(o => !o)} />
-                <DateInput label="End*"   value={customEnd}   active={calendarOpen} onClick={() => setCalendarOpen(o => !o)} />
+                <DateInput label="Start date" value={customStart} active={calendarOpen} onChange={setCustomStart} onClick={() => setCalendarOpen(o => !o)} />
+                <DateInput label="End date"   value={customEnd}   active={calendarOpen} onChange={setCustomEnd}   onClick={() => setCalendarOpen(o => !o)} />
                 {calendarOpen && (
                   <DualCalendar
                     initStart={customStart}
@@ -467,11 +481,13 @@ export default function MetricsSection() {
         })}
       </div>
 
-      {/* Trend graph */}
+      {/* Trend graph. On phones it stands as tall as two of the cards above it,
+          the pair plus the gap between them, so the column reads as one block. */}
       <TrendGraph
         metricLabel={METRICS[activeMetric].label}
         timeFilter={activeFilter}
         customRange={customRange}
+        outerHeight={twoUp && cardHeight ? cardHeight * 2 + GRID_GAP : undefined}
       />
 
     </div>

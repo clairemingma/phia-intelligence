@@ -49,7 +49,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    // The Phia browser extension stamps its own attribute on this element
+    // before React hydrates, which otherwise reads as a mismatch and makes
+    // React throw the server tree away and rebuild the page client-side.
     <html
+      suppressHydrationWarning
       lang="en"
       className={`${ppNeueMontreal.variable} ${gtSuperDisplay.variable} ${inter.variable} ${robotoMono.variable} h-full antialiased motion-safe:scroll-smooth`}
     >

@@ -24,7 +24,7 @@ export function FilledPill({
   children?: ReactNode;
 }) {
   return (
-    <div className="flex h-[60px] w-full shrink-0 items-center rounded-[999px] border border-[#d2cecb] bg-white">
+    <div className="group flex h-[60px] w-full shrink-0 items-center rounded-[999px] border border-[#d2cecb] bg-white">
       <div className="flex h-full w-full items-center gap-[10px] px-[18px] py-[16px]">
         <img
           src={image}
@@ -48,11 +48,15 @@ export function PillAction({
   icon,
   label,
   onClick,
+  revealOnHover = false,
 }: {
   icon: string;
   /** Names the control — it has no visible text of its own. */
   label: string;
   onClick: () => void;
+  /** Keeps the control out of the way until the row is pointed at. Revealed by
+   *  keyboard focus too, or it would be unreachable without a mouse. */
+  revealOnHover?: boolean;
 }) {
   return (
     <button
@@ -60,9 +64,49 @@ export function PillAction({
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="block size-[20px] shrink-0 cursor-pointer transition-opacity hover:opacity-60"
+      className={`block size-[20px] shrink-0 cursor-pointer transition-opacity hover:opacity-60 ${
+        revealOnHover
+          ? "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
+          : ""
+      }`}
     >
       <img src={icon} alt="" aria-hidden className="block size-full max-w-none" />
+    </button>
+  );
+}
+
+/**
+ * The grip a row is dragged by. Only the grip takes the drag, so the text in
+ * the row can still be selected and edited.
+ */
+export function GripAction({
+  label,
+  active,
+  handlers,
+}: {
+  label: string;
+  /** True while this row is the one being moved. */
+  active?: boolean;
+  handlers: Record<string, unknown>;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      {...handlers}
+      // Touch has to be handed to the drag rather than scrolling the page.
+      style={{ touchAction: "none" }}
+      className={`flex size-[20px] shrink-0 items-center justify-center transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 hover:opacity-60 ${
+        active ? "cursor-grabbing opacity-100" : "cursor-grab opacity-0"
+      }`}
+    >
+      <img
+        src="/assets/icon-grip.svg"
+        alt=""
+        aria-hidden
+        className="block size-full max-w-none"
+      />
     </button>
   );
 }
@@ -113,8 +157,14 @@ export default function CoverUpload({
             icon={PILL_ICON_EDIT}
             label="Replace cover image"
             onClick={() => inputRef.current?.click()}
+            revealOnHover
           />
-          <PillAction icon={PILL_ICON_REMOVE} label="Remove cover image" onClick={onClear} />
+          <PillAction
+            icon={PILL_ICON_REMOVE}
+            label="Remove cover image"
+            onClick={onClear}
+            revealOnHover
+          />
         </FilledPill>
       </>
     );

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import FloatingInput from "@/components/FloatingInput";
+import DateField from "@/components/DateField";
 import CoverUpload from "@/components/CoverUpload";
 import StepButton from "@/components/StepButton";
 import { useProductSlots } from "@/components/ProductSlots";
@@ -110,21 +111,23 @@ export default function OutfitFeatureFlow() {
             prefix="$"
           />
           {/* Timeframe reads as a range, so it is two boxes on one row */}
-          <div className="flex w-full gap-[16px]">
+          <div className="flex w-full flex-col gap-[16px] lg:flex-row">
             <div className="min-w-0 flex-1">
-              <FloatingInput
+              <DateField
                 id="outfit-start"
-                label="Start"
+                label="Start date"
                 value={startDate}
                 onChange={setStartDate}
               />
             </div>
             <div className="min-w-0 flex-1">
-              <FloatingInput
+              <DateField
                 id="outfit-end"
-                label="End"
+                label="End date"
                 value={endDate}
                 onChange={setEndDate}
+                // An end cannot precede the start it belongs to.
+                min={startDate}
               />
             </div>
           </div>

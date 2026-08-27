@@ -53,9 +53,10 @@ const AXIS_COLOR  = "#999999";
 const Y_AXIS_WIDTH = 40;
 const CHART_RIGHT_MARGIN = 8;
 
-/** The plot area inside the 320px chart — 8px of top margin, 16px of bottom. */
+/** The chart's own margins, and the height it takes when nothing constrains it. */
 const PLOT_TOP = 8;
-const PLOT_BOTTOM = 304;
+const PLOT_BOTTOM_MARGIN = 16;
+const DEFAULT_CHART_HEIGHT = 320;
 
 /**
  * The fill under the curve. A straight two-stop fade came out far paler than
@@ -77,6 +78,9 @@ const FILL_STOPS: [number, number][] = [
 
 interface Props {
   metricLabel: string;
+  /** Total height for the card. The chart takes whatever the surrounding
+   *  chrome leaves, so the caller does not have to know what that is. */
+  outerHeight?: number;
   timeFilter: string;
   customRange?: { start: string; end: string };
 }
@@ -135,19 +139,24 @@ function CustomTooltip({ active, payload, formatValue }: CustomTooltipProps) {
   );
 }
 
-export default function TrendGraph({ metricLabel, timeFilter, customRange }: Props) {
+export default function TrendGraph({ metricLabel, timeFilter, customRange, outerHeight }: Props) {
   const [isHovering, setIsHovering] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [chartWidth, setChartWidth] = useState(0);
+  /** Measured, so a constrained card can hand the chart what is left over. */
+  const [measuredHeight, setMeasuredHeight] = useState(DEFAULT_CHART_HEIGHT);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const ro = new ResizeObserver(entries => {
       setChartWidth(entries[0].contentRect.width);
+      setMeasuredHeight(entries[0].contentRect.height);
     });
     ro.observe(el);
-    setChartWidth(el.getBoundingClientRect().width);
+    const box = el.getBoundingClientRect();
+    setChartWidth(box.width);
+    setMeasuredHeight(box.height);
     return () => ro.disconnect();
   }, []);
 
@@ -171,17 +180,27 @@ export default function TrendGraph({ metricLabel, timeFilter, customRange }: Pro
     );
   };
 
+  // Constrained, the chart fills what the card's padding and labels leave.
+  const chartHeight = outerHeight ? Math.max(120, measuredHeight) : DEFAULT_CHART_HEIGHT;
+  const plotBottom = chartHeight - PLOT_BOTTOM_MARGIN;
+
   return (
-    <div className="w-full bg-white rounded-[8px] p-[24px] outline-none" style={{ border: '1px solid rgba(0,0,0,0.08)' }}>
-      <div className="[&_svg]:overflow-visible [&_*]:outline-none" ref={containerRef}>
-        <AreaChart width={chartWidth} height={320}
+    <div
+      className="flex w-full flex-col bg-white rounded-[8px] p-[24px] outline-none"
+      style={{ border: '1px solid rgba(0,0,0,0.08)', ...(outerHeight ? { height: outerHeight } : {}) }}
+    >
+      <div
+        className={`[&_svg]:overflow-visible [&_*]:outline-none ${outerHeight ? "min-h-0 flex-1" : ""}`}
+        ref={containerRef}
+      >
+        <AreaChart width={chartWidth} height={chartHeight}
           data={data}
           margin={{ top: 8, right: CHART_RIGHT_MARGIN, left: 0, bottom: 16 }}
           onMouseEnter={() => setIsHovering(true)}
           onMouseLeave={() => setIsHovering(false)}
         >
           <defs>
-            <linearGradient id="phia-fill" x1="0" y1={PLOT_TOP} x2="0" y2={PLOT_BOTTOM} gradientUnits="userSpaceOnUse">
+            <linearGradient id="phia-fill" x1="0" y1={PLOT_TOP} x2="0" y2={plotBottom} gradientUnits="userSpaceOnUse">
               {FILL_STOPS.map(([offset, opacity]) => (
                 <stop key={offset} offset={offset} stopColor={FILL_START} stopOpacity={opacity} />
               ))}

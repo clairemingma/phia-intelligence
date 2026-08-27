@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import NavBar from "@/components/NavBar";
-import FeatureRequestFlow from "@/components/FeatureRequestFlow";
+import SocialFeatureFlow from "@/components/SocialFeatureFlow";
 
 const SUBTITLE =
   "Surface your social posts and creator content alongside your products.";
@@ -18,7 +18,7 @@ export default function SocialFeaturePage() {
       <main className="flex flex-col items-stretch w-full">
         <NavBar />
         <div className="h-[68px] w-full" />
-        <FeatureRequestFlow title="Social Feature" subtitle={SUBTITLE} idPrefix="social" />
+        <SocialFeatureFlow />
       </main>
     </div>
   );

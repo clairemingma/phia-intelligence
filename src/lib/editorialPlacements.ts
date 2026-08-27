@@ -22,6 +22,9 @@ export type EditorialPlacement = {
    *  phia app icon is a full-bleed square. */
   avatarFit: "cover" | "contain";
   cover: string;
+  /** Whether the brand writes and shoots this one. An inclusion is Phia's
+   *  editorial, so the brand contributes products and nothing else. */
+  authoredByBrand: boolean;
   title: string;
   description: string;
   /** An exclusive names its own section above the grid; an inclusion, sitting
@@ -63,6 +66,7 @@ export const EDITORIAL_PLACEMENTS: EditorialPlacement[] = [
     avatar: "/assets/editorial-brand-frame.jpg",
     avatarFit: "contain",
     cover: "/assets/editorials/cover-the-trouser-edit.jpg",
+    authoredByBrand: true,
     title: "The Trouser Edit",
     description:
       "Flattering fits, refined details, and effortless sophistication. Shop the pieces that transition seamlessly from work to everywhere else.",
@@ -80,6 +84,7 @@ export const EDITORIAL_PLACEMENTS: EditorialPlacement[] = [
     avatar: "/assets/editorial-brand-phia.png",
     avatarFit: "cover",
     cover: "/assets/editorials/cover-premium-denim-edit.jpg",
+    authoredByBrand: false,
     title: "Premium Denim Edit",
     description: "Higher-price denim grouped for shoppers already prepared to spend.",
     products: PREMIUM_DENIM,

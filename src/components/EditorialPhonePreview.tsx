@@ -4,6 +4,15 @@ import { useRef } from "react";
 import useScrollHint from "@/components/useScrollHint";
 import type { EditorialPlacement, EditorialProduct } from "@/lib/editorialPlacements";
 
+/**
+ * The editorial body as the preview needs it: the blocks in reading order, with
+ * a run of products already gathered into one grid.
+ */
+export type EditorialBlockView =
+  | { kind: "header"; text: string }
+  | { kind: "description"; text: string }
+  | { kind: "products"; products: EditorialProduct[] };
+
 const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
 const GT = "var(--font-gt-super-display), 'Playfair Display', Georgia, serif";
 const MONO = "var(--font-roboto-mono), ui-monospace, monospace";
@@ -94,40 +103,34 @@ function ProductTile({ product }: { product: EditorialProduct }) {
  */
 export default function EditorialPhonePreview({
   placement,
-  products,
+  blocks,
   title,
   description,
   cover,
+  replayHintOn,
 }: {
   /** Which editorial is being previewed — supplies the byline and cover. */
   placement: EditorialPlacement;
-  /** What the grid shows, which the form's picker drives. */
-  products: EditorialProduct[];
+  /** The editorial's body, in the order it reads. */
+  blocks: EditorialBlockView[];
   title: string;
   description: string;
   cover?: string;
+  /** Replays the scroll hint when it changes, e.g. on reaching a new step. */
+  replayHintOn?: string | number;
 }) {
   // The screen hides its scrollbar to read as a phone, so a nudge on open
   // is what tells the viewer there is more below.
   const paneRef = useRef<HTMLDivElement>(null);
-  const { indicator } = useScrollHint(paneRef);
+  const { indicator } = useScrollHint(paneRef, replayHintOn);
 
   return (
-    <div className="relative h-[652px] w-[300px] shrink-0">
-
-      {/* Device frame sits behind the screen, so only its outer rim shows —
-          the same layering the design uses. */}
-      <img
-        src="/assets/phone-bezel-17pro.png"
-        alt=""
-        aria-hidden
-        className="pointer-events-none absolute left-[-17.91px] top-[-17.16px] h-[686.567px] w-[335.821px] max-w-none"
-      />
-
-      {/* Screen — clipped to the display area the bezel leaves open. The
-          content scrolls inside it, with the bar hidden so it reads as a phone. */}
-      <div className="absolute inset-0 overflow-hidden rounded-[44px] bg-white">
-        <div
+    // No device frame: the screen is a plain card lifted off the field by its
+    // shadow, matching the outfit preview.
+    <div className="relative h-[652.239px] w-[300px] shrink-0 overflow-hidden rounded-[31.343px] bg-white shadow-[0_16px_48px_0_rgba(0,0,0,0.22)]">
+      {/* The content scrolls inside, with the bar hidden so it reads as a
+          screen rather than a pane. */}
+      <div
           ref={paneRef}
           className="flex h-full w-[300px] flex-col overflow-y-auto overflow-x-hidden overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
@@ -215,37 +218,54 @@ export default function EditorialPhonePreview({
               </div>
             </div>
 
-            {/* An exclusive names its own section above the grid; an inclusion
-                sits amongst other brands and goes straight to the products. */}
-            {placement.section && (
-              <div className="flex w-full flex-col gap-[8.955px] px-[14.925px]">
-                <p
-                  className="text-[17.91px] leading-[20.896px] tracking-[-0.3582px] text-black"
-                  style={{ fontFamily: GT, fontWeight: 300 }}
+            {blocks.map((block, i) => {
+              if (block.kind === "products") {
+                return (
+                  <div
+                    key={i}
+                    // Left-aligned, as the design lays the grid out — a lone tile sits under
+                    // the copy above it rather than floating in the middle.
+                    className="flex flex-wrap items-start justify-start gap-x-[5.97px] gap-y-[8px]"
+                  >
+                    {block.products.map((product) => (
+                      <ProductTile key={product.id} product={product} />
+                    ))}
+                  </div>
+                );
+              }
+              // A blurb belongs to the header above it, so it closes up
+              // against it rather than sitting a whole block away.
+              const underHeader =
+                block.kind === "description" && blocks[i - 1]?.kind === "header";
+              return (
+                <div
+                  key={i}
+                  className="flex w-full flex-col px-[14.925px]"
+                  style={underHeader ? { marginTop: -12.445 } : undefined}
                 >
-                  {placement.section.title}
-                </p>
-                <p
-                  className="text-[11.94px] leading-[14.925px] tracking-[0.1194px] text-[#7f7f7f]"
-                  style={{ fontFamily: PP, fontWeight: 400, fontFeatureSettings: '"ss02" 1' }}
-                >
-                  {placement.section.body}
-                </p>
-              </div>
-            )}
+                  {block.kind === "header" ? (
+                    <p
+                      className="text-[17.91px] leading-[20.896px] tracking-[-0.3582px] text-black"
+                      style={{ fontFamily: GT, fontWeight: 300 }}
+                    >
+                      {block.text}
+                    </p>
+                  ) : (
+                    <p
+                      className="text-[11.94px] leading-[14.925px] tracking-[0.1194px] text-[#7f7f7f]"
+                      style={{ fontFamily: PP, fontWeight: 400, fontFeatureSettings: '"ss02" 1' }}
+                    >
+                      {block.text}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
 
-            <div className="flex flex-wrap items-start justify-center gap-x-[5.97px] gap-y-[8px]">
-              {products.map((product) => (
-                <ProductTile key={product.id} product={product} />
-              ))}
-            </div>
-
-          </div>
         </div>
-
-        {indicator}
       </div>
 
+      {indicator}
     </div>
   );
 }

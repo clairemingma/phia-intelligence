@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import FloatingInput from "@/components/FloatingInput";
+import DateField from "@/components/DateField";
 import PromoteFlowShell, {
   FlowSubmitButton,
   useFlowSubmit,
@@ -9,12 +10,6 @@ import PromoteFlowShell, {
 import PromoRow from "@/components/PromoRow";
 
 const PP = "var(--font-pp-neue-montreal), system-ui, sans-serif";
-
-/* The preview stands in with the design's sample offer until the brand types
-   over it, matching how the editorial flow seeds its phone. */
-const DEFAULT_TITLE = "20% off full-price denim";
-const DEFAULT_DESCRIPTION = "841 shoppers saved with this code today";
-const DEFAULT_CODE = "PHIA20";
 
 /* ------------------------------------------------------------------ */
 /* Offer type                                                           */
@@ -29,6 +24,54 @@ const OFFER_TYPES = [
 ] as const;
 
 type OfferType = (typeof OFFER_TYPES)[number];
+
+/** The offer types that carry a figure; the rest name what they give instead. */
+const PERCENT_TYPES: OfferType[] = [
+  "Exclusive Phia discount",
+  "Sitewide discount",
+  "Special promotion",
+];
+
+/**
+ * A sample offer per type, standing in until the brand types over it — the way
+ * the editorial flow seeds its phone. Each type gets its own, since a denim
+ * discount reads as a mistake beside a free-shipping tile.
+ */
+const OFFER_MOCKS: Record<
+  OfferType,
+  { title: string; description: string; code: string; percent: string }
+> = {
+  "Exclusive Phia discount": {
+    title: "20% off full-price denim",
+    description: "Applies to every full-price denim style, one use per shopper",
+    code: "PHIA20",
+    percent: "20",
+  },
+  "Sitewide discount": {
+    title: "15% off everything",
+    description: "Runs across the whole collection, no minimum spend",
+    code: "FRAME15",
+    percent: "15",
+  },
+  "Special promotion": {
+    title: "25% off new arrivals",
+    description: "Limited to this season's arrivals, while stock lasts",
+    code: "NEWIN25",
+    percent: "25",
+  },
+  "Free shipping": {
+    title: "Free shipping on every order",
+    description: "No minimum spend, standard delivery in three to five days",
+    code: "FRAMESHIP",
+    percent: "",
+  },
+  "Gift with Purchase": {
+    title: "Free tote with orders over $250",
+    description: "One gift per order, while stocks last",
+    code: "FRAMEGIFT",
+    percent: "",
+  },
+};
 
 /** Pill toggle; the chosen one fills black. */
 function OfferTypePill({
@@ -48,7 +91,7 @@ function OfferTypePill({
       onClick={onSelect}
       className={`flex h-[44px] shrink-0 cursor-pointer items-center justify-center gap-[8px] rounded-[999px] px-[18px] py-[14px] transition-colors duration-200 ${
         selected
-          ? "bg-black text-white"
+          ? "bg-[#002d9f] text-white"
           : "border border-[#e3e3e3] bg-white text-black hover:border-[#9a9a9a]"
       }`}
     >
@@ -67,17 +110,13 @@ function OfferTypePill({
 /* ------------------------------------------------------------------ */
 
 /**
- * The card has a discount tile but the form has no field for it, so the value
- * is read back out of the offer title — "Extra 20% off…" fills the tile with
- * "20% Off". Free shipping has no figure to show, so it labels itself.
+ * The tile a shopper sees first. A discount shows its own figure, while free
+ * shipping and a gift have no number to show and label themselves.
  */
-function discountTile(offerType: OfferType, title: string) {
+function discountTile(offerType: OfferType, percent: string) {
   if (offerType === "Free shipping") return { amount: "Free", unit: "Ship" };
-
-  const match = title.match(/\$\s?\d[\d,.]*|\d[\d,.]*\s?%/);
-  if (!match) return { amount: "20%", unit: "Off" };
-
-  return { amount: match[0].replace(/\s/g, ""), unit: "Off" };
+  if (offerType === "Gift with Purchase") return { amount: "Free", unit: "Gift" };
+  return { amount: `${percent}%`, unit: "Off" };
 }
 
 /* ------------------------------------------------------------------ */
@@ -89,13 +128,17 @@ export default function PromoCodeFlow() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [code, setCode] = useState("");
+  const [percent, setPercent] = useState("");
   const [budget, setBudget] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [notes, setNotes] = useState("");
   const { submit, overlay } = useFlowSubmit();
 
-  const previewTitle = title || DEFAULT_TITLE;
+  // Whatever has been typed wins; the rest comes from this type's sample.
+  const mock = OFFER_MOCKS[offerType];
+  const previewTitle = title || mock.title;
+  // Free shipping and a gift have no figure to enter, so the field steps out.
+  const takesPercent = PERCENT_TYPES.includes(offerType);
 
   return (
     <PromoteFlowShell
@@ -106,11 +149,11 @@ export default function PromoCodeFlow() {
         <div className="w-[568px] max-w-full">
           <PromoRow
             promo={{
-              ...discountTile(offerType, previewTitle),
+              ...discountTile(offerType, percent || mock.percent),
               title: previewTitle,
-              meta: description || DEFAULT_DESCRIPTION,
+              meta: description || mock.description,
               // The code is what a shopper copies, so show it as typed.
-              code: code.toUpperCase() || DEFAULT_CODE,
+              code: code.toUpperCase() || mock.code,
               // Only the Phia-exclusive offer earns the badged treatment.
               featured: offerType === "Exclusive Phia discount",
             }}
@@ -148,6 +191,19 @@ export default function PromoCodeFlow() {
           value={description}
           onChange={setDescription}
         />
+        {takesPercent && (
+          <FloatingInput
+            id="promo-percent"
+            label="Discount*"
+            value={percent}
+            onChange={(v) => {
+              // A percentage, so digits only and never past 100.
+              const n = v.replace(/\D/g, "").slice(0, 3);
+              setPercent(n && +n > 100 ? "100" : n);
+            }}
+            suffix="%"
+          />
+        )}
         <FloatingInput id="promo-code" label="Promo code*" value={code} onChange={setCode} />
         <FloatingInput
           id="promo-budget"
@@ -158,26 +214,26 @@ export default function PromoCodeFlow() {
         />
 
         {/* Timeframe reads as a range, so it is two boxes on one row */}
-        <div className="flex w-full gap-[16px]">
+        <div className="flex w-full flex-col gap-[16px] lg:flex-row">
           <div className="min-w-0 flex-1">
-            <FloatingInput
+            <DateField
               id="promo-start"
-              label="Start"
+              label="Start date"
               value={startDate}
               onChange={setStartDate}
             />
           </div>
           <div className="min-w-0 flex-1">
-            <FloatingInput id="promo-end" label="End" value={endDate} onChange={setEndDate} />
+            <DateField
+              id="promo-end"
+              label="End date"
+              value={endDate}
+              onChange={setEndDate}
+              // An end cannot precede the start it belongs to.
+              min={startDate}
+            />
           </div>
         </div>
-
-        <FloatingInput
-          id="promo-notes"
-          label="Tell us what you're looking for"
-          value={notes}
-          onChange={setNotes}
-        />
 
         <FlowSubmitButton />
       </form>

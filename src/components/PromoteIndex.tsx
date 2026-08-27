@@ -56,7 +56,12 @@ export default function PromoteIndex() {
           href={href}
           className="w-full transition-opacity hover:opacity-60"
         >
-          <SectionHeading title={title} description={description} action={<RowCaret />} />
+          <SectionHeading
+            title={title}
+            description={description}
+            action={<RowCaret />}
+            shrinkOnMobile
+          />
         </Link>
       ))}
     </StackedSection>

@@ -36,7 +36,11 @@ const easeInOut = (t: number) =>
  * motion turned off nothing moves, but the circle still appears — the
  * affordance matters more than the animation.
  */
-export default function useScrollHint(ref: RefObject<HTMLElement | null>) {
+export default function useScrollHint(
+  ref: RefObject<HTMLElement | null>,
+  /** Changing this replays the hint — a new step is a new thing to scroll. */
+  replayOn?: string | number,
+) {
   const [showing, setShowing] = useState(false);
   const [dy, setDy] = useState(0);
 
@@ -72,6 +76,10 @@ export default function useScrollHint(ref: RefObject<HTMLElement | null>) {
 
       const total = DOWN_MS + HOLD_MS + UP_MS;
       const start = performance.now();
+      // Nudging from where the viewer left the pane, so a replay never yanks
+      // them back to the top of it.
+      const base = el.scrollTop;
+      const room = Math.min(DIP_PX, el.scrollHeight - el.clientHeight - base);
 
       const tick = (now: number) => {
         if (cancelled) return;
@@ -81,7 +89,7 @@ export default function useScrollHint(ref: RefObject<HTMLElement | null>) {
         else if (t < DOWN_MS + HOLD_MS) progress = 1;
         else progress = 1 - easeInOut((t - DOWN_MS - HOLD_MS) / UP_MS);
 
-        el.scrollTop = DIP_PX * progress;
+        el.scrollTop = base + room * progress;
         setDy(PUCK_PX * progress);
 
         if (t < total) frame = requestAnimationFrame(tick);
@@ -95,7 +103,7 @@ export default function useScrollHint(ref: RefObject<HTMLElement | null>) {
       stop();
       events.forEach((e) => el.removeEventListener(e, stop));
     };
-  }, [ref]);
+  }, [ref, replayOn]);
 
   /**
    * Sits over the pane, never in the way of it. Decorative — the pane scrolls
